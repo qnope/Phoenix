@@ -1,0 +1,10 @@
+#pragma once
+
+#include <ltl/strong_type.h>
+
+namespace phx {
+using Width = ltl::strong_type_t<std::size_t, struct WidthTag>;
+using Height = ltl::strong_type_t<std::size_t, struct HeightTag>;
+using WindowTitle = ltl::strong_type_t<std::string_view, struct WindowTitleTag>;
+constexpr double pi = 3.14159265358979;
+} // namespace phx
