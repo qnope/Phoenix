@@ -6,6 +6,10 @@
 #include "vkw/Instance.h"
 
 namespace phx {
+struct PhoenixWindowOpeningException {
+  std::string exception;
+};
+
 class PhoenixWindow {
 public:
   PhoenixWindow(Width width, Height height, WindowTitle windowTitle);

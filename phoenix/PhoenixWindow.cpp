@@ -3,11 +3,21 @@
 namespace phx {
 
 static auto createWindow(Width w, Height h, WindowTitle windowTitle) {
-  if (!SDL_WasInit(SDL_INIT_VIDEO))
-    SDL_Init(SDL_INIT_VIDEO);
-  return SDL_CreateWindow(windowTitle.get().data(), SDL_WINDOWPOS_CENTERED,
-                          SDL_WINDOWPOS_CENTERED, w.get(), h.get(),
-                          SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
+  if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+      throw PhoenixWindowOpeningException{SDL_GetError()};
+  }
+
+  SDL_Window *window = SDL_CreateWindow(
+      windowTitle.get().data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+      w.get(), h.get(), SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
+
+  if (window == nullptr) {
+    SDL_Quit();
+    throw PhoenixWindowOpeningException{SDL_GetError()};
+  }
+
+  return window;
 }
 
 PhoenixWindow::PhoenixWindow(Width width, Height height,

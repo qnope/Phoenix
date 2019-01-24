@@ -19,5 +19,10 @@ int main(int ac, char **av) {
     std::cerr << "The validation layer " << exception.layer
               << " is not available" << std::endl;
   }
+
+  catch (phx::PhoenixWindowOpeningException exception) {
+    std::cerr << "Unable to open the PhoenixWindow : " << exception.exception
+              << std::endl;
+  }
   return 0;
 }

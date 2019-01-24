@@ -12,7 +12,7 @@ struct LayerInvalidException {
   std::string layer;
 };
 
-class Instance {
+class Instance final {
 public:
   Instance(SDL_Window *window, bool debug);
 
