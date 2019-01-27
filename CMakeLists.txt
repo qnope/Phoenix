@@ -58,11 +58,15 @@ set(HEADERS_LTL
 set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Instance.h
     phoenix/vkw/Device.h
+    phoenix/vkw/Queue.h
+    phoenix/vkw/Surface.h
     )
 
 set(PHOENIX_VKW_SRC
     phoenix/vkw/Instance.cpp
     phoenix/vkw/Device.cpp
+    phoenix/vkw/Queue.cpp
+    phoenix/vkw/Surface.cpp
     )
 
 set(HEADERS_PHOENIX

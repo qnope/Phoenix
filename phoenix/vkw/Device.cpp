@@ -1,5 +1,6 @@
-#include "Device.h"
 #include <ltl/smart_iterator.h>
+
+#include "Device.h"
 
 namespace phx {
 static vk::PhysicalDevice choosePhysicalDevice(Instance &instance) {
@@ -59,6 +60,9 @@ Device::Device(Instance &instance) {
   info.enabledLayerCount = static_cast<uint32_t>(layers.size());
   info.ppEnabledLayerNames = layers.data();
   m_device = physicalDevice.createDeviceUnique(info);
+  m_queue = std::make_unique<Queue>(m_device->getQueue(queueFamily, 0));
 }
+
+Queue &Device::getQueue() { return *m_queue; }
 
 } // namespace phx
