@@ -13,7 +13,7 @@ debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
   return VK_FALSE;
 }
 
-static auto createApplicationInfo() noexcept {
+static constexpr auto createApplicationInfo() noexcept {
   vk::ApplicationInfo info;
   info.pApplicationName = "Phoenix Engine";
   info.applicationVersion = VK_MAKE_VERSION(0, 0, 1);
@@ -23,7 +23,7 @@ static auto createApplicationInfo() noexcept {
   return info;
 }
 
-bool isExtensionAvailable(const char *extension) {
+static bool isExtensionAvailable(const char *extension) {
   const auto allowedExtensions = vk::enumerateInstanceExtensionProperties();
 
   for (auto allowedExtension : allowedExtensions) {
@@ -34,7 +34,7 @@ bool isExtensionAvailable(const char *extension) {
   return false;
 }
 
-bool isLayerAvailable(const char *layer) {
+static bool isLayerAvailable(const char *layer) {
   const auto allowedLayers = vk::enumerateInstanceLayerProperties();
 
   for (auto allowedLayer : allowedLayers) {
@@ -45,7 +45,8 @@ bool isLayerAvailable(const char *layer) {
   return false;
 }
 
-void checkExtensionAvailability(const std::vector<const char *> &extensions) {
+static void
+checkExtensionAvailability(const std::vector<const char *> &extensions) {
   for (auto extension : extensions) {
     if (!isExtensionAvailable(extension)) {
       throw phx::ExtentionInvalidException{extension};
@@ -53,7 +54,7 @@ void checkExtensionAvailability(const std::vector<const char *> &extensions) {
   }
 }
 
-void checkLayersAvailability(const std::vector<const char *> &layers) {
+static void checkLayersAvailability(const std::vector<const char *> &layers) {
   for (auto layer : layers) {
     if (!isLayerAvailable(layer)) {
       throw phx::LayerInvalidException{layer};
@@ -91,7 +92,7 @@ static auto getValidationLayers() {
   return validationLayers;
 }
 
-static auto createDebugMessengerInfo() noexcept {
+static constexpr auto createDebugMessengerInfo() noexcept {
   vk::DebugUtilsMessengerCreateInfoEXT info;
 
   info.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
@@ -109,7 +110,7 @@ static auto createDebugMessengerInfo() noexcept {
 
 namespace phx {
 Instance::Instance(SDL_Window *window, bool debug) {
-  auto appliInfo = createApplicationInfo();
+  constexpr auto appliInfo = createApplicationInfo();
   auto extensions = getExtensions(window, debug);
 
   vk::InstanceCreateInfo info;
@@ -128,9 +129,13 @@ Instance::Instance(SDL_Window *window, bool debug) {
   m_dispatchLoaderDynamic = vk::DispatchLoaderDynamic(*m_instance);
 
   if (debug) {
-    auto debugMessengerInfo = createDebugMessengerInfo();
+    constexpr auto debugMessengerInfo = createDebugMessengerInfo();
     m_debugMessenger = m_instance->createDebugUtilsMessengerEXTUnique(
         debugMessengerInfo, nullptr, m_dispatchLoaderDynamic);
   }
+}
+
+std::vector<vk::PhysicalDevice> Instance::physicalDevices() const noexcept {
+  return m_instance->enumeratePhysicalDevices();
 }
 } // namespace phx

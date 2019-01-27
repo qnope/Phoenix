@@ -1,7 +1,8 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include <vulkan/vulkan.hpp>
+
+#include "vulkan.hpp"
 
 namespace phx {
 struct ExtentionInvalidException {
@@ -15,6 +16,8 @@ struct LayerInvalidException {
 class Instance final {
 public:
   Instance(SDL_Window *window, bool debug);
+
+  std::vector<vk::PhysicalDevice> physicalDevices() const noexcept;
 
 private:
   vk::UniqueInstance m_instance;
