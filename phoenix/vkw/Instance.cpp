@@ -2,6 +2,7 @@
 #include <SDL2/SDL_vulkan.h>
 #include <ltl/range.h>
 
+namespace phx {
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -49,7 +50,7 @@ static void
 checkExtensionAvailability(const std::vector<const char *> &extensions) {
   for (auto extension : extensions) {
     if (!isExtensionAvailable(extension)) {
-      throw phx::ExtentionInvalidException{extension};
+      throw ExtentionInvalidException{extension};
     }
   }
 }
@@ -57,7 +58,7 @@ checkExtensionAvailability(const std::vector<const char *> &extensions) {
 static void checkLayersAvailability(const std::vector<const char *> &layers) {
   for (auto layer : layers) {
     if (!isLayerAvailable(layer)) {
-      throw phx::LayerInvalidException{layer};
+      throw LayerInvalidException{layer};
     }
   }
 }
@@ -108,7 +109,6 @@ static constexpr auto createDebugMessengerInfo() noexcept {
   return info;
 }
 
-namespace phx {
 Instance::Instance(SDL_Window *window, bool debug) {
   constexpr auto appliInfo = createApplicationInfo();
   auto extensions = getExtensions(window, debug);
@@ -123,13 +123,15 @@ Instance::Instance(SDL_Window *window, bool debug) {
   if (debug) {
     info.enabledLayerCount = static_cast<uint32_t>(layers.size());
     info.ppEnabledLayerNames = layers.data();
+    m_validationLayers = layers;
   }
 
   m_instance = vk::createInstanceUnique(info);
-  m_dispatchLoaderDynamic = vk::DispatchLoaderDynamic(*m_instance);
 
   if (debug) {
     constexpr auto debugMessengerInfo = createDebugMessengerInfo();
+
+    m_dispatchLoaderDynamic = vk::DispatchLoaderDynamic(*m_instance);
     m_debugMessenger = m_instance->createDebugUtilsMessengerEXTUnique(
         debugMessengerInfo, nullptr, m_dispatchLoaderDynamic);
   }
@@ -137,5 +139,9 @@ Instance::Instance(SDL_Window *window, bool debug) {
 
 std::vector<vk::PhysicalDevice> Instance::physicalDevices() const noexcept {
   return m_instance->enumeratePhysicalDevices();
+}
+
+const std::vector<const char *> &Instance::validationLayers() const noexcept {
+  return m_validationLayers;
 }
 } // namespace phx

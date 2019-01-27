@@ -6204,7 +6204,7 @@ public:
 
   struct PhysicalDeviceFeatures
   {
-    PhysicalDeviceFeatures( Bool32 robustBufferAccess_ = 0,
+    VULKAN_HPP_CONSTEXPR PhysicalDeviceFeatures( Bool32 robustBufferAccess_ = 0,
                             Bool32 fullDrawIndexUint32_ = 0,
                             Bool32 imageCubeArray_ = 0,
                             Bool32 independentBlend_ = 0,

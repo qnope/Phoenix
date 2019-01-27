@@ -24,5 +24,15 @@ int main(int ac, char **av) {
     std::cerr << "Unable to open the PhoenixWindow : " << exception.exception
               << std::endl;
   }
+
+  catch (phx::NoDeviceCompatibleException) {
+    std::cerr << "Unable to find a Vulkan compatible GPU" << std::endl;
+  }
+
+  catch (phx::NoGraphicComputeQueueException) {
+    std::cerr << "The GPU is not compatible with Graphic or Compute queue"
+              << std::endl;
+  }
+
   return 0;
 }

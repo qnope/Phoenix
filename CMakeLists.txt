@@ -57,6 +57,12 @@ set(HEADERS_LTL
 
 set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Instance.h
+    phoenix/vkw/Device.h
+    )
+
+set(PHOENIX_VKW_SRC
+    phoenix/vkw/Instance.cpp
+    phoenix/vkw/Device.cpp
     )
 
 set(HEADERS_PHOENIX
@@ -64,9 +70,11 @@ set(HEADERS_PHOENIX
     phoenix/PhoenixWindow.h
     ${HEADERS_PHOENIX_VKW})
 
+
+
 set(PHOENIX_SRC
     phoenix/PhoenixWindow.cpp
-    phoenix/vkw/Instance.cpp
+    ${PHOENIX_VKW_SRC}
     )
 
 add_executable(Phoenix
