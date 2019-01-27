@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 
 #include "constant.h"
-#include "vkw/Instance.h"
+#include "vkw/Device.h"
 
 namespace phx {
 struct PhoenixWindowOpeningException {
@@ -29,6 +29,7 @@ private:
 
   SDL_Window *m_windowHandle;
   SDL_Event m_event;
-  Instance instance{m_windowHandle, true};
+  Instance m_instance{m_windowHandle, true};
+  Device m_device{m_instance};
 };
 } // namespace phx

@@ -10,7 +10,8 @@ static auto createWindow(Width w, Height h, WindowTitle windowTitle) {
 
   SDL_Window *window = SDL_CreateWindow(
       windowTitle.get().data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-      w.get(), h.get(), SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
+      static_cast<int>(w.get()), static_cast<int>(h.get()),
+      SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
 
   if (window == nullptr) {
     SDL_Quit();
