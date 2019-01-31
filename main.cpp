@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "ltl/range.h"
 #include "phoenix/PhoenixWindow.h"
 
 int main(int ac, char **av) {
@@ -11,13 +12,21 @@ int main(int ac, char **av) {
   }
 
   catch (phx::ExtentionInvalidException exception) {
-    std::cerr << "The extension " << exception.extension << " is not available"
-              << std::endl;
+    std::cerr << "The extensions ";
+    ltl::copy(exception.extensions,
+              std::ostream_iterator<std::string>(std::cerr, ","));
+    std::cerr << " are not available" << std::endl;
   }
 
   catch (phx::LayerInvalidException exception) {
-    std::cerr << "The validation layer " << exception.layer
-              << " is not available" << std::endl;
+    std::cerr << "The validation layers ";
+    ltl::copy(exception.layers,
+              std::ostream_iterator<std::string>(std::cerr, ","));
+    std::cerr << " are not available" << std::endl;
+  }
+
+  catch (phx::PhoenixSDLInitializationException exception) {
+
   }
 
   catch (phx::PhoenixWindowOpeningException exception) {
@@ -32,6 +41,10 @@ int main(int ac, char **av) {
   catch (phx::NoGraphicComputeQueueException) {
     std::cerr << "The GPU is not compatible with Graphic or Compute queue"
               << std::endl;
+  }
+
+  catch (phx::UnableToCreateSurfaceException) {
+    std::cerr << "Unable to create Surface to draw on" << std::endl;
   }
 
   return 0;

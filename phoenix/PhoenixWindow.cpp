@@ -3,18 +3,12 @@
 namespace phx {
 
 static auto createWindow(Width w, Height h, WindowTitle windowTitle) {
-  if (!SDL_WasInit(SDL_INIT_VIDEO)) {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-      throw PhoenixWindowOpeningException{SDL_GetError()};
-  }
-
   SDL_Window *window = SDL_CreateWindow(
       windowTitle.get().data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
       static_cast<int>(w.get()), static_cast<int>(h.get()),
       SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
 
   if (window == nullptr) {
-    SDL_Quit();
     throw PhoenixWindowOpeningException{SDL_GetError()};
   }
 
@@ -42,10 +36,5 @@ bool PhoenixWindow::run() const noexcept {
 Width PhoenixWindow::width() const noexcept { return m_width; }
 
 Height PhoenixWindow::height() const noexcept { return m_height; }
-
-PhoenixWindow::~PhoenixWindow() noexcept {
-  SDL_DestroyWindow(m_windowHandle);
-  SDL_Quit();
-}
 
 } // namespace phx

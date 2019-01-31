@@ -1,16 +1,19 @@
 #include "Instance.h"
+
+#include "utility.h"
 #include <SDL2/SDL_vulkan.h>
+#include <iterator>
+#include <ltl/overloader.h>
 #include <ltl/range.h>
 
 namespace phx {
+
 static VKAPI_ATTR VkBool32 VKAPI_CALL
 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
               VkDebugUtilsMessageTypeFlagsEXT messageType,
               const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
               void *pUserData) {
-
   std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
-
   return VK_FALSE;
 }
 
@@ -22,45 +25,6 @@ static constexpr auto createApplicationInfo() noexcept {
   info.engineVersion = VK_MAKE_VERSION(0, 0, 1);
   info.apiVersion = VK_API_VERSION_1_1;
   return info;
-}
-
-static bool isExtensionAvailable(const char *extension) {
-  const auto allowedExtensions = vk::enumerateInstanceExtensionProperties();
-
-  for (auto allowedExtension : allowedExtensions) {
-    if (std::string_view{extension} == allowedExtension.extensionName)
-      return true;
-  }
-
-  return false;
-}
-
-static bool isLayerAvailable(const char *layer) {
-  const auto allowedLayers = vk::enumerateInstanceLayerProperties();
-
-  for (auto allowedLayer : allowedLayers) {
-    if (std::string_view{layer} == allowedLayer.layerName)
-      return true;
-  }
-
-  return false;
-}
-
-static void
-checkExtensionAvailability(const std::vector<const char *> &extensions) {
-  for (auto extension : extensions) {
-    if (!isExtensionAvailable(extension)) {
-      throw ExtentionInvalidException{extension};
-    }
-  }
-}
-
-static void checkLayersAvailability(const std::vector<const char *> &layers) {
-  for (auto layer : layers) {
-    if (!isLayerAvailable(layer)) {
-      throw LayerInvalidException{layer};
-    }
-  }
 }
 
 static auto getExtensions(SDL_Window *window, bool debug) {
@@ -79,7 +43,7 @@ static auto getExtensions(SDL_Window *window, bool debug) {
   SDL_Vulkan_GetInstanceExtensions(window, &extensionsNumber,
                                    extensions.data() + baseNumberExtensions);
 
-  checkExtensionAvailability(extensions);
+  checkAvailability(extensions, extensionTag);
 
   return extensions;
 }
@@ -88,7 +52,7 @@ static auto getValidationLayers() {
   std::vector<const char *> validationLayers = {
       "VK_LAYER_LUNARG_standard_validation"};
 
-  checkLayersAvailability(validationLayers);
+  checkAvailability(validationLayers, layerTag);
 
   return validationLayers;
 }
@@ -126,22 +90,19 @@ Instance::Instance(SDL_Window *window, bool debug) {
     m_validationLayers = layers;
   }
 
-  m_instance = vk::createInstanceUnique(info);
+  m_handle = vk::createInstanceUnique(info);
 
   if (debug) {
     constexpr auto debugMessengerInfo = createDebugMessengerInfo();
 
-    m_dispatchLoaderDynamic = vk::DispatchLoaderDynamic(*m_instance);
-    m_debugMessenger = m_instance->createDebugUtilsMessengerEXTUnique(
+    m_dispatchLoaderDynamic = vk::DispatchLoaderDynamic(*m_handle);
+    m_debugMessenger = m_handle->createDebugUtilsMessengerEXTUnique(
         debugMessengerInfo, nullptr, m_dispatchLoaderDynamic);
   }
-}
-
-std::vector<vk::PhysicalDevice> Instance::physicalDevices() const noexcept {
-  return m_instance->enumeratePhysicalDevices();
 }
 
 const std::vector<const char *> &Instance::validationLayers() const noexcept {
   return m_validationLayers;
 }
+
 } // namespace phx

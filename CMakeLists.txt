@@ -60,6 +60,8 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Device.h
     phoenix/vkw/Queue.h
     phoenix/vkw/Surface.h
+    phoenix/vkw/VulkanResource.h
+    phoenix/vkw/utility.h
     )
 
 set(PHOENIX_VKW_SRC
@@ -72,12 +74,14 @@ set(PHOENIX_VKW_SRC
 set(HEADERS_PHOENIX
     phoenix/constant.h
     phoenix/PhoenixWindow.h
+    phoenix/SDL_Initializer.h
     ${HEADERS_PHOENIX_VKW})
 
 
 
 set(PHOENIX_SRC
     phoenix/PhoenixWindow.cpp
+    phoenix/SDL_Initializer.cpp
     ${PHOENIX_VKW_SRC}
     )
 

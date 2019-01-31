@@ -4,19 +4,20 @@
 
 #include "Instance.h"
 #include "Queue.h"
+#include "Surface.h"
+#include "VulkanResource.h"
 
 namespace phx {
 struct NoDeviceCompatibleException {};
 struct NoGraphicComputeQueueException {};
 
-class Device final {
+class Device final : public VulkanResource<vk::UniqueDevice> {
 public:
-  Device(Instance &instance);
+  Device(const Instance &instance, const Surface &surface);
 
   Queue &getQueue();
 
 private:
-  vk::UniqueDevice m_device;
   std::unique_ptr<Queue> m_queue;
 };
 } // namespace phx

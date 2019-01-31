@@ -1,13 +1,20 @@
 #pragma once
 
 #include <SDL2/SDL.h>
+#include <memory>
 
+#include "SDL_Initializer.h"
 #include "constant.h"
 #include "vkw/Device.h"
+#include "vkw/Surface.h"
 
 namespace phx {
 struct PhoenixWindowOpeningException {
   std::string exception;
+};
+
+struct SDL_WindowDeleter {
+  void operator()(SDL_Window *window) { SDL_DestroyWindow(window); }
 };
 
 class PhoenixWindow {
@@ -21,15 +28,15 @@ public:
 
   void update() noexcept;
 
-  ~PhoenixWindow() noexcept;
-
 private:
+  SDL_Initializer m_sdl_initializer;
   Width m_width;
   Height m_height;
 
-  SDL_Window *m_windowHandle;
+  std::unique_ptr<SDL_Window, SDL_WindowDeleter> m_windowHandle;
   SDL_Event m_event;
-  Instance m_instance{m_windowHandle, true};
-  Device m_device{m_instance};
+  Instance m_instance{m_windowHandle.get(), true};
+  Surface m_surface{m_windowHandle.get(), m_instance};
+  Device m_device{m_instance, m_surface};
 };
 } // namespace phx

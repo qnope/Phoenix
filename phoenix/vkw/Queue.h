@@ -1,5 +1,6 @@
 #pragma once
 
+#include "VulkanResource.h"
 #include "vulkan.hpp"
 
 namespace phx {

@@ -1,30 +1,57 @@
+#include "Device.h"
+#include "utility.h"
+#include <ltl/range.h>
 #include <ltl/smart_iterator.h>
 
-#include "Device.h"
-
 namespace phx {
-static vk::PhysicalDevice choosePhysicalDevice(Instance &instance) {
-  auto physicalDevices = instance.physicalDevices();
+static bool isDeviceSuitable(vk::PhysicalDevice device) noexcept {
+  std::vector<const char *> deviceExtensions = {
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-  for (auto physicalDevice : physicalDevices) {
-    auto deviceProperty = physicalDevice.getProperties();
-    if (deviceProperty.deviceType == vk::PhysicalDeviceType::eDiscreteGpu) {
-      return physicalDevice;
-    }
+  try {
+    checkAvailability(deviceExtensions, extensionTag, device);
   }
+
+  catch (...) {
+    return false;
+  }
+
+  auto deviceProperty = device.getProperties();
+
+  return deviceProperty.deviceType == vk::PhysicalDeviceType::eDiscreteGpu;
+}
+
+static vk::PhysicalDevice choosePhysicalDevice(vk::Instance instance) {
+  auto physicalDevices = instance.enumeratePhysicalDevices();
+
+  if (auto device = ltl::find_if(physicalDevices, isDeviceSuitable))
+    return **device;
 
   throw NoDeviceCompatibleException{};
 }
 
-static uint32_t getQueueFamily(vk::PhysicalDevice device) {
-  auto queueFamilies = device.getQueueFamilyProperties();
-  constexpr auto queueOperations =
-      vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eGraphics;
+static bool isQueueSuitable(vk::PhysicalDevice device,
+                            std::size_t indexQueueFamily,
+                            vk::QueueFamilyProperties property,
+                            vk::SurfaceKHR surface) noexcept {
+  constexpr auto computeGraphicBits =
+      vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute;
+  const bool supportComputeGraphicOperations =
+      (property.queueFlags & computeGraphicBits) == computeGraphicBits;
+  const bool supportPresentationOperation = device.getSurfaceSupportKHR(
+      static_cast<uint32_t>(indexQueueFamily), surface);
+  return supportComputeGraphicOperations && supportPresentationOperation;
+}
 
-  for (auto [i, queueFamily] : ltl::enumerate(queueFamilies)) {
-    if (queueFamily.queueCount > 0 &&
-        (queueFamily.queueFlags & queueOperations) == queueOperations) {
-      return static_cast<uint32_t>(i);
+static uint32_t getQueueFamily(vk::PhysicalDevice device,
+                               vk::SurfaceKHR surface) {
+  auto queueFamilies = device.getQueueFamilyProperties();
+
+  for (auto [indexQueueFamily, queueFamilyProperty] :
+       ltl::enumerate(queueFamilies)) {
+    if (isQueueSuitable(device, indexQueueFamily, queueFamilyProperty,
+                        surface)) {
+      return static_cast<uint32_t>(indexQueueFamily);
     }
   }
 
@@ -45,9 +72,9 @@ static constexpr auto createDeviceFeatures() {
   return features;
 }
 
-Device::Device(Instance &instance) {
-  auto physicalDevice = choosePhysicalDevice(instance);
-  auto queueFamily = getQueueFamily(physicalDevice);
+Device::Device(const Instance &instance, const Surface &surface) {
+  auto physicalDevice = choosePhysicalDevice(instance.getHandle());
+  auto queueFamily = getQueueFamily(physicalDevice, surface.getHandle());
   auto queueInfo = createDeviceQueueInfo(queueFamily);
   constexpr auto features = createDeviceFeatures();
 
@@ -59,8 +86,8 @@ Device::Device(Instance &instance) {
   info.pEnabledFeatures = &features;
   info.enabledLayerCount = static_cast<uint32_t>(layers.size());
   info.ppEnabledLayerNames = layers.data();
-  m_device = physicalDevice.createDeviceUnique(info);
-  m_queue = std::make_unique<Queue>(m_device->getQueue(queueFamily, 0));
+  m_handle = physicalDevice.createDeviceUnique(info);
+  m_queue = std::make_unique<Queue>(m_handle->getQueue(queueFamily, 0));
 }
 
 Queue &Device::getQueue() { return *m_queue; }
