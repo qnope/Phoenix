@@ -4,17 +4,18 @@
 #include <ltl/smart_iterator.h>
 
 namespace phx {
-static bool isDeviceSuitable(vk::PhysicalDevice device) noexcept {
+static auto getNeededDeviceExtensions() noexcept {
   std::vector<const char *> deviceExtensions = {
       VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  return deviceExtensions;
+}
 
-  try {
-    checkAvailability(deviceExtensions, extensionTag, device);
-  }
+static bool isDeviceSuitable(vk::PhysicalDevice device) noexcept {
+  auto neededExtensions = getNeededDeviceExtensions();
+  auto neededExtensionsString = to_string_vector(neededExtensions);
 
-  catch (...) {
+  if (!areAvailable(neededExtensionsString, device))
     return false;
-  }
 
   auto deviceProperty = device.getProperties();
 
@@ -79,13 +80,15 @@ Device::Device(const Instance &instance, const Surface &surface) {
   constexpr auto features = createDeviceFeatures();
 
   const auto &layers = instance.validationLayers();
-
+  const auto extensions = getNeededDeviceExtensions();
   vk::DeviceCreateInfo info;
   info.queueCreateInfoCount = 1;
   info.pQueueCreateInfos = &queueInfo;
   info.pEnabledFeatures = &features;
   info.enabledLayerCount = static_cast<uint32_t>(layers.size());
   info.ppEnabledLayerNames = layers.data();
+  info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+  info.ppEnabledExtensionNames = extensions.data();
   m_handle = physicalDevice.createDeviceUnique(info);
   m_queue = std::make_unique<Queue>(m_handle->getQueue(queueFamily, 0));
 }

@@ -1,38 +1,38 @@
 #pragma once
+#include <cassert>
+#include <iterator>
 #include <ltl/overloader.h>
 #include <ltl/range.h>
 #include <string_view>
 #include <utility>
 #include <vector>
 
-#include "Instance.h"
 #include "vulkan.hpp"
 
+#define FWD(x) ::std::forward<decltype(x)>(x)
+
 namespace phx {
-constexpr auto compare_const_char() {
-  return [](const char *a, const char *b) {
-    return std::string_view{a} < std::string_view{b};
-  };
+
+inline std::vector<const char *>
+to_const_char_vector(std::vector<std::string> &strings) noexcept {
+  std::vector<const char *> ptrs;
+  auto to_const_char = [](std::string &s) { return s.c_str(); };
+  ltl::transform(strings, std::back_inserter(ptrs), to_const_char);
+  return ptrs;
 }
 
-constexpr auto equality_const_char() {
-  return [](const char *a, const char *b) {
-    return std::string_view{a} == std::string_view{b};
-  };
-}
-
-static constexpr auto to_name() {
-  return ltl::overloader{
-      [](const vk::ExtensionProperties &p) { return p.extensionName; },
-      [](const vk::LayerProperties &p) { return p.layerName; }};
+inline std::vector<std::string>
+to_string_vector(std::vector<const char *> &ptrs) noexcept {
+  std::vector<std::string> strings;
+  auto to_string = [](const char *p) -> std::string { return p; };
+  ltl::transform(ptrs, std::back_inserter(strings), to_string);
+  return strings;
 }
 
 constexpr struct ExtensionTag {
-  using ExceptionType = ExtentionInvalidException;
 } extensionTag;
 
 constexpr struct LayerTag {
-  using ExceptionType = LayerInvalidException;
 } layerTag;
 
 inline auto getProperties(ExtensionTag) {
@@ -43,33 +43,37 @@ inline auto getProperties(LayerTag) {
   return vk::enumerateInstanceLayerProperties();
 }
 
-inline auto getProperties(ExtensionTag, vk::PhysicalDevice device) {
+inline auto getProperties(vk::PhysicalDevice device) {
   return device.enumerateDeviceExtensionProperties();
 }
 
-template <typename Tag, typename... Args>
-inline void checkAvailability(std::vector<const char *> &toTest, Tag tag,
-                              Args &&... argsGetProperties) {
-  const auto allowedProperties =
-      getProperties(tag, std::forward<Args>(argsGetProperties)...);
+template <typename Tag> auto getPropertiesNames(Tag &&tag) {
+  const auto properties = getProperties(FWD(tag));
+  std::vector<std::string> propertiesNames;
+  ltl::overloader to_name{
+      [](vk::ExtensionProperties p) -> std::string { return p.extensionName; },
+      [](vk::LayerProperties p) -> std::string { return p.layerName; }};
 
-  std::vector<const char *> allowed;
-  ltl::transform(allowedProperties, std::back_inserter(allowed), to_name());
-  ltl::sort(toTest, compare_const_char());
-  ltl::sort(allowed, compare_const_char());
+  ltl::transform(properties, std::back_inserter(propertiesNames), to_name);
+  ltl::sort(propertiesNames);
+  return propertiesNames;
+};
 
-  std::vector<const char *> intersections;
+template <typename Tag>
+bool areAvailable(std::vector<std::string> &values, Tag &&tag) noexcept {
+  const auto allowed = getPropertiesNames(FWD(tag));
+  ltl::sort(values);
+  return ltl::includes(allowed, values);
+};
 
+template <typename Tag>
+std::vector<std::string> getUnavailables(std::vector<std::string> &values,
+                                         Tag &&tag) noexcept {
+  const auto allowed = getPropertiesNames(FWD(tag));
+  ltl::sort(values);
   std::vector<std::string> differences;
-  ltl::set_intersection(allowed, toTest, std::back_inserter(intersections),
-                        compare_const_char());
-  ltl::set_symmetric_difference(intersections, toTest,
-                                std::back_inserter(differences),
-                                compare_const_char());
-
-  if (!differences.empty()) {
-    throw typename Tag::ExceptionType{std::move(differences)};
-  }
+  ltl::set_difference(values, allowed, std::back_inserter(differences));
+  return differences;
 }
 
 } // namespace phx

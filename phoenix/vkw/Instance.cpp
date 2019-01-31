@@ -42,19 +42,25 @@ static auto getExtensions(SDL_Window *window, bool debug) {
   extensions.resize(baseNumberExtensions + extensionsNumber);
   SDL_Vulkan_GetInstanceExtensions(window, &extensionsNumber,
                                    extensions.data() + baseNumberExtensions);
+  auto extensionsStrings = to_string_vector(extensions);
 
-  checkAvailability(extensions, extensionTag);
+  if (!areAvailable(extensionsStrings, extensionTag)) {
+    auto notAvailables = getUnavailables(extensionsStrings, extensionTag);
+    throw ExtentionInvalidException{notAvailables};
+  }
 
   return extensions;
 }
 
 static auto getValidationLayers() {
-  std::vector<const char *> validationLayers = {
-      "VK_LAYER_LUNARG_standard_validation"};
+  std::vector<const char *> layers = {"VK_LAYER_LUNARG_standard_validation"};
+  auto layerStrings = to_string_vector(layers);
+  if (!areAvailable(layerStrings, layerTag)) {
+    auto notAvailables = getUnavailables(layerStrings, layerTag);
+    throw LayerInvalidException{notAvailables};
+  }
 
-  checkAvailability(validationLayers, layerTag);
-
-  return validationLayers;
+  return layers;
 }
 
 static constexpr auto createDebugMessengerInfo() noexcept {
