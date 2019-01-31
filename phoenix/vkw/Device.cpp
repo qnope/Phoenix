@@ -10,11 +10,22 @@ static auto getNeededDeviceExtensions() noexcept {
   return deviceExtensions;
 }
 
-static bool isDeviceSuitable(vk::PhysicalDevice device) noexcept {
+static bool isSwapchainSupported(vk::PhysicalDevice device,
+                                 vk::SurfaceKHR surface) noexcept {
+  auto formats = device.getSurfaceFormatsKHR(surface);
+  auto presentModes = device.getSurfacePresentModesKHR(surface);
+  return !formats.empty() && !presentModes.empty();
+}
+
+static bool isDeviceSuitable(vk::PhysicalDevice device,
+                             vk::SurfaceKHR surface) noexcept {
   auto neededExtensions = getNeededDeviceExtensions();
   auto neededExtensionsString = to_string_vector(neededExtensions);
 
   if (!areAvailable(neededExtensionsString, device))
+    return false;
+
+  if (!isSwapchainSupported(device, surface))
     return false;
 
   auto deviceProperty = device.getProperties();
@@ -22,11 +33,14 @@ static bool isDeviceSuitable(vk::PhysicalDevice device) noexcept {
   return deviceProperty.deviceType == vk::PhysicalDeviceType::eDiscreteGpu;
 }
 
-static vk::PhysicalDevice choosePhysicalDevice(vk::Instance instance) {
+static vk::PhysicalDevice choosePhysicalDevice(vk::Instance instance,
+                                               vk::SurfaceKHR surface) {
   auto physicalDevices = instance.enumeratePhysicalDevices();
 
-  if (auto device = ltl::find_if(physicalDevices, isDeviceSuitable))
-    return **device;
+  for (auto physicalDevice : physicalDevices) {
+    if (isDeviceSuitable(physicalDevice, surface))
+      return physicalDevice;
+  }
 
   throw NoDeviceCompatibleException{};
 }
@@ -74,7 +88,8 @@ static constexpr auto createDeviceFeatures() {
 }
 
 Device::Device(const Instance &instance, const Surface &surface) {
-  auto physicalDevice = choosePhysicalDevice(instance.getHandle());
+  auto physicalDevice =
+      choosePhysicalDevice(instance.getHandle(), surface.getHandle());
   auto queueFamily = getQueueFamily(physicalDevice, surface.getHandle());
   auto queueInfo = createDeviceQueueInfo(queueFamily);
   constexpr auto features = createDeviceFeatures();
