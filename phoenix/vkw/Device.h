@@ -15,9 +15,12 @@ class Device final : public VulkanResource<vk::UniqueDevice> {
 public:
   Device(const Instance &instance, const Surface &surface);
 
-  Queue &getQueue();
+  Queue &getQueue() const noexcept;
+
+  vk::PhysicalDevice getPhysicalDevice() const noexcept;
 
 private:
+  vk::PhysicalDevice m_physicalDevice;
   std::unique_ptr<Queue> m_queue;
 };
 } // namespace phx

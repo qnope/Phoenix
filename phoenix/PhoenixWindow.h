@@ -7,6 +7,7 @@
 #include "constant.h"
 #include "vkw/Device.h"
 #include "vkw/Surface.h"
+#include "vkw/Swapchain.h"
 
 namespace phx {
 struct PhoenixWindowOpeningException {
@@ -38,5 +39,6 @@ private:
   Instance m_instance{m_windowHandle.get(), true};
   Surface m_surface{m_windowHandle.get(), m_instance};
   Device m_device{m_instance, m_surface};
+  Swapchain m_swapchain{m_device, m_surface, m_width, m_height};
 };
 } // namespace phx

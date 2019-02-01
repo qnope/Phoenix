@@ -62,13 +62,15 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Surface.h
     phoenix/vkw/VulkanResource.h
     phoenix/vkw/utility.h
+    phoenix/vkw/Swapchain.h
     )
 
-set(PHOENIX_VKW_SRC
+set(SRC_PHOENIX_VKW
     phoenix/vkw/Instance.cpp
     phoenix/vkw/Device.cpp
     phoenix/vkw/Queue.cpp
     phoenix/vkw/Surface.cpp
+    phoenix/vkw/Swapchain.cpp
     )
 
 set(HEADERS_PHOENIX
@@ -78,16 +80,15 @@ set(HEADERS_PHOENIX
     ${HEADERS_PHOENIX_VKW})
 
 
-
-set(PHOENIX_SRC
+set(SRC_PHOENIX
     phoenix/PhoenixWindow.cpp
     phoenix/SDL_Initializer.cpp
-    ${PHOENIX_VKW_SRC}
+    ${SRC_PHOENIX_VKW}
     )
 
 add_executable(Phoenix
     ${MAIN_SRC}
-    ${PHOENIX_SRC}
+    ${SRC_PHOENIX}
     ${HEADERS_LPL} ${HEADERS_LTL}
     ${HEADERS_PHOENIX}
     )

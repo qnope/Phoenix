@@ -55,6 +55,7 @@ static bool isQueueSuitable(vk::PhysicalDevice device,
       (property.queueFlags & computeGraphicBits) == computeGraphicBits;
   const bool supportPresentationOperation = device.getSurfaceSupportKHR(
       static_cast<uint32_t>(indexQueueFamily), surface);
+
   return supportComputeGraphicOperations && supportPresentationOperation;
 }
 
@@ -73,7 +74,7 @@ static uint32_t getQueueFamily(vk::PhysicalDevice device,
   throw NoGraphicComputeQueueException{};
 }
 
-static auto createDeviceQueueInfo(uint32_t familyIndex) {
+static auto createDeviceQueueInfo(uint32_t familyIndex) noexcept {
   vk::DeviceQueueCreateInfo info;
   static constexpr float queuePriority = 1.0f;
   info.queueCount = 1;
@@ -82,20 +83,21 @@ static auto createDeviceQueueInfo(uint32_t familyIndex) {
   return info;
 }
 
-static constexpr auto createDeviceFeatures() {
+static constexpr auto createDeviceFeatures() noexcept {
   vk::PhysicalDeviceFeatures features;
   return features;
 }
 
 Device::Device(const Instance &instance, const Surface &surface) {
-  auto physicalDevice =
+  m_physicalDevice =
       choosePhysicalDevice(instance.getHandle(), surface.getHandle());
-  auto queueFamily = getQueueFamily(physicalDevice, surface.getHandle());
+  auto queueFamily = getQueueFamily(m_physicalDevice, surface.getHandle());
   auto queueInfo = createDeviceQueueInfo(queueFamily);
   constexpr auto features = createDeviceFeatures();
 
   const auto &layers = instance.validationLayers();
   const auto extensions = getNeededDeviceExtensions();
+
   vk::DeviceCreateInfo info;
   info.queueCreateInfoCount = 1;
   info.pQueueCreateInfos = &queueInfo;
@@ -104,10 +106,15 @@ Device::Device(const Instance &instance, const Surface &surface) {
   info.ppEnabledLayerNames = layers.data();
   info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   info.ppEnabledExtensionNames = extensions.data();
-  m_handle = physicalDevice.createDeviceUnique(info);
-  m_queue = std::make_unique<Queue>(m_handle->getQueue(queueFamily, 0));
+  m_handle = m_physicalDevice.createDeviceUnique(info);
+  m_queue =
+      std::make_unique<Queue>(m_handle->getQueue(queueFamily, 0), queueFamily);
 }
 
-Queue &Device::getQueue() { return *m_queue; }
+Queue &Device::getQueue() const noexcept { return *m_queue; }
+
+vk::PhysicalDevice Device::getPhysicalDevice() const noexcept {
+  return m_physicalDevice;
+}
 
 } // namespace phx
