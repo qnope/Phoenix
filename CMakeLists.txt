@@ -63,6 +63,7 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/VulkanResource.h
     phoenix/vkw/utility.h
     phoenix/vkw/Swapchain.h
+    phoenix/vkw/Image.h
     )
 
 set(SRC_PHOENIX_VKW

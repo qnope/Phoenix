@@ -88,7 +88,7 @@ Instance::Instance(SDL_Window *window, bool debug) {
   info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   info.ppEnabledExtensionNames = extensions.data();
 
-  auto layers = getValidationLayers();
+  auto layers = ::phx::getValidationLayers();
 
   if (debug) {
     info.enabledLayerCount = static_cast<uint32_t>(layers.size());
@@ -107,7 +107,8 @@ Instance::Instance(SDL_Window *window, bool debug) {
   }
 }
 
-const std::vector<const char *> &Instance::validationLayers() const noexcept {
+const std::vector<const char *> &Instance::getValidationLayers() const
+    noexcept {
   return m_validationLayers;
 }
 

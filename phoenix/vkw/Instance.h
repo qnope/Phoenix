@@ -18,7 +18,7 @@ class Instance final : public VulkanResource<vk::UniqueInstance> {
 public:
   Instance(SDL_Window *window, bool debug);
 
-  const std::vector<const char *> &validationLayers() const noexcept;
+  const std::vector<const char *> &getValidationLayers() const noexcept;
 
 private:
   std::vector<const char *> m_validationLayers;

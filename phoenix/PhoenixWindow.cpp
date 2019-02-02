@@ -33,8 +33,8 @@ bool PhoenixWindow::run() const noexcept {
   return true;
 }
 
-Width PhoenixWindow::width() const noexcept { return m_width; }
+Width PhoenixWindow::getWidth() const noexcept { return m_width; }
 
-Height PhoenixWindow::height() const noexcept { return m_height; }
+Height PhoenixWindow::getHeight() const noexcept { return m_height; }
 
 } // namespace phx

@@ -24,8 +24,8 @@ public:
 
   bool run() const noexcept;
 
-  Width width() const noexcept;
-  Height height() const noexcept;
+  Width getWidth() const noexcept;
+  Height getHeight() const noexcept;
 
   void update() noexcept;
 

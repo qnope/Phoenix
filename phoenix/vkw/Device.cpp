@@ -95,7 +95,7 @@ Device::Device(const Instance &instance, const Surface &surface) {
   auto queueInfo = createDeviceQueueInfo(queueFamily);
   constexpr auto features = createDeviceFeatures();
 
-  const auto &layers = instance.validationLayers();
+  const auto &layers = instance.getValidationLayers();
   const auto extensions = getNeededDeviceExtensions();
 
   vk::DeviceCreateInfo info;

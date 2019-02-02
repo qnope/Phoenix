@@ -82,7 +82,16 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width,
   info.presentMode = presentMode;
   info.clipped = true;
 
-  m_handle = device.getHandle().createSwapchainKHRUnique(info);
+  vk::Device deviceHandle = device.getHandle();
+  m_handle = deviceHandle.createSwapchainKHRUnique(info);
+
+  auto images = deviceHandle.getSwapchainImagesKHR(*m_handle);
+
+  vk::Extent3D extent(size.width, size.height, 1);
+
+  for (auto image : images) {
+    m_swapchainImages.emplace_back(image, format.format, extent, 1, 1);
+  }
 }
 
 } // namespace phx
