@@ -70,7 +70,7 @@
   #undef MemoryBarrier
 #endif
 
-static_assert( VK_HEADER_VERSION ==  92 , "Wrong VK_HEADER_VERSION!" );
+static_assert( VK_HEADER_VERSION ==  97 , "Wrong VK_HEADER_VERSION!" );
 
 // 32-bit vulkan is not typesafe for handles, so don't allow copy constructors on this platform by default.
 // To enable this feature on 32-bit platforms please define VULKAN_HPP_TYPESAFE_CONVERSION
@@ -18355,43 +18355,44 @@ public:
   static_assert( sizeof( PhysicalDeviceVertexAttributeDivisorPropertiesEXT ) == sizeof( VkPhysicalDeviceVertexAttributeDivisorPropertiesEXT ), "struct and wrapper have different size!" );
 
   struct PhysicalDevicePCIBusInfoPropertiesEXT
-  {
-    operator VkPhysicalDevicePCIBusInfoPropertiesEXT const&() const
     {
-      return *reinterpret_cast<const VkPhysicalDevicePCIBusInfoPropertiesEXT*>(this);
-    }
+      operator VkPhysicalDevicePCIBusInfoPropertiesEXT const&() const
+      {
+        return *reinterpret_cast<const VkPhysicalDevicePCIBusInfoPropertiesEXT*>(this);
+      }
 
-    operator VkPhysicalDevicePCIBusInfoPropertiesEXT &()
-    {
-      return *reinterpret_cast<VkPhysicalDevicePCIBusInfoPropertiesEXT*>(this);
-    }
+      operator VkPhysicalDevicePCIBusInfoPropertiesEXT &()
+      {
+        return *reinterpret_cast<VkPhysicalDevicePCIBusInfoPropertiesEXT*>(this);
+      }
 
-    bool operator==( PhysicalDevicePCIBusInfoPropertiesEXT const& rhs ) const
-    {
-      return ( sType == rhs.sType )
-          && ( pNext == rhs.pNext )
-          && ( pciDomain == rhs.pciDomain )
-          && ( pciBus == rhs.pciBus )
-          && ( pciDevice == rhs.pciDevice )
-          && ( pciFunction == rhs.pciFunction );
-    }
+      bool operator==( PhysicalDevicePCIBusInfoPropertiesEXT const& rhs ) const
+      {
+        return ( sType == rhs.sType )
+            && ( pNext == rhs.pNext )
+            && ( pciDomain == rhs.pciDomain )
+            && ( pciBus == rhs.pciBus )
+            && ( pciDevice == rhs.pciDevice )
+            && ( pciFunction == rhs.pciFunction );
+      }
 
-    bool operator!=( PhysicalDevicePCIBusInfoPropertiesEXT const& rhs ) const
-    {
-      return !operator==( rhs );
-    }
+      bool operator!=( PhysicalDevicePCIBusInfoPropertiesEXT const& rhs ) const
+      {
+        return !operator==( rhs );
+      }
 
-  private:
-    StructureType sType = StructureType::ePhysicalDevicePciBusInfoPropertiesEXT;
+    private:
+      StructureType sType = StructureType::ePhysicalDevicePciBusInfoPropertiesEXT;
 
-  public:
-    void* pNext = nullptr;
-    uint16_t pciDomain;
-    uint8_t pciBus;
-    uint8_t pciDevice;
-    uint8_t pciFunction;
-  };
-  static_assert( sizeof( PhysicalDevicePCIBusInfoPropertiesEXT ) == sizeof( VkPhysicalDevicePCIBusInfoPropertiesEXT ), "struct and wrapper have different size!" );
+    public:
+      void* pNext = nullptr;
+      uint32_t pciDomain;
+      uint32_t pciBus;
+      uint32_t pciDevice;
+      uint32_t pciFunction;
+    };
+    static_assert( sizeof( PhysicalDevicePCIBusInfoPropertiesEXT ) == sizeof( VkPhysicalDevicePCIBusInfoPropertiesEXT ), "struct and wrapper have different size!" );
+
 
 #ifdef VK_USE_PLATFORM_ANDROID_ANDROID
   struct ImportAndroidHardwareBufferInfoANDROID

@@ -4,6 +4,7 @@
 
 #include "Instance.h"
 #include "Queue.h"
+#include "ShaderModule.h"
 #include "Surface.h"
 #include "VulkanResource.h"
 
@@ -18,6 +19,12 @@ public:
   Queue &getQueue() const noexcept;
 
   vk::PhysicalDevice getPhysicalDevice() const noexcept;
+
+  template <typename Type>
+  ShaderModule<Type> createShaderModule(const std::string &path,
+                                        bool debug) const {
+    return ShaderModule<Type>(getHandle(), path, debug);
+  }
 
 private:
   vk::PhysicalDevice m_physicalDevice;

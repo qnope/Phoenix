@@ -4,12 +4,19 @@
 #include "phoenix/PhoenixWindow.h"
 #include "phoenix/vkw/utility.h"
 
-#include "phoenix/vkw/ShaderCompiler.h"
-
 int main(int ac, char **av) {
   try {
     phx::PhoenixWindow window{phx::Width(800u), phx::Height(600u),
                               phx::WindowTitle("Phoenix Engine")};
+
+    phx::Device &device = window.getDevice();
+
+    auto vertexShader = device.createShaderModule<phx::VertexShaderType>(
+        "../Phoenix/phoenix/shaders/TriangleTest/triangle.vert", true);
+
+    auto fragmentShader = device.createShaderModule<phx::FragmentShaderType>(
+        "../Phoenix/phoenix/shaders/TriangleTest/triangle.frag", true);
+
     while (window.run()) {
     }
   }

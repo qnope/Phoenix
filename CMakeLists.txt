@@ -66,6 +66,7 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Image.h
     phoenix/vkw/ImageView.h
     phoenix/vkw/ShaderCompiler.h
+    phoenix/vkw/ShaderModule.h
     )
 
 set(SRC_PHOENIX_VKW
@@ -102,7 +103,7 @@ target_link_libraries(Phoenix
     ${VULKAN_SDK_PATH}/Lib/vulkan-1.lib)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_combined.lib)
+    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_sharedd.lib)
 elseif(CMAKE_BUILD_TYPE MATCHES Release)
-    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_combined.lib)
+    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_shared.lib )
 endif(CMAKE_BUILD_TYPE MATCHES Debug)

@@ -27,6 +27,8 @@ public:
   Width getWidth() const noexcept;
   Height getHeight() const noexcept;
 
+  Device &getDevice() noexcept;
+
   void update() noexcept;
 
 private:

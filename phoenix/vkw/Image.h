@@ -7,13 +7,14 @@
 
 namespace phx {
 
-inline constexpr std::size_t colorAttachmentUsageBit() {
-  return static_cast<std::size_t>(vk::ImageUsageFlagBits::eColorAttachment);
-}
+struct ColorAttachmentUsageBit {
+  static constexpr vk::ImageUsageFlags usage =
+      vk::ImageUsageFlagBits::eColorAttachment;
+};
 
-template <std::size_t Usage> class Image {
+template <typename Usage> class Image {
 public:
-  static constexpr std::size_t usage = Usage;
+  static constexpr auto usage = Usage::usage;
 
   Image(vk::Device device, vk::Image image, vk::Format format,
         vk::Extent3D extent, uint32_t mipLevels, uint32_t arrayLayers) noexcept
@@ -31,10 +32,10 @@ public:
     return std::visit(visitor, m_handle);
   }
 
-  ImageView<usage> createImageView(vk::ImageViewType type, vk::Format format,
+  ImageView<Usage> createImageView(vk::ImageViewType type, vk::Format format,
                                    vk::ImageSubresourceRange range) const
       noexcept {
-    return ImageView<usage>{m_device, getHandle(), type, format, range};
+    return ImageView<Usage>{m_device, getHandle(), type, format, range};
   }
 
 private:

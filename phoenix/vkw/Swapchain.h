@@ -15,8 +15,8 @@ public:
   Swapchain(Device &device, Surface &surface, Width width, Height height);
 
 private:
-  using SwapchainImage = Image<colorAttachmentUsageBit()>;
-  using SwapchainImageView = ImageView<colorAttachmentUsageBit()>;
+  using SwapchainImage = Image<ColorAttachmentUsageBit>;
+  using SwapchainImageView = ImageView<ColorAttachmentUsageBit>;
   std::vector<ltl::tuple_t<SwapchainImage, SwapchainImageView>>
       m_swapchainImages;
 };

@@ -37,4 +37,6 @@ Width PhoenixWindow::getWidth() const noexcept { return m_width; }
 
 Height PhoenixWindow::getHeight() const noexcept { return m_height; }
 
+Device &PhoenixWindow::getDevice() noexcept { return m_device; }
+
 } // namespace phx

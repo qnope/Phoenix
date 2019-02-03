@@ -5,10 +5,10 @@
 #include "vulkan.hpp"
 
 namespace phx {
-template <std::size_t Usage>
+template <typename Usage>
 class ImageView : public VulkanResource<vk::UniqueImageView> {
 public:
-  static constexpr std::size_t usage = Usage;
+  static constexpr auto usage = Usage::usage;
 
   ImageView(vk::Device device, vk::Image image, vk::ImageViewType type,
             vk::Format format, vk::ImageSubresourceRange range) {
