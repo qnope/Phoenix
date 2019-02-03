@@ -22,7 +22,6 @@ public:
                                      shaderc_include_type,
                                      const char *requesting, size_t) override;
 
-  // Handles shaderc_include_result_release_fn callbacks.
   void ReleaseInclude(shaderc_include_result *result) override;
 
 private:
