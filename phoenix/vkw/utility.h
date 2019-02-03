@@ -1,5 +1,9 @@
 #pragma once
 #include <cassert>
+
+#include <filesystem>
+#include <fstream>
+
 #include <iterator>
 #include <ltl/overloader.h>
 #include <ltl/range.h>
@@ -74,6 +78,28 @@ std::vector<std::string> getUnavailables(std::vector<std::string> &values,
   std::vector<std::string> differences;
   ltl::set_difference(values, allowed, std::back_inserter(differences));
   return differences;
+}
+
+struct FileNotFoundException {
+  std::string path;
+};
+
+inline std::string readFile(const std::string &path) {
+  std::ifstream stream(path, std::ios::ate | std::ios::binary);
+
+  if (stream) {
+    std::string result;
+    result.reserve(stream.tellg());
+    stream.seekg(0);
+    return {std::istreambuf_iterator<char>(stream),
+            std::istreambuf_iterator<char>()};
+  }
+
+  throw FileNotFoundException{path};
+}
+
+inline std::string getBaseDirectory(std::string_view path) noexcept {
+  return std::filesystem::path(path).parent_path().string();
 }
 
 } // namespace phx

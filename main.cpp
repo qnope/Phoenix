@@ -2,6 +2,9 @@
 
 #include "ltl/range.h"
 #include "phoenix/PhoenixWindow.h"
+#include "phoenix/vkw/utility.h"
+
+#include "phoenix/vkw/ShaderCompiler.h"
 
 int main(int ac, char **av) {
   try {
@@ -26,7 +29,6 @@ int main(int ac, char **av) {
   }
 
   catch (phx::PhoenixSDLInitializationException exception) {
-
   }
 
   catch (phx::PhoenixWindowOpeningException exception) {
@@ -45,6 +47,14 @@ int main(int ac, char **av) {
 
   catch (phx::UnableToCreateSurfaceException) {
     std::cerr << "Unable to create Surface to draw on" << std::endl;
+  }
+
+  catch (phx::FileNotFoundException e) {
+    std::cerr << "Unable to open : " << e.path << std::endl;
+  }
+
+  catch (phx::ShaderErrorException e) {
+    std::cerr << e.error << std::endl;
   }
 
   return 0;

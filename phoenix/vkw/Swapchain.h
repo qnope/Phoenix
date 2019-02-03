@@ -6,6 +6,8 @@
 #include "VulkanResource.h"
 #include "vulkan.hpp"
 
+#include "ltl/tuple.h"
+
 namespace phx {
 struct NoFormatAvailableException {};
 class Swapchain final : public VulkanResource<vk::UniqueSwapchainKHR> {
@@ -14,6 +16,8 @@ public:
 
 private:
   using SwapchainImage = Image<colorAttachmentUsageBit()>;
-  std::vector<SwapchainImage> m_swapchainImages;
+  using SwapchainImageView = ImageView<colorAttachmentUsageBit()>;
+  std::vector<ltl::tuple_t<SwapchainImage, SwapchainImageView>>
+      m_swapchainImages;
 };
 } // namespace phx

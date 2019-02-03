@@ -57,6 +57,7 @@ static vk::Extent2D chooseSwapchainExtent(vk::PhysicalDevice device,
 
 Swapchain::Swapchain(Device &device, Surface &surface, Width width,
                      Height height) {
+  using namespace vk;
   auto physicalDevice = device.getPhysicalDevice();
   auto surfaceKHR = surface.getHandle();
   auto format = chooseSwapchainFormat(physicalDevice, surfaceKHR);
@@ -67,7 +68,7 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width,
   auto imageCount =
       std::clamp(3u, capabilities.minImageCount, capabilities.maxImageCount);
 
-  vk::SwapchainCreateInfoKHR info;
+  SwapchainCreateInfoKHR info;
 
   info.surface = surfaceKHR;
   info.minImageCount = imageCount;
@@ -75,10 +76,10 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width,
   info.imageColorSpace = format.colorSpace;
   info.imageExtent = size;
   info.imageArrayLayers = 1;
-  info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
-  info.imageSharingMode = vk::SharingMode::eExclusive;
+  info.imageUsage = ImageUsageFlagBits::eColorAttachment;
+  info.imageSharingMode = SharingMode::eExclusive;
   info.preTransform = capabilities.currentTransform;
-  info.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+  info.compositeAlpha = CompositeAlphaFlagBitsKHR::eOpaque;
   info.presentMode = presentMode;
   info.clipped = true;
 
@@ -87,10 +88,15 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width,
 
   auto images = deviceHandle.getSwapchainImagesKHR(*m_handle);
 
-  vk::Extent3D extent(size.width, size.height, 1);
+  Extent3D extent(size.width, size.height, 1);
 
-  for (auto image : images) {
-    m_swapchainImages.emplace_back(image, format.format, extent, 1, 1);
+  for (auto vkimage : images) {
+    ImageSubresourceRange range(ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+    SwapchainImage image{deviceHandle, vkimage, format.format, extent, 1u, 1u};
+    auto imageView =
+        image.createImageView(ImageViewType::e2D, format.format, range);
+
+    m_swapchainImages.emplace_back(std::move(image), std::move(imageView));
   }
 }
 

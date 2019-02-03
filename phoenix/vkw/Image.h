@@ -1,8 +1,9 @@
 #pragma once
 
-#include "vulkan.hpp"
 #include <ltl/overloader.h>
 #include <variant>
+
+#include "ImageView.h"
 
 namespace phx {
 
@@ -14,9 +15,9 @@ template <std::size_t Usage> class Image {
 public:
   static constexpr std::size_t usage = Usage;
 
-  Image(vk::Image image, vk::Format format, vk::Extent3D extent,
-        uint32_t mipLevels, uint32_t arrayLayers) noexcept
-      : m_handle{image}, m_format{format}, m_extent{extent},
+  Image(vk::Device device, vk::Image image, vk::Format format,
+        vk::Extent3D extent, uint32_t mipLevels, uint32_t arrayLayers) noexcept
+      : m_device{device}, m_handle{image}, m_format{format}, m_extent{extent},
         m_mipLevels{mipLevels}, m_arrayLayers{arrayLayers} {}
 
   vk::Format getFormat() const noexcept { return m_format; }
@@ -30,7 +31,14 @@ public:
     return std::visit(visitor, m_handle);
   }
 
+  ImageView<usage> createImageView(vk::ImageViewType type, vk::Format format,
+                                   vk::ImageSubresourceRange range) const
+      noexcept {
+    return ImageView<usage>{m_device, getHandle(), type, format, range};
+  }
+
 private:
+  vk::Device m_device;
   std::variant<vk::Image, vk::UniqueImage> m_handle;
   vk::Format m_format;
   vk::Extent3D m_extent;

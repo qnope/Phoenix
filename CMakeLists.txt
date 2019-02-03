@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Phoenix)
 
 if(MSVC)
-    add_compile_options(/experimental:preprocessor /permissive- /NODEFAULTLIB)
+    add_compile_options(/experimental:preprocessor /permissive-)
 endif(MSVC)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -64,6 +64,8 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/utility.h
     phoenix/vkw/Swapchain.h
     phoenix/vkw/Image.h
+    phoenix/vkw/ImageView.h
+    phoenix/vkw/ShaderCompiler.h
     )
 
 set(SRC_PHOENIX_VKW
@@ -72,6 +74,7 @@ set(SRC_PHOENIX_VKW
     phoenix/vkw/Queue.cpp
     phoenix/vkw/Surface.cpp
     phoenix/vkw/Swapchain.cpp
+    phoenix/vkw/ShaderCompiler.cpp
     )
 
 set(HEADERS_PHOENIX
@@ -96,4 +99,10 @@ add_executable(Phoenix
 
 target_link_libraries(Phoenix
     ${LIBRARIES_LIB}/SDL2main.lib ${LIBRARIES_LIB}/SDL2.lib
-    ${VULKAN_SDK_PATH}/lib/vulkan-1.lib )
+    ${VULKAN_SDK_PATH}/Lib/vulkan-1.lib)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_combined.lib)
+elseif(CMAKE_BUILD_TYPE MATCHES Release)
+    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_combined.lib)
+endif(CMAKE_BUILD_TYPE MATCHES Debug)
