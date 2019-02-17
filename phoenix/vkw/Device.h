@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "GraphicPipeline.h"
 #include "Instance.h"
 #include "Queue.h"
 #include "ShaderModule.h"
@@ -21,9 +22,13 @@ public:
   vk::PhysicalDevice getPhysicalDevice() const noexcept;
 
   template <typename Type>
-  ShaderModule<Type> createShaderModule(const std::string &path,
-                                        bool debug) const {
+  ShaderModule<Type> createShaderModule(const std::string &path, bool debug) const {
     return ShaderModule<Type>(getHandle(), path, debug);
+  }
+
+  template <typename... Args>
+  GraphicPipeline<Args...> createGraphicPipeline(Args... args) {
+    return GraphicPipeline<Args...>{getHandle(), std::move(args)...};
   }
 
 private:

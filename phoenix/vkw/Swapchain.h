@@ -6,7 +6,7 @@
 #include "VulkanResource.h"
 #include "vulkan.hpp"
 
-#include "ltl/tuple.h"
+#include <ltl/ltl.h>
 
 namespace phx {
 struct NoFormatAvailableException {};

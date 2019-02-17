@@ -1,8 +1,9 @@
 #include <iostream>
 
-#include "ltl/range.h"
 #include "phoenix/PhoenixWindow.h"
+#include "phoenix/vkw/GraphicPipeline.h"
 #include "phoenix/vkw/utility.h"
+#include <ltl/ltl.h>
 
 int main(int ac, char **av) {
   try {
@@ -17,21 +18,31 @@ int main(int ac, char **av) {
     auto fragmentShader = device.createShaderModule<phx::FragmentShaderType>(
         "../Phoenix/phoenix/shaders/TriangleTest/triangle.frag", true);
 
+    auto graphicPipeline = device.createGraphicPipeline(
+        phx::WithShaders{std::move(vertexShader), std::move(fragmentShader)},
+        vk::PrimitiveTopology::eTriangleList,
+        phx::WithViewports{
+            phx::viewport::dynamic_viewport
+            /*phx::viewport::StaticViewport{window.getWidth(), window.getHeight()}*/},
+        phx::WithScissors{
+            phx::scissor::StaticScissor{window.getWidth(), window.getHeight()}},
+        vk::CullModeFlagBits::eNone, vk::PolygonMode::eFill,
+        phx::WithOutputs{phx::output::normal_attachment},
+        phx::WithDynamicStates{phx::dynamic_state::dynamic_viewport});
+
     while (window.run()) {
     }
   }
 
   catch (phx::ExtentionInvalidException exception) {
     std::cerr << "The extensions ";
-    ltl::copy(exception.extensions,
-              std::ostream_iterator<std::string>(std::cerr, ","));
+    ltl::copy(exception.extensions, std::ostream_iterator<std::string>(std::cerr, ","));
     std::cerr << " are not available" << std::endl;
   }
 
   catch (phx::LayerInvalidException exception) {
     std::cerr << "The validation layers ";
-    ltl::copy(exception.layers,
-              std::ostream_iterator<std::string>(std::cerr, ","));
+    ltl::copy(exception.layers, std::ostream_iterator<std::string>(std::cerr, ","));
     std::cerr << " are not available" << std::endl;
   }
 
@@ -48,8 +59,7 @@ int main(int ac, char **av) {
   }
 
   catch (phx::NoGraphicComputeQueueException) {
-    std::cerr << "The GPU is not compatible with Graphic or Compute queue"
-              << std::endl;
+    std::cerr << "The GPU is not compatible with Graphic or Compute queue" << std::endl;
   }
 
   catch (phx::UnableToCreateSurfaceException) {

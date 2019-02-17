@@ -6,36 +6,33 @@
 
 namespace phx {
 struct VertexShaderType {
-  static constexpr vk::ShaderStageFlags type = vk::ShaderStageFlagBits::eVertex;
+  static constexpr vk::ShaderStageFlagBits stage = vk::ShaderStageFlagBits::eVertex;
 };
 
 struct GeometryShaderType {
-  static constexpr vk::ShaderStageFlags type =
-      vk::ShaderStageFlagBits::eGeometry;
+  static constexpr vk::ShaderStageFlagBits stage = vk::ShaderStageFlagBits::eGeometry;
 };
 
 struct FragmentShaderType {
-  static constexpr vk::ShaderStageFlags type =
-      vk::ShaderStageFlagBits::eFragment;
+  static constexpr vk::ShaderStageFlagBits stage = vk::ShaderStageFlagBits::eFragment;
 };
 
 struct ComputeShaderType {
-  static constexpr vk::ShaderStageFlags type =
-      vk::ShaderStageFlagBits::eCompute;
+  static constexpr vk::ShaderStageFlagBits stage = vk::ShaderStageFlagBits::eCompute;
 };
 
 namespace detail {
-constexpr shaderc_shader_kind getShaderKind(vk::ShaderStageFlags flag) {
-  if (flag == vk::ShaderStageFlagBits::eVertex)
+constexpr shaderc_shader_kind getShaderKind(vk::ShaderStageFlagBits stage) {
+  if (stage == vk::ShaderStageFlagBits::eVertex)
     return shaderc_vertex_shader;
 
-  else if (flag == vk::ShaderStageFlagBits::eGeometry)
+  else if (stage == vk::ShaderStageFlagBits::eGeometry)
     return shaderc_geometry_shader;
 
-  else if (flag == vk::ShaderStageFlagBits::eFragment)
+  else if (stage == vk::ShaderStageFlagBits::eFragment)
     return shaderc_fragment_shader;
 
-  else if (flag == vk::ShaderStageFlagBits::eCompute)
+  else if (stage == vk::ShaderStageFlagBits::eCompute)
     return shaderc_compute_shader;
 
   throw "Not a good kind of shader";
@@ -45,8 +42,8 @@ constexpr shaderc_shader_kind getShaderKind(vk::ShaderStageFlags flag) {
 template <typename ShaderType>
 class ShaderModule final : public VulkanResource<vk::UniqueShaderModule> {
 public:
-  static constexpr auto type = ShaderType::type;
-  static constexpr auto kind = detail::getShaderKind(type);
+  static constexpr auto stage = ShaderType::stage;
+  static constexpr auto kind = detail::getShaderKind(stage);
 
   ShaderModule(vk::Device device, const std::string &path, bool debug) {
     ShaderCompiler compiler{debug};
@@ -60,5 +57,7 @@ public:
 
 private:
 };
+
+LTL_MAKE_IS_KIND(ShaderModule, isShaderModule);
 
 } // namespace phx

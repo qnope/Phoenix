@@ -17,43 +17,13 @@ include_directories(${VULKAN_SDK_PATH}/Include)
 set(MAIN_SRC main.cpp)
 
 set(HEADERS_LPL
-    lib/include/lpl/and.h
-    lib/include/lpl/cat.h
-    lib/include/lpl/checker.h
-    lib/include/lpl/compl.h
-    lib/include/lpl/dec_inc.h
-    lib/include/lpl/evaluation.h
-    lib/include/lpl/if.h
-    lib/include/lpl/lpl.h
-    lib/include/lpl/stringify.h)
-
-set(HEADERS_LTL_TUPLE
-    lib/include/ltl/tuple/algorithm.h
-    lib/include/ltl/tuple/argument.h
-    lib/include/ltl/tuple/template.h
-    lib/include/ltl/tuple/tuple_t.h)
-
-set(HEADERS_LTL_STRONG_TYPE
-    lib/include/ltl/strong_type/strong_type_t.h
-    lib/include/ltl/strong_type/equality.h
-    lib/include/ltl/strong_type/arithmetic.h
-    lib/include/ltl/strong_type/converter.h
-    lib/include/ltl/strong_type/stream.h)
+    lib/include/lpl/lpl.h)
 
 set(HEADERS_LTL
-    lib/include/ltl/bool_t.h
-    lib/include/ltl/crtp.h
-    lib/include/ltl/decay_reference_wrapper.h
-    lib/include/ltl/is_valid.h
-    lib/include/ltl/number_t.h
-    lib/include/ltl/overloader.h
-    lib/include/ltl/tuple.h
-    lib/include/ltl/type_t.h
-    lib/include/ltl/type_traits.h
-    lib/include/ltl/strong_type.h
-    lib/include/ltl/range.h
-    lib/include/ltl/smart_iterator.h
-    ${HEADERS_LTL_TUPLE} ${HEADERS_LTL_STRONG_TYPE})
+    lib/include/ltl/ltl.h)
+
+set(HEADERS_LOL
+    lib/include/lol/lol.h)
 
 set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Instance.h
@@ -67,6 +37,12 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/ImageView.h
     phoenix/vkw/ShaderCompiler.h
     phoenix/vkw/ShaderModule.h
+    phoenix/vkw/GraphicPipeline.h
+    phoenix/vkw/With_Pipeline/WithDynamicStates.h
+    phoenix/vkw/With_Pipeline/WithShaders.h
+    phoenix/vkw/With_Pipeline/WithScissors.h
+    phoenix/vkw/With_Pipeline/WithViewports.h
+    phoenix/vkw/With_Pipeline/WithOutputs.h
     )
 
 set(SRC_PHOENIX_VKW
@@ -94,7 +70,7 @@ set(SRC_PHOENIX
 add_executable(Phoenix
     ${MAIN_SRC}
     ${SRC_PHOENIX}
-    ${HEADERS_LPL} ${HEADERS_LTL}
+    ${HEADERS_LPL} ${HEADERS_LTL} ${HEADERS_LOL}
     ${HEADERS_PHOENIX}
     )
 

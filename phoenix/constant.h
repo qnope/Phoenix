@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ltl/strong_type.h>
+#include <ltl/ltl.h>
 
 namespace phx {
 using Width = ltl::strong_type_t<unsigned int, struct WidthTag>;
