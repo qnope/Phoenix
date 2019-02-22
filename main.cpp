@@ -2,10 +2,12 @@
 
 #include "phoenix/PhoenixWindow.h"
 #include "phoenix/vkw/GraphicPipeline.h"
+#include "phoenix/vkw/SubpassBuilder.h"
 #include "phoenix/vkw/utility.h"
 #include <ltl/ltl.h>
 
 int main(int ac, char **av) {
+  using namespace ltl::literals;
   try {
     phx::PhoenixWindow window{phx::Width(800u), phx::Height(600u),
                               phx::WindowTitle("Phoenix Engine")};
@@ -18,17 +20,24 @@ int main(int ac, char **av) {
     auto fragmentShader = device.createShaderModule<phx::FragmentShaderType>(
         "../Phoenix/phoenix/shaders/TriangleTest/triangle.frag", true);
 
+    auto pipelineLayout = device.createPipelineLayout();
+
+    auto subpass = phx::buildNoDepthStencilNoInputColors(0_n);
+    auto attachment = window.getAttachmentDescription();
+
+    auto renderPass = device.createRenderPass(ltl::tuple_t{attachment},
+                                              ltl::tuple_t{subpass}, ltl::tuple_t{});
+
     auto graphicPipeline = device.createGraphicPipeline(
+        std::move(pipelineLayout), renderPass, 0_n,
         phx::WithShaders{std::move(vertexShader), std::move(fragmentShader)},
         vk::PrimitiveTopology::eTriangleList,
         phx::WithViewports{
-            phx::viewport::dynamic_viewport
-            /*phx::viewport::StaticViewport{window.getWidth(), window.getHeight()}*/},
+            phx::viewport::StaticViewport{window.getWidth(), window.getHeight()}},
         phx::WithScissors{
             phx::scissor::StaticScissor{window.getWidth(), window.getHeight()}},
         vk::CullModeFlagBits::eNone, vk::PolygonMode::eFill,
-        phx::WithOutputs{phx::output::normal_attachment},
-        phx::WithDynamicStates{phx::dynamic_state::dynamic_viewport});
+        phx::WithOutputs{phx::output::normal_attachment});
 
     while (window.run()) {
     }

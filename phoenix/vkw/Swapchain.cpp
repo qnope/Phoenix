@@ -20,9 +20,8 @@ static vk::SurfaceFormatKHR chooseSwapchainFormat(vk::PhysicalDevice device,
   throw NoFormatAvailableException{};
 }
 
-static vk::PresentModeKHR
-chooseSwapchainPresentMode(vk::PhysicalDevice device,
-                           vk::SurfaceKHR surface) noexcept {
+static vk::PresentModeKHR chooseSwapchainPresentMode(vk::PhysicalDevice device,
+                                                     vk::SurfaceKHR surface) noexcept {
   auto presentModes = device.getSurfacePresentModesKHR(surface);
   vk::PresentModeKHR bestMode = vk::PresentModeKHR::eFifo;
 
@@ -55,12 +54,11 @@ static vk::Extent2D chooseSwapchainExtent(vk::PhysicalDevice device,
   return extent;
 }
 
-Swapchain::Swapchain(Device &device, Surface &surface, Width width,
-                     Height height) {
+Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height height) {
   using namespace vk;
   auto physicalDevice = device.getPhysicalDevice();
   auto surfaceKHR = surface.getHandle();
-  auto format = chooseSwapchainFormat(physicalDevice, surfaceKHR);
+  m_surfaceFormat = chooseSwapchainFormat(physicalDevice, surfaceKHR);
   auto presentMode = chooseSwapchainPresentMode(physicalDevice, surfaceKHR);
   auto size = chooseSwapchainExtent(physicalDevice, surfaceKHR, width, height);
 
@@ -72,8 +70,8 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width,
 
   info.surface = surfaceKHR;
   info.minImageCount = imageCount;
-  info.imageFormat = format.format;
-  info.imageColorSpace = format.colorSpace;
+  info.imageFormat = m_surfaceFormat.format;
+  info.imageColorSpace = m_surfaceFormat.colorSpace;
   info.imageExtent = size;
   info.imageArrayLayers = 1;
   info.imageUsage = ImageUsageFlagBits::eColorAttachment;
@@ -92,12 +90,33 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width,
 
   for (auto vkimage : images) {
     ImageSubresourceRange range(ImageAspectFlagBits::eColor, 0, 1, 0, 1);
-    SwapchainImage image{deviceHandle, vkimage, format.format, extent, 1u, 1u};
+    SwapchainImage image{deviceHandle, vkimage, m_surfaceFormat.format, extent, 1u, 1u};
     auto imageView =
-        image.createImageView(ImageViewType::e2D, format.format, range);
+        image.createImageView(ImageViewType::e2D, m_surfaceFormat.format, range);
 
     m_swapchainImages.emplace_back(std::move(image), std::move(imageView));
   }
+}
+
+vk::Format Swapchain::getImageFormat() const noexcept { return m_surfaceFormat.format; }
+
+vk::AttachmentDescription Swapchain::getAttachmentDescription() const noexcept {
+  vk::AttachmentDescription description;
+
+  description.initialLayout = vk::ImageLayout::eUndefined;
+  description.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+
+  description.format = getImageFormat();
+
+  description.storeOp = vk::AttachmentStoreOp::eStore;
+  description.loadOp = vk::AttachmentLoadOp::eDontCare;
+
+  description.samples = vk::SampleCountFlagBits::e1;
+
+  description.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+  description.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+
+  return description;
 }
 
 } // namespace phx

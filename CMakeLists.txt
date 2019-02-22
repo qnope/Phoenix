@@ -43,6 +43,10 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/With_Pipeline/WithScissors.h
     phoenix/vkw/With_Pipeline/WithViewports.h
     phoenix/vkw/With_Pipeline/WithOutputs.h
+    phoenix/vkw/PipelineLayout.h
+    phoenix/vkw/RenderPass.h
+    phoenix/vkw/Subpass.h
+    phoenix/vkw/SubpassBuilder.h
     )
 
 set(SRC_PHOENIX_VKW

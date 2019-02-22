@@ -102,15 +102,14 @@ template <typename T>[[nodiscard]] constexpr false_t operator!=(type_t<T>, type_
 }
 
 ////////////////////// number
-template <std::size_t N> struct number_t { constexpr static std::size_t value = N; };
+template <int N> struct number_t { constexpr static int value = N; };
 
-template <std::size_t N> constexpr number_t<N> number_v{};
+template <int N> constexpr number_t<N> number_v{};
 
 namespace detail {
-template <char... _digits>[[nodiscard]] constexpr std::size_t digits_to_size_t() {
+template <char... _digits>[[nodiscard]] constexpr int digits_to_int() {
   char digits[] = {_digits...};
-  std::size_t result = 0;
-
+  int result = 0;
   for (auto d : digits) {
     result *= 10;
     result += d - '0';
@@ -121,17 +120,17 @@ template <char... _digits>[[nodiscard]] constexpr std::size_t digits_to_size_t()
 } // namespace detail
 
 #define OP(op)                                                                           \
-  template <std::size_t N1, std::size_t N2>                                              \
+  template <int N1, int N2>                                                              \
   [[nodiscard]] constexpr number_t<(N1 op N2)> operator op(number_t<N1>, number_t<N2>) { \
     return {};                                                                           \
   }                                                                                      \
-  template <std::size_t N, bool v>                                                       \
-  [[nodiscard]] constexpr number_t<(N op static_cast<std::size_t>(v))> operator op(      \
-      number_t<N>, bool_t<v>) {                                                          \
+  template <int N, bool v>                                                               \
+  [[nodiscard]] constexpr number_t<(N op static_cast<int>(v))> operator op(number_t<N>,  \
+                                                                           bool_t<v>) {  \
     return {};                                                                           \
   }                                                                                      \
-  template <std::size_t N, bool v>                                                       \
-  [[nodiscard]] constexpr number_t<(static_cast<std::size_t>(v) op N)> operator op(      \
+  template <int N, bool v>                                                               \
+  [[nodiscard]] constexpr number_t<(static_cast<int>(v) op N)> operator op(              \
       bool_t<v>, number_t<N>) {                                                          \
     return {};                                                                           \
   }
@@ -139,7 +138,7 @@ LPL_MAP(OP, +, -, *, /, %, &, |, ^, <<, >>)
 #undef OP
 
 #define OP(op)                                                                           \
-  template <std::size_t N1, std::size_t N2>                                              \
+  template <int N1, int N2>                                                              \
   [[nodiscard]] constexpr bool_t<(N1 op N2)> operator op(number_t<N1>, number_t<N2>) {   \
     return {};                                                                           \
   }
@@ -147,13 +146,36 @@ LPL_MAP(OP, +, -, *, /, %, &, |, ^, <<, >>)
 LPL_MAP(OP, ==, !=, >, >=, <, <=)
 #undef OP
 
-template <std::size_t N>[[nodiscard]] constexpr number_t<~N> operator~(number_t<N>) {
-  return {};
+#define OP(op)                                                                           \
+  template <int N>[[nodiscard]] constexpr number_t<(op N)> operator op(number_t<N>) {    \
+    return {};                                                                           \
+  }
+LPL_MAP(OP, ~, +, -)
+#undef OP
+
+template <typename T1, typename T2>[[nodiscard]] constexpr auto max(T1 a, T2 b) {
+  if_constexpr(a > b) return a;
+  else return b;
+}
+
+template <typename T1, typename T2, typename... Ts>
+[[nodiscard]] constexpr auto max(T1 a, T2 b, Ts... ts) {
+  return max(max(a, b), ts...);
+}
+
+template <typename T1, typename T2>[[nodiscard]] constexpr auto min(T1 a, T2 b) {
+  if_constexpr(a > b) return b;
+  else return a;
+}
+
+template <typename T1, typename T2, typename... Ts>
+[[nodiscard]] constexpr auto min(T1 a, T2 b, Ts... ts) {
+  return min(min(a, b), ts...);
 }
 
 namespace literals {
 template <char... digits>
-[[nodiscard]] constexpr ltl::number_t<ltl::detail::digits_to_size_t<digits...>()>
+[[nodiscard]] constexpr ltl::number_t<ltl::detail::digits_to_int<digits...>()>
 operator""_n() {
   return {};
 }
@@ -236,43 +258,44 @@ public:
     return std::move(m_storage)(FWD(f));
   }
 
-  template <std::size_t N>[[nodiscard]] auto &get(number_t<N> n) & noexcept {
-    typed_static_assert(n < length);
+  template <int N>[[nodiscard]] auto &get(number_t<N> n) & noexcept {
+    using namespace ltl::literals;
+    typed_static_assert(0_n <= n && n < length);
     return std::get<N>(m_storage.m_tuple);
   }
 
-  template <std::size_t N>
-  [[nodiscard]] constexpr const auto &get(number_t<N> n) const &noexcept {
-    typed_static_assert(n < length);
+  template <int N>[[nodiscard]] constexpr const auto &get(number_t<N> n) const &noexcept {
+    using namespace ltl::literals;
+    typed_static_assert(0_n <= n && n < length);
     return std::get<N>(m_storage.m_tuple);
   }
 
-  template <std::size_t N>[[nodiscard]] constexpr auto &&get(number_t<N> n) && noexcept {
-    typed_static_assert(n < length);
+  template <int N>[[nodiscard]] constexpr auto &&get(number_t<N> n) && noexcept {
+    using namespace ltl::literals;
+    typed_static_assert(0_n <= n && n < length);
     return std::get<N>(std::move(m_storage.m_tuple));
   }
 
-  template <std::size_t N>[[nodiscard]] auto &operator[](number_t<N> n) & noexcept {
+  template <int N>[[nodiscard]] auto &operator[](number_t<N> n) & noexcept {
     return get(n);
   }
 
-  template <std::size_t N>
+  template <int N>
   [[nodiscard]] constexpr const auto &operator[](number_t<N> n) const &noexcept {
     return get(n);
   }
 
-  template <std::size_t N>
-      [[nodiscard]] constexpr auto &&operator[](number_t<N> n) && noexcept {
+  template <int N>[[nodiscard]] constexpr auto &&operator[](number_t<N> n) && noexcept {
     return std::move(*this).get(n);
   }
 
-  template <std::size_t... Is>
+  template <int... Is>
   [[nodiscard]] constexpr auto extract(number_t<Is>... ns) const &noexcept {
     constexpr tuple_t<type_t<Ts>...> types{};
     return tuple_t<decltype_t(types[ns])...>{get(ns)...};
   }
 
-  template <std::size_t... Is>
+  template <int... Is>
       [[nodiscard]] constexpr auto extract(number_t<Is>... ns) && noexcept {
     constexpr tuple_t<type_t<Ts>...> types{};
     return tuple_t<decltype_t(types[ns])...>{std::move(*this).get(ns)...};
@@ -486,10 +509,11 @@ constexpr auto count_type(const tuple_t<Ts...> &tuple, type_t<T> type) {
   else return count_type(type_list_v<Ts...>, type);
 }
 
-template <typename... Ts, typename T, std::size_t N = 0>
+template <typename... Ts, typename T, int N = 0>
 constexpr auto find_type(const tuple_t<Ts...> &tuple, type_t<T> type,
                          number_t<N> first = {}) {
-  using namespace literals;
+  using namespace ltl::literals;
+  typed_static_assert(first >= 0_n);
   if_constexpr(is_type_list_t(tuple)) {
     if_constexpr(tuple[first] == type) return first;
     else return find_type(tuple, type, first + 1_n);
@@ -498,9 +522,10 @@ constexpr auto find_type(const tuple_t<Ts...> &tuple, type_t<T> type,
   else return find_type(type_list_v<Ts...>, type, first);
 }
 
-template <typename... Ts, typename P, std::size_t N = 0>
+template <typename... Ts, typename P, int N = 0>
 constexpr auto find_if_type(const tuple_t<Ts...> &tuple, P &&p, number_t<N> first = {}) {
-  using namespace literals;
+  using namespace ltl::literals;
+  typed_static_assert(first >= 0_n);
   if_constexpr(is_type_list_t(tuple)) {
     if_constexpr(FWD(p)(tuple[first])) return first;
     else return find_if_type(tuple, FWD(p), first + 1_n);

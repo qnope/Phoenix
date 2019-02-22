@@ -7967,7 +7967,7 @@ public:
 
   struct AttachmentReference
   {
-    AttachmentReference( uint32_t attachment_ = 0,
+    constexpr AttachmentReference( uint32_t attachment_ = 0,
                          ImageLayout layout_ = ImageLayout::eUndefined )
       : attachment( attachment_ )
       , layout( layout_ )

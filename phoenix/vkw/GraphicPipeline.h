@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PipelineLayout.h"
+#include "RenderPass.h"
 #include "With_Pipeline/WithDynamicStates.h"
 #include "With_Pipeline/WithOutputs.h"
 #include "With_Pipeline/WithScissors.h"
@@ -8,7 +10,11 @@
 
 namespace phx {
 
-template <typename... Args> class GraphicPipeline {
+template <typename... Args> class GraphicPipeline;
+
+template <typename... Uniforms, typename... RPs, typename SubpassIndex, typename... Args>
+class GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>, SubpassIndex,
+                      Args...> : public VulkanResource<vk::UniquePipeline> {
   static constexpr ltl::type_list_t<Args...> types{};
 
   vk::PrimitiveTopology getTopology() {
@@ -54,7 +60,9 @@ template <typename... Args> class GraphicPipeline {
 public:
   static constexpr auto hasDynamicStates = contains_if_type(types, isWithDynamicStates);
 
-  GraphicPipeline(vk::Device device, Args... args) : m_args{std::move(args)...} {
+  GraphicPipeline(vk::Device device, PipelineLayout<Uniforms...> pipelineLayout,
+                  const RenderPass<RPs...> &renderPass, SubpassIndex, Args... args)
+      : m_args{std::move(args)...}, m_pipelineLayout{std::move(pipelineLayout)} {
     using namespace ltl;
     compileTimeCheck();
 
@@ -86,6 +94,7 @@ public:
 
     vk::PipelineDynamicStateCreateInfo dynamicStateInfo;
     std::array<vk::DynamicState, 20> dynamicStatesArray;
+    (void)dynamicStatesArray;
 
     if_constexpr(hasDynamicStates) {
       auto indexDynamicStates = find_if_type(types, isWithDynamicStates);
@@ -107,6 +116,10 @@ public:
     info.pMultisampleState = &multisampleState;
     info.pDepthStencilState = nullptr;
     info.pColorBlendState = &colorBlendState;
+    info.layout = m_pipelineLayout.getHandle();
+    info.renderPass = renderPass.getHandle();
+    info.subpass = SubpassIndex::value;
+    m_handle = device.createGraphicsPipelineUnique(vk::PipelineCache(), info);
   }
 
 private:
@@ -169,9 +182,15 @@ private:
           m_args[indexScissors].isStatic,
           "You must specify scissor dynamic state if you want to use dynamic scissor");
     }
+
+    typed_static_assert(ltl::is_number_t(SubpassIndex{}));
+    typed_static_assert_msg(RenderPass<RPs...>::number_subpasses > SubpassIndex{},
+                            "The Subpass Index must be less than the number of subpass "
+                            "within the RenderPass");
   }
 
 private:
   ltl::tuple_t<Args...> m_args;
+  PipelineLayout<Uniforms...> m_pipelineLayout;
 };
 } // namespace phx

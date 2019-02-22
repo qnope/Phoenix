@@ -14,10 +14,14 @@ class Swapchain final : public VulkanResource<vk::UniqueSwapchainKHR> {
 public:
   Swapchain(Device &device, Surface &surface, Width width, Height height);
 
+  vk::Format getImageFormat() const noexcept;
+
+  vk::AttachmentDescription getAttachmentDescription() const noexcept;
+
 private:
   using SwapchainImage = Image<ColorAttachmentUsageBit>;
   using SwapchainImageView = ImageView<ColorAttachmentUsageBit>;
-  std::vector<ltl::tuple_t<SwapchainImage, SwapchainImageView>>
-      m_swapchainImages;
+  std::vector<ltl::tuple_t<SwapchainImage, SwapchainImageView>> m_swapchainImages;
+  vk::SurfaceFormatKHR m_surfaceFormat;
 };
 } // namespace phx

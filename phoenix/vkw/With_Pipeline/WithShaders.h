@@ -14,7 +14,7 @@ public:
   }
 
   auto getStages() {
-    auto construct_stages = [](auto &... xs) { return std::array{buildStages(xs)...}; };
+    auto construct_stages = [](auto &... xs) { return std::array{xs.getStageInfo()...}; };
     return m_shaders(construct_stages);
   }
 
@@ -33,14 +33,6 @@ private:
             count_type(shader_types, type_v<ShaderModule<GeometryShaderType>>) <= 1_n &&
             count_type(shader_types, type_v<ShaderModule<FragmentShaderType>>) <= 1_n,
         "No multiple same shader allowed");
-  }
-
-  template <typename Type> static auto buildStages(ShaderModule<Type> &shader) {
-    vk::PipelineShaderStageCreateInfo info;
-    info.stage = shader.stage;
-    info.module = shader.getHandle();
-    info.pName = "main";
-    return info;
   }
 
 private:

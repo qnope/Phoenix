@@ -4,7 +4,9 @@
 
 #include "GraphicPipeline.h"
 #include "Instance.h"
+#include "PipelineLayout.h"
 #include "Queue.h"
+#include "RenderPass.h"
 #include "ShaderModule.h"
 #include "Surface.h"
 #include "VulkanResource.h"
@@ -23,12 +25,31 @@ public:
 
   template <typename Type>
   ShaderModule<Type> createShaderModule(const std::string &path, bool debug) const {
-    return ShaderModule<Type>(getHandle(), path, debug);
+    return {getHandle(), path, debug};
   }
 
-  template <typename... Args>
-  GraphicPipeline<Args...> createGraphicPipeline(Args... args) {
-    return GraphicPipeline<Args...>{getHandle(), std::move(args)...};
+  template <typename... Uniforms>
+  PipelineLayout<Uniforms...> createPipelineLayout(Uniforms... uniforms) {
+    return {getHandle(), std::move(uniforms)...};
+  }
+
+  template <typename... Uniforms, typename... RPs, typename SubpassIndex,
+            typename... Args>
+  GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>, SubpassIndex, Args...>
+  createGraphicPipeline(PipelineLayout<Uniforms...> pipelineLayout,
+                        RenderPass<RPs...> &renderPass, SubpassIndex subpassIndex,
+                        Args... args) {
+    return {getHandle(), std::move(pipelineLayout), renderPass, subpassIndex,
+            std::move(args)...};
+  }
+
+  template <typename... Attachments, typename... Subpasses, typename... Dependencies>
+  RenderPass<ltl::tuple_t<Attachments...>, ltl::tuple_t<Subpasses...>,
+             ltl::tuple_t<Dependencies...>>
+  createRenderPass(ltl::tuple_t<Attachments...> attachments,
+                   ltl::tuple_t<Subpasses...> subpasses,
+                   ltl::tuple_t<Dependencies...> dependencies) {
+    return {getHandle(), attachments, subpasses, dependencies};
   }
 
 private:

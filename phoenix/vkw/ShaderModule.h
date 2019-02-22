@@ -41,10 +41,10 @@ constexpr shaderc_shader_kind getShaderKind(vk::ShaderStageFlagBits stage) {
 
 template <typename ShaderType>
 class ShaderModule final : public VulkanResource<vk::UniqueShaderModule> {
-public:
   static constexpr auto stage = ShaderType::stage;
   static constexpr auto kind = detail::getShaderKind(stage);
 
+public:
   ShaderModule(vk::Device device, const std::string &path, bool debug) {
     ShaderCompiler compiler{debug};
     auto spirv = compiler.compile(path, kind);
@@ -53,6 +53,14 @@ public:
     info.codeSize = spirv.size() * sizeof(decltype(spirv)::value_type);
     info.pCode = spirv.data();
     m_handle = device.createShaderModuleUnique(info);
+  }
+
+  auto getStageInfo() {
+    vk::PipelineShaderStageCreateInfo info;
+    info.stage = stage;
+    info.module = getHandle();
+    info.pName = "main";
+    return info;
   }
 
 private:
