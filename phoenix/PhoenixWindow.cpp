@@ -42,4 +42,12 @@ vk::AttachmentDescription PhoenixWindow::getAttachmentDescription() const noexce
   return m_swapchain.getAttachmentDescription();
 }
 
+void PhoenixWindow::generateFramebuffer(vk::RenderPass renderPass) noexcept {
+  m_swapchain.generateFramebuffer(renderPass);
+}
+
+vk::Framebuffer PhoenixWindow::getCurrentFramebuffer() const noexcept {
+  return m_swapchain.getFramebuffer(0);
+}
+
 } // namespace phx

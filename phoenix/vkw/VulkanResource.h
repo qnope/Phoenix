@@ -9,4 +9,7 @@ public:
 protected:
   T m_handle;
 };
+
+inline auto getHandle = [](const auto &value) { return value.getHandle(); };
+
 } // namespace phx

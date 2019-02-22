@@ -34,6 +34,9 @@ public:
 
   vk::AttachmentDescription getAttachmentDescription() const noexcept;
 
+  void generateFramebuffer(vk::RenderPass renderPass) noexcept;
+  vk::Framebuffer getCurrentFramebuffer() const noexcept;
+
 private:
   SDL_Initializer m_sdl_initializer;
   Width m_width;

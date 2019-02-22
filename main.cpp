@@ -28,6 +28,8 @@ int main(int ac, char **av) {
     auto renderPass = device.createRenderPass(ltl::tuple_t{attachment},
                                               ltl::tuple_t{subpass}, ltl::tuple_t{});
 
+    window.generateFramebuffer(renderPass.getHandle());
+
     auto graphicPipeline = device.createGraphicPipeline(
         std::move(pipelineLayout), renderPass, 0_n,
         phx::WithShaders{std::move(vertexShader), std::move(fragmentShader)},

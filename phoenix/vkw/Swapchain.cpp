@@ -1,5 +1,6 @@
 #include "Swapchain.h"
 #include <limits>
+#include <lol/lol.h>
 namespace phx {
 
 static vk::SurfaceFormatKHR chooseSwapchainFormat(vk::PhysicalDevice device,
@@ -54,7 +55,8 @@ static vk::Extent2D chooseSwapchainExtent(vk::PhysicalDevice device,
   return extent;
 }
 
-Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height height) {
+Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height height)
+    : m_device{device.getHandle()} {
   using namespace vk;
   auto physicalDevice = device.getPhysicalDevice();
   auto surfaceKHR = surface.getHandle();
@@ -81,16 +83,15 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height heigh
   info.presentMode = presentMode;
   info.clipped = true;
 
-  vk::Device deviceHandle = device.getHandle();
-  m_handle = deviceHandle.createSwapchainKHRUnique(info);
+  m_handle = m_device.createSwapchainKHRUnique(info);
 
-  auto images = deviceHandle.getSwapchainImagesKHR(*m_handle);
+  auto images = m_device.getSwapchainImagesKHR(*m_handle);
 
-  Extent3D extent(size.width, size.height, 1);
+  m_extent = vk::Extent3D{size.width, size.height, 1};
 
   for (auto vkimage : images) {
     ImageSubresourceRange range(ImageAspectFlagBits::eColor, 0, 1, 0, 1);
-    SwapchainImage image{deviceHandle, vkimage, m_surfaceFormat.format, extent, 1u, 1u};
+    SwapchainImage image{m_device, vkimage, m_surfaceFormat.format, m_extent, 1u, 1u};
     auto imageView =
         image.createImageView(ImageViewType::e2D, m_surfaceFormat.format, range);
 
@@ -117,6 +118,19 @@ vk::AttachmentDescription Swapchain::getAttachmentDescription() const noexcept {
   description.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 
   return description;
+}
+
+void Swapchain::generateFramebuffer(vk::RenderPass renderpass) noexcept {
+  using namespace ltl::literals;
+  for (auto &img : m_swapchainImages) {
+    auto imgView = img[1_n].getHandle();
+    m_framebuffers.emplace_back(
+        Framebuffer{m_device, renderpass, m_extent.width, m_extent.height, {imgView}});
+  }
+}
+
+vk::Framebuffer Swapchain::getFramebuffer(uint32_t index) const noexcept {
+  return m_framebuffers[index].getHandle();
 }
 
 } // namespace phx
