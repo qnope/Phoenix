@@ -65,13 +65,12 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height heigh
   auto size = chooseSwapchainExtent(physicalDevice, surfaceKHR, width, height);
 
   auto capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surfaceKHR);
-  auto imageCount =
-      std::clamp(3u, capabilities.minImageCount, capabilities.maxImageCount);
+  m_imageCount = std::clamp(3u, capabilities.minImageCount, capabilities.maxImageCount);
 
   SwapchainCreateInfoKHR info;
 
   info.surface = surfaceKHR;
-  info.minImageCount = imageCount;
+  info.minImageCount = m_imageCount;
   info.imageFormat = m_surfaceFormat.format;
   info.imageColorSpace = m_surfaceFormat.colorSpace;
   info.imageExtent = size;
@@ -101,6 +100,8 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height heigh
 
 vk::Format Swapchain::getImageFormat() const noexcept { return m_surfaceFormat.format; }
 
+uint32_t Swapchain::getImageCount() const noexcept { return m_imageCount; }
+
 vk::AttachmentDescription Swapchain::getAttachmentDescription() const noexcept {
   vk::AttachmentDescription description;
 
@@ -109,8 +110,8 @@ vk::AttachmentDescription Swapchain::getAttachmentDescription() const noexcept {
 
   description.format = getImageFormat();
 
+  description.loadOp = vk::AttachmentLoadOp::eClear;
   description.storeOp = vk::AttachmentStoreOp::eStore;
-  description.loadOp = vk::AttachmentLoadOp::eDontCare;
 
   description.samples = vk::SampleCountFlagBits::e1;
 

@@ -48,6 +48,7 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Subpass.h
     phoenix/vkw/SubpassBuilder.h
     phoenix/vkw/Framebuffer.h
+    phoenix/vkw/CommandPool.h
     )
 
 set(SRC_PHOENIX_VKW
@@ -58,6 +59,7 @@ set(SRC_PHOENIX_VKW
     phoenix/vkw/Swapchain.cpp
     phoenix/vkw/ShaderCompiler.cpp
     phoenix/vkw/Framebuffer.cpp
+    phoenix/vkw/CommandPool.cpp
     )
 
 set(HEADERS_PHOENIX

@@ -15,6 +15,7 @@ public:
   Swapchain(Device &device, Surface &surface, Width width, Height height);
 
   vk::Format getImageFormat() const noexcept;
+  uint32_t getImageCount() const noexcept;
 
   vk::AttachmentDescription getAttachmentDescription() const noexcept;
   void generateFramebuffer(vk::RenderPass renderpass) noexcept;
@@ -27,6 +28,7 @@ private:
 
   vk::Device m_device;
   vk::Extent3D m_extent;
+  uint32_t m_imageCount;
 
   std::vector<ltl::tuple_t<SwapchainImage, SwapchainImageView>> m_swapchainImages;
   std::vector<Framebuffer> m_framebuffers;

@@ -32,6 +32,15 @@ bool PhoenixWindow::run() const noexcept {
   return true;
 }
 
+void PhoenixWindow::update() noexcept {
+  vk::Device deviceHandle = m_device.getHandle();
+  m_currentImageIndex = deviceHandle
+                            .acquireNextImageKHR(m_swapchain.getHandle(),
+                                                 std::numeric_limits<uint64_t>::max(),
+                                                 *m_imgAvailable, vk::Fence())
+                            .value;
+}
+
 Width PhoenixWindow::getWidth() const noexcept { return m_width; }
 
 Height PhoenixWindow::getHeight() const noexcept { return m_height; }
@@ -46,8 +55,28 @@ void PhoenixWindow::generateFramebuffer(vk::RenderPass renderPass) noexcept {
   m_swapchain.generateFramebuffer(renderPass);
 }
 
+uint32_t PhoenixWindow::getImageCount() const noexcept {
+  return m_swapchain.getImageCount();
+}
+
+uint32_t PhoenixWindow::getCurrentImageIndex() const noexcept {
+  return m_currentImageIndex;
+}
+
 vk::Framebuffer PhoenixWindow::getCurrentFramebuffer() const noexcept {
   return m_swapchain.getFramebuffer(0);
+}
+
+vk::Framebuffer PhoenixWindow::getFramebuffer(uint32_t index) const noexcept {
+  return m_swapchain.getFramebuffer(index);
+}
+
+vk::Semaphore PhoenixWindow::getImageAvailableSemaphore() const noexcept {
+  return *m_imgAvailable;
+}
+
+vk::SwapchainKHR PhoenixWindow::getSwapchainHandle() const noexcept {
+  return m_swapchain.getHandle();
 }
 
 } // namespace phx

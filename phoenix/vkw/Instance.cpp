@@ -7,11 +7,10 @@
 #include <ltl/ltl.h>
 namespace phx {
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL
-debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-              VkDebugUtilsMessageTypeFlagsEXT messageType,
-              const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-              void *pUserData) {
+static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData) {
   std::cerr << pCallbackData->pMessage << std::endl;
   return VK_FALSE;
 }
@@ -64,7 +63,6 @@ static auto getValidationLayers() {
 
 static constexpr auto createDebugMessengerInfo() noexcept {
   vk::DebugUtilsMessengerCreateInfoEXT info;
-
   info.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
@@ -106,8 +104,7 @@ Instance::Instance(SDL_Window *window, bool debug) {
   }
 }
 
-const std::vector<const char *> &Instance::getValidationLayers() const
-    noexcept {
+const std::vector<const char *> &Instance::getValidationLayers() const noexcept {
   return m_validationLayers;
 }
 

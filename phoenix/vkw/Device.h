@@ -23,6 +23,10 @@ public:
 
   vk::PhysicalDevice getPhysicalDevice() const noexcept;
 
+  auto createSemaphore() const noexcept {
+    return getHandle().createSemaphoreUnique(vk::SemaphoreCreateInfo());
+  }
+
   template <typename Type>
   ShaderModule<Type> createShaderModule(const std::string &path, bool debug) const {
     return {getHandle(), path, debug};

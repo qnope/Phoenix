@@ -35,7 +35,15 @@ public:
   vk::AttachmentDescription getAttachmentDescription() const noexcept;
 
   void generateFramebuffer(vk::RenderPass renderPass) noexcept;
+
+  uint32_t getImageCount() const noexcept;
+  uint32_t getCurrentImageIndex() const noexcept;
   vk::Framebuffer getCurrentFramebuffer() const noexcept;
+  vk::Framebuffer getFramebuffer(uint32_t index) const noexcept;
+
+  vk::Semaphore getImageAvailableSemaphore() const noexcept;
+
+  vk::SwapchainKHR getSwapchainHandle() const noexcept;
 
 private:
   SDL_Initializer m_sdl_initializer;
@@ -48,5 +56,7 @@ private:
   Surface m_surface{m_windowHandle.get(), m_instance};
   Device m_device{m_instance, m_surface};
   Swapchain m_swapchain{m_device, m_surface, m_width, m_height};
+  uint32_t m_currentImageIndex;
+  vk::UniqueSemaphore m_imgAvailable = m_device.createSemaphore();
 };
 } // namespace phx

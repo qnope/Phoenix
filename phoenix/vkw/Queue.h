@@ -9,6 +9,8 @@ class Queue final {
 public:
   Queue(vk::Queue queue, uint32_t indexFamily) noexcept;
 
+  vk::Queue getHandle() const noexcept { return m_queue; }
+
   uint32_t getIndexFamily() const noexcept;
 
 private:
