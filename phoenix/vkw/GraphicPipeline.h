@@ -54,6 +54,7 @@ class GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>, SubpassIn
     vk::PipelineRasterizationStateCreateInfo info;
     info.polygonMode = getPolygonMode();
     info.cullMode = getCullModeFlag();
+    info.lineWidth = 1.0f;
     return info;
   }
 
@@ -77,6 +78,8 @@ public:
 
     auto stages = m_args[indexShaders].getStages();
     auto inputAssembly = getInputAssembly();
+
+    vk::PipelineVertexInputStateCreateInfo inputState;
 
     vk::PipelineViewportStateCreateInfo viewportInfo;
     viewportInfo.viewportCount = static_cast<uint32_t>(viewports.size());
@@ -110,6 +113,7 @@ public:
 
     info.stageCount = static_cast<uint32_t>(stages.size());
     info.pStages = stages.data();
+    info.pVertexInputState = &inputState;
     info.pInputAssemblyState = &inputAssembly;
     info.pViewportState = &viewportInfo;
     info.pRasterizationState = &rasterizationState;

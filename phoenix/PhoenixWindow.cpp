@@ -47,6 +47,8 @@ Height PhoenixWindow::getHeight() const noexcept { return m_height; }
 
 Device &PhoenixWindow::getDevice() noexcept { return m_device; }
 
+const Device &PhoenixWindow::getDevice() const noexcept { return m_device; }
+
 vk::AttachmentDescription PhoenixWindow::getAttachmentDescription() const noexcept {
   return m_swapchain.getAttachmentDescription();
 }
@@ -63,11 +65,12 @@ uint32_t PhoenixWindow::getCurrentImageIndex() const noexcept {
   return m_currentImageIndex;
 }
 
-vk::Framebuffer PhoenixWindow::getCurrentFramebuffer() const noexcept {
-  return m_swapchain.getFramebuffer(0);
+const Framebuffer<vk::ImageView> &PhoenixWindow::getCurrentFramebuffer() const noexcept {
+  return m_swapchain.getFramebuffer(m_currentImageIndex);
 }
 
-vk::Framebuffer PhoenixWindow::getFramebuffer(uint32_t index) const noexcept {
+const Framebuffer<vk::ImageView> &PhoenixWindow::getFramebuffer(uint32_t index) const
+    noexcept {
   return m_swapchain.getFramebuffer(index);
 }
 

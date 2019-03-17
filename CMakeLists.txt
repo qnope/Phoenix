@@ -58,7 +58,6 @@ set(SRC_PHOENIX_VKW
     phoenix/vkw/Surface.cpp
     phoenix/vkw/Swapchain.cpp
     phoenix/vkw/ShaderCompiler.cpp
-    phoenix/vkw/Framebuffer.cpp
     phoenix/vkw/CommandPool.cpp
     )
 
@@ -87,7 +86,7 @@ target_link_libraries(Phoenix
     ${VULKAN_SDK_PATH}/Lib/vulkan-1.lib)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_sharedd.lib)
+    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_combinedd.lib)
 elseif(CMAKE_BUILD_TYPE MATCHES Release)
-    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_shared.lib )
+    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_combined.lib )
 endif(CMAKE_BUILD_TYPE MATCHES Debug)

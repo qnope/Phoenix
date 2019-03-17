@@ -98,7 +98,7 @@ Instance::Instance(SDL_Window *window, bool debug) {
   if (debug) {
     constexpr auto debugMessengerInfo = createDebugMessengerInfo();
 
-    m_dispatchLoaderDynamic = vk::DispatchLoaderDynamic(*m_handle);
+    m_dispatchLoaderDynamic = vk::DispatchLoaderDynamic(*m_handle, vkGetInstanceProcAddr);
     m_debugMessenger = m_handle->createDebugUtilsMessengerEXTUnique(
         debugMessengerInfo, nullptr, m_dispatchLoaderDynamic);
   }

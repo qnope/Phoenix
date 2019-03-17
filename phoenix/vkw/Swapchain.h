@@ -20,7 +20,7 @@ public:
   vk::AttachmentDescription getAttachmentDescription() const noexcept;
   void generateFramebuffer(vk::RenderPass renderpass) noexcept;
 
-  vk::Framebuffer getFramebuffer(uint32_t index) const noexcept;
+  const Framebuffer<vk::ImageView> &getFramebuffer(uint32_t index) const noexcept;
 
 private:
   using SwapchainImage = Image<ColorAttachmentUsageBit>;
@@ -31,7 +31,7 @@ private:
   uint32_t m_imageCount;
 
   std::vector<ltl::tuple_t<SwapchainImage, SwapchainImageView>> m_swapchainImages;
-  std::vector<Framebuffer> m_framebuffers;
+  std::vector<Framebuffer<vk::ImageView>> m_framebuffers;
 
   vk::SurfaceFormatKHR m_surfaceFormat;
 };

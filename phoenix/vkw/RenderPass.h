@@ -37,6 +37,22 @@ public:
       return std::array<vk::SubpassDependency, number_dependencies.value>{xs...};
     };
 
+    auto toClearValues = [](auto... xs) {
+      auto toClearValue = [](vk::AttachmentDescription desc) -> vk::ClearValue {
+        switch (desc.format) {
+        case vk::Format::eD16Unorm:
+        case vk::Format::eD16UnormS8Uint:
+        case vk::Format::eD24UnormS8Uint:
+        case vk::Format::eD32Sfloat:
+        case vk::Format::eD32SfloatS8Uint:
+          return vk::ClearDepthStencilValue{0.0f, 0};
+        default:
+          return vk::ClearColorValue{std::array{0.0f, 0.0f, 0.0f, 1.0f}};
+        }
+      };
+      return std::array<vk::ClearValue, number_attachments.value>{toClearValue(xs)...};
+    };
+
     const auto attachmentArray = attachments(toAttachmentDescriptions);
     const auto subpassArray = subpasses(toSubpassDescriptions);
     const auto dependencyArray = dependencies(toSubpassDependencies);
@@ -50,7 +66,10 @@ public:
     info.pSubpasses = subpassArray.data();
     info.pDependencies = dependencyArray.data();
     m_handle = device.createRenderPassUnique(info);
+    m_clearValues = attachments(toClearValues);
   }
+
+  auto getClearValues() const noexcept { return m_clearValues; }
 
 private:
   void compileTimeCheck() {
@@ -76,6 +95,11 @@ private:
     typed_static_assert_msg(all_of_type(subpass_types, isSubpassCompatible),
                             "Subpass cannot have out of bounds attachments");
   }
+
+private:
+  std::array<vk::ClearValue, number_attachments.value> m_clearValues;
 };
+
+LTL_MAKE_IS_KIND(RenderPass, isRenderPass);
 
 } // namespace phx

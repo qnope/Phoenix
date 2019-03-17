@@ -33,7 +33,7 @@ public:
   }
 
   template <typename... Uniforms>
-  PipelineLayout<Uniforms...> createPipelineLayout(Uniforms... uniforms) {
+  PipelineLayout<Uniforms...> createPipelineLayout(Uniforms... uniforms) const {
     return {getHandle(), std::move(uniforms)...};
   }
 
@@ -41,8 +41,8 @@ public:
             typename... Args>
   GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>, SubpassIndex, Args...>
   createGraphicPipeline(PipelineLayout<Uniforms...> pipelineLayout,
-                        RenderPass<RPs...> &renderPass, SubpassIndex subpassIndex,
-                        Args... args) {
+                        const RenderPass<RPs...> &renderPass, SubpassIndex subpassIndex,
+                        Args... args) const {
     return {getHandle(), std::move(pipelineLayout), renderPass, subpassIndex,
             std::move(args)...};
   }
@@ -52,7 +52,7 @@ public:
              ltl::tuple_t<Dependencies...>>
   createRenderPass(ltl::tuple_t<Attachments...> attachments,
                    ltl::tuple_t<Subpasses...> subpasses,
-                   ltl::tuple_t<Dependencies...> dependencies) {
+                   ltl::tuple_t<Dependencies...> dependencies) const {
     return {getHandle(), attachments, subpasses, dependencies};
   }
 

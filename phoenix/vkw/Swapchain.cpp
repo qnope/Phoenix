@@ -125,13 +125,14 @@ void Swapchain::generateFramebuffer(vk::RenderPass renderpass) noexcept {
   using namespace ltl::literals;
   for (auto &img : m_swapchainImages) {
     auto imgView = img[1_n].getHandle();
-    m_framebuffers.emplace_back(
-        Framebuffer{m_device, renderpass, m_extent.width, m_extent.height, {imgView}});
+    m_framebuffers.emplace_back(Framebuffer{m_device, renderpass, m_extent.width,
+                                            m_extent.height, ltl::tuple_t{imgView}});
   }
 }
 
-vk::Framebuffer Swapchain::getFramebuffer(uint32_t index) const noexcept {
-  return m_framebuffers[index].getHandle();
+const Framebuffer<vk::ImageView> &Swapchain::getFramebuffer(uint32_t index) const
+    noexcept {
+  return m_framebuffers[index];
 }
 
 } // namespace phx

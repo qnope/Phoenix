@@ -29,6 +29,7 @@ public:
   Height getHeight() const noexcept;
 
   Device &getDevice() noexcept;
+  const Device &getDevice() const noexcept;
 
   void update() noexcept;
 
@@ -38,8 +39,8 @@ public:
 
   uint32_t getImageCount() const noexcept;
   uint32_t getCurrentImageIndex() const noexcept;
-  vk::Framebuffer getCurrentFramebuffer() const noexcept;
-  vk::Framebuffer getFramebuffer(uint32_t index) const noexcept;
+  const Framebuffer<vk::ImageView> &getCurrentFramebuffer() const noexcept;
+  const Framebuffer<vk::ImageView> &getFramebuffer(uint32_t index) const noexcept;
 
   vk::Semaphore getImageAvailableSemaphore() const noexcept;
 
