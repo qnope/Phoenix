@@ -36,8 +36,9 @@ static vk::PhysicalDevice choosePhysicalDevice(vk::Instance instance,
                                                vk::SurfaceKHR surface) {
   auto physicalDevices = instance.enumeratePhysicalDevices();
 
-  if (auto physicalDevice = ltl::find_if(physicalDevices, hasDeviceSuitable(surface)))
-    return **physicalDevice;
+  if (auto physicalDevice =
+          ltl::find_if_by_value(physicalDevices, hasDeviceSuitable(surface)))
+    return *physicalDevice;
 
   throw NoDeviceCompatibleException{};
 }

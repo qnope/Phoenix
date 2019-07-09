@@ -38,15 +38,13 @@ template <typename T> Ostream_Wrapper &operator<<(Ostream_Wrapper &s, T &&t) {
   return s;
 }
 
-inline Ostream_Wrapper cout(std::cout);
+Ostream_Wrapper cout(std::cout);
 
 constexpr auto identityFunction = [](auto &&x) constexpr -> decltype(auto) {
   return FWD(x);
 };
 
-template <typename F, typename G, typename... Fs>
-constexpr auto compose(F f, G g, Fs... fs) {
-  using namespace ltl::literals;
+template <typename F, typename G, typename... Fs> auto compose(F f, G g, Fs... fs) {
   auto ret = [f, g](auto &&x) { return g(f(FWD(x))); };
   if_constexpr(ltl::type_list_v<Fs...>.length > 0_n) return compose(ret, fs...);
   else return ret;

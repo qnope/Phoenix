@@ -39,7 +39,6 @@ public:
 private:
   void compileTimeCheck() {
     using namespace ltl;
-    using namespace ltl::literals;
     typed_static_assert_msg(
         number_outputs > 0_n,
         "If WithOutputs is specified, it must have at least one output");

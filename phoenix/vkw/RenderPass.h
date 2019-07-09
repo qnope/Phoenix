@@ -74,7 +74,6 @@ public:
 private:
   void compileTimeCheck() {
     using namespace ltl;
-    using namespace ltl::literals;
 
     typed_static_assert_msg(
         all_of_type(attachment_types, is_type(type_v<vk::AttachmentDescription>)),

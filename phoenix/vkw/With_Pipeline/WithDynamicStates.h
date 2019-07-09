@@ -36,7 +36,6 @@ template <typename... DynamicStates> struct WithDynamicStates {
   auto getDynamicStates() { return std::array{DynamicStates::state...}; }
 
   constexpr WithDynamicStates(DynamicStates...) {
-    using namespace ltl::literals;
     using namespace ltl;
     typed_static_assert_msg(
         numberDynamicStates > 0_n,

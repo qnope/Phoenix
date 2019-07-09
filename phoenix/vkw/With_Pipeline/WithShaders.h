@@ -20,7 +20,6 @@ public:
 
 private:
   void compileTimeCheck() {
-    using namespace ltl::literals;
     using namespace ltl;
     typed_static_assert_msg(shader_types.length > 0_n,
                             "You must have shaders within the WithShaders");

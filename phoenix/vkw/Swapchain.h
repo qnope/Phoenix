@@ -21,6 +21,7 @@ public:
   void generateFramebuffer(vk::RenderPass renderpass) noexcept;
 
   const Framebuffer<vk::ImageView> &getFramebuffer(uint32_t index) const noexcept;
+  const std::vector<Framebuffer<vk::ImageView>> &getFramebuffers() const noexcept;
 
 private:
   using SwapchainImage = Image<ColorAttachmentUsageBit>;

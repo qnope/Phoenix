@@ -28,10 +28,10 @@ class Subpass<ltl::tuple_t<Outputs...>, ltl::tuple_t<Inputs...>,
   static constexpr ltl::type_list_t<DepthStencil...> depth_stencil_type{};
   static constexpr ltl::tuple_t<Preserve...> preserve_types{};
 
-  static constexpr auto hasOutputs = output_types.length > ltl::number_v<0>;
-  static constexpr auto hasInputs = input_types.length > ltl::number_v<0>;
-  static constexpr auto hasPreserve = preserve_types.length > ltl::number_v<0>;
-  static constexpr auto hasDepthStencil = depth_stencil_type.length == ltl::number_v<1>;
+  static constexpr auto hasOutputs = !output_types.isEmpty;
+  static constexpr auto hasInputs = !input_types.isEmpty;
+  static constexpr auto hasPreserve = !preserve_types.isEmpty;
+  static constexpr auto hasDepthStencil = !depth_stencil_type.isEmpty;
 
   static constexpr auto construct() {
     return [](auto... xs) {
@@ -46,11 +46,10 @@ public:
       : m_outputs{outputs(construct())}, m_inputs{inputs(construct())},
         m_depthStencil{depthStencil(construct())}, m_preserve{static_cast<uint32_t>(
                                                        Preserve::value)...} {
-    using namespace ltl::literals;
     compileTimeCheck();
   }
 
-  auto getSubpassDescription() {
+  auto getSubpassDescription() const {
     vk::SubpassDescription description;
 
     description.colorAttachmentCount = static_cast<uint32_t>(m_outputs.size());
@@ -70,18 +69,17 @@ public:
   }
 
   static constexpr auto getMaxAttachmentIndex() {
-    using namespace ltl::literals;
-    constexpr auto maxOutput = ltl::max(-1_n, -1_n, Outputs::index...);
-    constexpr auto maxInput = ltl::max(-1_n, -1_n, Inputs::index...);
-    constexpr auto maxPreserve = ltl::max(-1_n, -1_n, Preserve{}...);
+    constexpr auto minimum = number_v<-1>;
+    constexpr auto maxOutput = ltl::max(minimum, Outputs::index...);
+    constexpr auto maxInput = ltl::max(minimum, Inputs::index...);
+    constexpr auto maxPreserve = ltl::max(minimum, Preserve{}...);
 
     return ltl::max(maxOutput, maxInput, maxPreserve);
   }
 
 private:
-  void compileTimeCheck() {
+  constexpr void compileTimeCheck() {
     using namespace ltl;
-    using namespace ltl::literals;
 
     typed_static_assert_msg(all_of_type(output_types, isAttachmentReference),
                             "All outputs must be AttachmentReference");
@@ -106,6 +104,8 @@ private:
   std::array<vk::AttachmentReference, sizeof...(DepthStencil)> m_depthStencil;
   std::array<uint32_t, sizeof...(Preserve)> m_preserve;
 };
+
+template <typename... Ts> Subpass(Ts...)->Subpass<Ts...>;
 
 LTL_MAKE_IS_KIND(Subpass, isSubpass);
 } // namespace phx

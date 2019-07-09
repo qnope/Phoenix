@@ -41,6 +41,7 @@ public:
   uint32_t getCurrentImageIndex() const noexcept;
   const Framebuffer<vk::ImageView> &getCurrentFramebuffer() const noexcept;
   const Framebuffer<vk::ImageView> &getFramebuffer(uint32_t index) const noexcept;
+  const std::vector<Framebuffer<vk::ImageView>> &getFramebuffers() const noexcept;
 
   vk::Semaphore getImageAvailableSemaphore() const noexcept;
 

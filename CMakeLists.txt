@@ -49,7 +49,18 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/SubpassBuilder.h
     phoenix/vkw/Framebuffer.h
     phoenix/vkw/CommandPool.h
+    phoenix/vkw/CommandBufferWrapper.h
     )
+
+set(HEADERS_PHOENIX_EXAMPLE
+    ex/triangle.h)
+
+set(HEADERS_PHOENIX
+    phoenix/constant.h
+    phoenix/PhoenixWindow.h
+    phoenix/SDL_Initializer.h
+    ${HEADERS_PHOENIX_VKW}
+    ${HEADERS_PHOENIX_EXAMPLE})
 
 set(SRC_PHOENIX_VKW
     phoenix/vkw/Instance.cpp
@@ -60,13 +71,6 @@ set(SRC_PHOENIX_VKW
     phoenix/vkw/ShaderCompiler.cpp
     phoenix/vkw/CommandPool.cpp
     )
-
-set(HEADERS_PHOENIX
-    phoenix/constant.h
-    phoenix/PhoenixWindow.h
-    phoenix/SDL_Initializer.h
-    ${HEADERS_PHOENIX_VKW})
-
 
 set(SRC_PHOENIX
     phoenix/PhoenixWindow.cpp

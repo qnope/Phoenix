@@ -238,7 +238,7 @@ namespace VULKAN_HPP_NAMESPACE
   class Flags
   {
   public:
-    VULKAN_HPP_CONSTEXPR Flags()
+    constexpr Flags()
       : m_mask(0)
     {
     }
@@ -42516,7 +42516,7 @@ namespace VULKAN_HPP_NAMESPACE
 
   struct SubpassDependency
   {
-    SubpassDependency( uint32_t srcSubpass_ = 0,
+    constexpr SubpassDependency( uint32_t srcSubpass_ = 0,
                        uint32_t dstSubpass_ = 0,
                        PipelineStageFlags srcStageMask_ = PipelineStageFlags(),
                        PipelineStageFlags dstStageMask_ = PipelineStageFlags(),
@@ -42531,17 +42531,6 @@ namespace VULKAN_HPP_NAMESPACE
       , dstAccessMask( dstAccessMask_ )
       , dependencyFlags( dependencyFlags_ )
     {}
-
-    SubpassDependency( VkSubpassDependency const & rhs )
-    {
-      memcpy( this, &rhs, sizeof( SubpassDependency ) );
-    }
-
-    SubpassDependency& operator=( VkSubpassDependency const & rhs )
-    {
-      memcpy( this, &rhs, sizeof( SubpassDependency ) );
-      return *this;
-    }
 
     SubpassDependency & setSrcSubpass( uint32_t srcSubpass_ )
     {
@@ -42595,7 +42584,7 @@ namespace VULKAN_HPP_NAMESPACE
       return *reinterpret_cast<VkSubpassDependency*>( this );
     }
 
-    bool operator==( SubpassDependency const& rhs ) const
+    constexpr bool operator==( SubpassDependency const& rhs ) const
     {
       return ( srcSubpass == rhs.srcSubpass )
           && ( dstSubpass == rhs.dstSubpass )
@@ -42606,7 +42595,7 @@ namespace VULKAN_HPP_NAMESPACE
           && ( dependencyFlags == rhs.dependencyFlags );
     }
 
-    bool operator!=( SubpassDependency const& rhs ) const
+    constexpr bool operator!=( SubpassDependency const& rhs ) const
     {
       return !operator==( rhs );
     }

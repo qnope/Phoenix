@@ -33,7 +33,7 @@ template <typename... Scissors> class WithScissors {
 
 public:
   static constexpr auto numberScissors = scissor_types.length;
-  static constexpr auto isDynamic = numberDynamicScissors > ltl::number_v<0>;
+  static constexpr auto isDynamic = numberDynamicScissors > 0_n;
   static constexpr auto isStatic = !isDynamic;
 
   WithScissors(Scissors... scissors) {
@@ -45,7 +45,6 @@ public:
 
 private:
   void compileTimeCheck() {
-    using namespace ltl::literals;
     using namespace ltl;
     typed_static_assert_msg(numberScissors > 0_n, "You must have at least one scissor.");
     typed_static_assert_msg(numberDynamicScissors == numberScissors ||

@@ -34,7 +34,7 @@ template <typename... Viewports> class WithViewports {
 
 public:
   static constexpr auto numberViewports = viewport_types.length;
-  static constexpr auto isDynamic = numberDynamicViewports > ltl::number_v<0>;
+  static constexpr auto isDynamic = numberDynamicViewports > 0_n;
   static constexpr auto isStatic = !isDynamic;
 
   WithViewports(Viewports... viewports) {
@@ -47,7 +47,6 @@ public:
 
 private:
   void compileTimeCheck() {
-    using namespace ltl::literals;
     using namespace ltl;
     typed_static_assert_msg(numberViewports > 0_n, "You must have at least one viewport");
     typed_static_assert_msg(numberDynamicViewports == numberViewports ||

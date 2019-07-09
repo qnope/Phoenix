@@ -74,6 +74,11 @@ const Framebuffer<vk::ImageView> &PhoenixWindow::getFramebuffer(uint32_t index) 
   return m_swapchain.getFramebuffer(index);
 }
 
+const std::vector<Framebuffer<vk::ImageView>> &PhoenixWindow::getFramebuffers() const
+    noexcept {
+  return m_swapchain.getFramebuffers();
+}
+
 vk::Semaphore PhoenixWindow::getImageAvailableSemaphore() const noexcept {
   return *m_imgAvailable;
 }

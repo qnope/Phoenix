@@ -128,7 +128,6 @@ public:
 
 private:
   void compileTimeCheck() {
-    using namespace ltl::literals;
     using namespace ltl;
 
     typed_static_assert_msg(count_if_type(types, isWithShaders) == 1_n,
@@ -197,4 +196,5 @@ private:
   ltl::tuple_t<Args...> m_args;
   PipelineLayout<Uniforms...> m_pipelineLayout;
 };
+LTL_MAKE_IS_KIND(GraphicPipeline, isGraphicPipeline);
 } // namespace phx
