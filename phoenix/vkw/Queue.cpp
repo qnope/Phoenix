@@ -37,15 +37,14 @@ void Queue::push(vk::Semaphore signalSemaphore) noexcept {
 }
 
 void Queue::next() noexcept {
-  m_waitStages.emplace_back(0);
   m_commandBufferBySubmitNumbers.emplace_back(0);
   m_waitSemaphoreBySubmitNumbers.emplace_back(0);
   m_signalSemaphoreBySubmitNumbers.emplace_back(0);
 }
 
-void Queue::flush(vk::Fence) noexcept {
+void Queue::flush(vk::Fence fence) noexcept {
   populateSubmits();
-  getHandle().submit(m_submits, vk::Fence());
+  getHandle().submit(m_submits, fence);
   m_submits.resize(0);
   m_waitStages.resize(0);
   m_commandBuffers.resize(0);
@@ -69,10 +68,10 @@ void Queue::populateSubmits() noexcept {
     info.waitSemaphoreCount = waitNumber;
     info.signalSemaphoreCount = signalNumber;
 
-    info.pWaitDstStageMask = &m_waitStages[totalWaitNumber];
-    info.pCommandBuffers = &m_commandBuffers[totalCmdNumber];
-    info.pWaitSemaphores = &m_waitSemaphores[totalWaitNumber];
-    info.pSignalSemaphores = &m_signalSemaphores[totalSignalNumber];
+    info.pWaitDstStageMask = m_waitStages.data() + totalWaitNumber;
+    info.pCommandBuffers = m_commandBuffers.data() + totalCmdNumber;
+    info.pWaitSemaphores = m_waitSemaphores.data() + totalWaitNumber;
+    info.pSignalSemaphores = m_signalSemaphores.data() + totalSignalNumber;
 
     totalCmdNumber += cmdNumber;
     totalWaitNumber += waitNumber;

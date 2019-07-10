@@ -56,6 +56,8 @@ public:
     return {getHandle(), attachments, subpasses, dependencies};
   }
 
+  Fence createFence(bool signaledState) const noexcept;
+
 private:
   vk::PhysicalDevice m_physicalDevice;
   std::unique_ptr<Queue> m_queue;

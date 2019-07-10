@@ -51,7 +51,9 @@ static auto getExtensions(SDL_Window *window, bool debug) {
 }
 
 static auto getValidationLayers() {
-  std::vector<const char *> layers = {"VK_LAYER_LUNARG_standard_validation"};
+  std::vector<const char *> layers = {
+      "VK_LAYER_LUNARG_standard_validation",
+  };
   auto layerStrings = to_string_vector(layers);
   if (!areAvailable(layerStrings, layerTag)) {
     auto notAvailables = getUnavailables(layerStrings, layerTag);

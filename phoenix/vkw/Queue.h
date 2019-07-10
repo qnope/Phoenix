@@ -3,11 +3,13 @@
 #include "VulkanResource.h"
 #include "vulkan.hpp"
 
+#include "Fence.h"
+
 namespace phx {
 
 struct WaitSemaphore {
   vk::Semaphore semaphore;
-  vk::PipelineStageFlagBits stages;
+  vk::PipelineStageFlags stages;
 };
 
 class Queue final {
@@ -46,11 +48,19 @@ private:
   std::vector<vk::Semaphore> m_signalSemaphores;
 };
 
-struct Flush {};
-constexpr Flush flush;
+struct Flush {
+  Flush() = default;
+  Flush(const Fence &fence) : fence{fence.getHandle()} {}
 
-inline Queue &operator<<(Queue &queue, Flush) noexcept {
-  queue.flush();
+  Flush operator()(const Fence &fence) const noexcept { return Flush{fence}; }
+
+  vk::Fence fence;
+};
+
+inline Flush flush;
+
+inline Queue &operator<<(Queue &queue, Flush flush) noexcept {
+  queue.flush(flush.fence);
   return queue;
 }
 

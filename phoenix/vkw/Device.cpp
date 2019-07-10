@@ -107,4 +107,8 @@ Queue &Device::getQueue() const noexcept { return *m_queue; }
 
 vk::PhysicalDevice Device::getPhysicalDevice() const noexcept { return m_physicalDevice; }
 
+Fence Device::createFence(bool signaledState) const noexcept {
+  return Fence(*m_handle, signaledState);
+}
+
 } // namespace phx

@@ -32,33 +32,39 @@ int main(int ac, char **av) {
 
     window.generateFramebuffer(renderPass.getHandle());
 
-    phx::CommandPool pool(deviceHandle, queue.getIndexFamily(), false, false);
+    phx::CommandPool pool(deviceHandle, queue.getIndexFamily(), false, true);
     auto commandBuffers = pool.allocateCommandBuffer(vk::CommandBufferLevel::ePrimary,
                                                      window.getImageCount());
 
     auto &framebuffers = window.getFramebuffers();
-    for (auto [cmdBuffer, framebuffer] : ltl::zip(commandBuffers, framebuffers)) {
-      phx::CommandBufferWrapperSimultaneous(cmdBuffer)
-          .withRenderPass(renderPass, framebuffer)
-          .performSubpass(trianglePass);
-    }
 
     vk::UniqueSemaphore renderFinished = device.createSemaphore();
 
     auto imgAvailable =
         phx::WaitSemaphore{window.getImageAvailableSemaphore(),
                            vk::PipelineStageFlagBits::eColorAttachmentOutput};
+
+    std::vector<phx::Fence> fences;
+
+    for (int i = 0; i < window.getImageCount(); ++i)
+      fences.emplace_back(device.createFence(true));
+
     while (window.run()) {
       window.update();
 
       uint32_t imgIndex = window.getCurrentImageIndex();
 
-      queue << imgAvailable << commandBuffers[imgIndex] << *renderFinished;
-      queue << phx::flush;
+      fences[imgIndex].waitAndReset();
+
+      phx::CommandBufferWrapperSimultaneous(commandBuffers[imgIndex])
+          .withRenderPass(renderPass, framebuffers[imgIndex])
+          .performSubpass(trianglePass);
+
+      queue << imgAvailable << commandBuffers[imgIndex] << *renderFinished
+            << phx::flush(fences[imgIndex]);
 
       queue.present(*renderFinished, window.getSwapchainHandle(), imgIndex);
     }
-
     deviceHandle.waitIdle();
   }
 

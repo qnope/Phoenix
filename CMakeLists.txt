@@ -50,6 +50,7 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Framebuffer.h
     phoenix/vkw/CommandPool.h
     phoenix/vkw/CommandBufferWrapper.h
+    phoenix/vkw/Fence.h
     )
 
 set(HEADERS_PHOENIX_EXAMPLE
@@ -70,6 +71,7 @@ set(SRC_PHOENIX_VKW
     phoenix/vkw/Swapchain.cpp
     phoenix/vkw/ShaderCompiler.cpp
     phoenix/vkw/CommandPool.cpp
+    phoenix/vkw/Fence.cpp
     )
 
 set(SRC_PHOENIX
