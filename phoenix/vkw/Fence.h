@@ -1,8 +1,6 @@
-#ifndef FENCE_H
-#define FENCE_H
-
+#pragma once
 #include "VulkanResource.h"
-#include "vulkan.hpp"
+#include "vulkan.h"
 
 namespace phx {
 
@@ -19,5 +17,3 @@ private:
 };
 
 } // namespace phx
-
-#endif // FENCE_H

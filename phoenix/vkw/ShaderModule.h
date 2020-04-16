@@ -2,23 +2,26 @@
 
 #include "ShaderCompiler.h"
 #include "VulkanResource.h"
-#include "vulkan.hpp"
 
 namespace phx {
 struct VertexShaderType {
-  static constexpr vk::ShaderStageFlagBits stage = vk::ShaderStageFlagBits::eVertex;
+  static constexpr vk::ShaderStageFlagBits stage =
+      vk::ShaderStageFlagBits::eVertex;
 };
 
 struct GeometryShaderType {
-  static constexpr vk::ShaderStageFlagBits stage = vk::ShaderStageFlagBits::eGeometry;
+  static constexpr vk::ShaderStageFlagBits stage =
+      vk::ShaderStageFlagBits::eGeometry;
 };
 
 struct FragmentShaderType {
-  static constexpr vk::ShaderStageFlagBits stage = vk::ShaderStageFlagBits::eFragment;
+  static constexpr vk::ShaderStageFlagBits stage =
+      vk::ShaderStageFlagBits::eFragment;
 };
 
 struct ComputeShaderType {
-  static constexpr vk::ShaderStageFlagBits stage = vk::ShaderStageFlagBits::eCompute;
+  static constexpr vk::ShaderStageFlagBits stage =
+      vk::ShaderStageFlagBits::eCompute;
 };
 
 namespace detail {
@@ -66,6 +69,6 @@ public:
 private:
 };
 
-LTL_MAKE_IS_KIND(ShaderModule, isShaderModule);
+LTL_MAKE_IS_KIND(ShaderModule, is_shader_module, IsShaderModule, typename);
 
 } // namespace phx

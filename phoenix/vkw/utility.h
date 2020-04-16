@@ -5,19 +5,19 @@
 #include <fstream>
 
 #include <iterator>
-#include <ltl/ltl.h>
+#include <ltl/algos.h>
 #include <string_view>
 #include <utility>
 #include <vector>
 
-#include "vulkan.hpp"
+#include "vulkan.h"
 
 namespace phx {
 
 inline std::vector<const char *>
-to_const_char_vector(std::vector<std::string> &strings) noexcept {
+to_const_char_vector(const std::vector<std::string> &strings) noexcept {
   std::vector<const char *> ptrs;
-  auto to_const_char = [](std::string &s) { return s.c_str(); };
+  auto to_const_char = [](const std::string &s) { return s.c_str(); };
   ltl::transform(strings, std::back_inserter(ptrs), to_const_char);
   return ptrs;
 }

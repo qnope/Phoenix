@@ -1,10 +1,12 @@
 #pragma once
 #include "Subpass.h"
-#include "vulkan.hpp"
+#include "vulkan.h"
+
 #include <ltl/ltl.h>
 
 namespace phx {
-template <typename... Ns> constexpr auto buildNoDepthStencilNoInputColors(Ns... ns) {
+template <typename... Ns>
+constexpr auto buildNoDepthStencilNoInputColors(Ns... ns) {
   typed_static_assert((ltl::is_number_t(ns) && ... && true_v));
   constexpr ltl::tuple_t outputs{
       AttachmentReference{ns, vk::ImageLayout::eColorAttachmentOptimal}...};
@@ -12,7 +14,7 @@ template <typename... Ns> constexpr auto buildNoDepthStencilNoInputColors(Ns... 
   return Subpass{outputs, ltl::tuple_t{}, ltl::tuple_t{}, ltl::tuple_t{}};
 }
 
-constexpr auto buildPresentationDependency() {
+inline auto buildPresentationDependency() {
   vk::SubpassDependency dependency;
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
   dependency.dstSubpass = 0;

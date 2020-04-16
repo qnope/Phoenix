@@ -1,7 +1,6 @@
 #pragma once
 
 #include "VulkanResource.h"
-#include "vulkan.hpp"
 
 #include "Fence.h"
 

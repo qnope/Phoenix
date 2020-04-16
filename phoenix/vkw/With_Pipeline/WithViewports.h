@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../vulkan.hpp"
+#include "../vulkan.h"
 #include <array>
 #include <ltl/ltl.h>
 
@@ -13,9 +13,12 @@ protected:
 
 struct StaticViewport : Viewport {
   StaticViewport(Width width, Height height)
-      : m_viewport{
-            0.0f, 0.0f, static_cast<float>(width.get()), static_cast<float>(height.get()),
-            0.0f, 1.0f} {}
+      : m_viewport{0.0f,
+                   0.0f,
+                   static_cast<float>(width.get()),
+                   static_cast<float>(height.get()),
+                   0.0f,
+                   1.0f} {}
 
   vk::Viewport m_viewport;
 };
@@ -48,12 +51,14 @@ public:
 private:
   void compileTimeCheck() {
     using namespace ltl;
-    typed_static_assert_msg(numberViewports > 0_n, "You must have at least one viewport");
+    typed_static_assert_msg(numberViewports > 0_n,
+                            "You must have at least one viewport");
     typed_static_assert_msg(numberDynamicViewports == numberViewports ||
                                 numberStaticViewports == numberViewports,
                             "You can not mix static and dynamic viewports.");
     typed_static_assert_msg(
-        all_of_type(viewport_types, is_derived_from(type_v<viewport::Viewport>)),
+        all_of_type(viewport_types,
+                    is_derived_from(type_v<viewport::Viewport>)),
         "You must have only static or dynamic viewports within WithViewports.");
   }
 
@@ -61,6 +66,6 @@ private:
   std::array<vk::Viewport, numberViewports.value> m_viewports;
 };
 
-LTL_MAKE_IS_KIND(WithViewports, isWithViewports);
+LTL_MAKE_IS_KIND(WithViewports, is_with_viewports, IsWithViewports, typename);
 
 } // namespace phx

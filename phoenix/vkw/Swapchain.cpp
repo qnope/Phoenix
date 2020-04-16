@@ -1,6 +1,6 @@
 #include "Swapchain.h"
 #include <limits>
-#include <lol/lol.h>
+
 namespace phx {
 
 static vk::SurfaceFormatKHR chooseSwapchainFormat(vk::PhysicalDevice device,
@@ -21,8 +21,9 @@ static vk::SurfaceFormatKHR chooseSwapchainFormat(vk::PhysicalDevice device,
   throw NoFormatAvailableException{};
 }
 
-static vk::PresentModeKHR chooseSwapchainPresentMode(vk::PhysicalDevice device,
-                                                     vk::SurfaceKHR surface) noexcept {
+static vk::PresentModeKHR
+chooseSwapchainPresentMode(vk::PhysicalDevice device,
+                           vk::SurfaceKHR surface) noexcept {
   auto presentModes = device.getSurfacePresentModesKHR(surface);
   vk::PresentModeKHR bestMode = vk::PresentModeKHR::eFifo;
 
@@ -55,7 +56,8 @@ static vk::Extent2D chooseSwapchainExtent(vk::PhysicalDevice device,
   return extent;
 }
 
-Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height height)
+Swapchain::Swapchain(Device &device, Surface &surface, Width width,
+                     Height height)
     : m_device{device.getHandle()} {
   using namespace vk;
   auto physicalDevice = device.getPhysicalDevice();
@@ -65,7 +67,8 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height heigh
   auto size = chooseSwapchainExtent(physicalDevice, surfaceKHR, width, height);
 
   auto capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surfaceKHR);
-  m_imageCount = std::clamp(3u, capabilities.minImageCount, capabilities.maxImageCount);
+  m_imageCount =
+      std::clamp(3u, capabilities.minImageCount, capabilities.maxImageCount);
 
   SwapchainCreateInfoKHR info;
 
@@ -90,15 +93,18 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height heigh
 
   for (auto vkimage : images) {
     ImageSubresourceRange range(ImageAspectFlagBits::eColor, 0, 1, 0, 1);
-    SwapchainImage image{m_device, vkimage, m_surfaceFormat.format, m_extent, 1u, 1u};
-    auto imageView =
-        image.createImageView(ImageViewType::e2D, m_surfaceFormat.format, range);
+    SwapchainImage image{m_device, vkimage, m_surfaceFormat.format,
+                         m_extent, 1u,      1u};
+    auto imageView = image.createImageView(ImageViewType::e2D,
+                                           m_surfaceFormat.format, range);
 
     m_swapchainImages.emplace_back(std::move(image), std::move(imageView));
   }
 }
 
-vk::Format Swapchain::getImageFormat() const noexcept { return m_surfaceFormat.format; }
+vk::Format Swapchain::getImageFormat() const noexcept {
+  return m_surfaceFormat.format;
+}
 
 uint32_t Swapchain::getImageCount() const noexcept { return m_imageCount; }
 
@@ -125,18 +131,19 @@ void Swapchain::generateFramebuffer(vk::RenderPass renderpass) noexcept {
   using namespace ltl;
   for (auto &img : m_swapchainImages) {
     auto imgView = img[1_n].getHandle();
-    m_framebuffers.emplace_back(Framebuffer{m_device, renderpass, m_extent.width,
-                                            m_extent.height, tuple_t{imgView}});
+    m_framebuffers.emplace_back(Framebuffer{m_device, renderpass,
+                                            m_extent.width, m_extent.height,
+                                            tuple_t{imgView}});
   }
 }
 
-const Framebuffer<vk::ImageView> &Swapchain::getFramebuffer(uint32_t index) const
-    noexcept {
+const Framebuffer<vk::ImageView> &
+Swapchain::getFramebuffer(uint32_t index) const noexcept {
   return m_framebuffers[index];
 }
 
-const std::vector<Framebuffer<vk::ImageView>> &Swapchain::getFramebuffers() const
-    noexcept {
+const std::vector<Framebuffer<vk::ImageView>> &
+Swapchain::getFramebuffers() const noexcept {
   return m_framebuffers;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../vulkan.hpp"
-#include <ltl/ltl.h>
+#include "vulkan.h"
+#include <ltl/traits.h>
 
 namespace phx {
 namespace output {
@@ -30,7 +30,8 @@ template <typename... Outputs> class WithOutputs {
 public:
   static constexpr auto number_outputs = output_types.length;
 
-  WithOutputs(Outputs... outputs) : m_attachmentStates{outputs.getAttachmentState()...} {
+  WithOutputs(Outputs... outputs)
+      : m_attachmentStates{outputs.getAttachmentState()...} {
     compileTimeCheck();
   }
 
@@ -43,7 +44,8 @@ private:
         number_outputs > 0_n,
         "If WithOutputs is specified, it must have at least one output");
     typed_static_assert_msg(
-        all_of_type(output_types, is_derived_from(type_v<output::OutputAttachment>)),
+        all_of_type(output_types,
+                    is_derived_from(type_v<output::OutputAttachment>)),
         "Outputs must be derived from OutputAttachment");
   }
 
@@ -52,6 +54,6 @@ private:
       m_attachmentStates;
 };
 
-LTL_MAKE_IS_KIND(WithOutputs, isWithOutputs);
+LTL_MAKE_IS_KIND(WithOutputs, is_with_outputs, IsWithOutputs, typename);
 
 } // namespace phx

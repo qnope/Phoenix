@@ -1,6 +1,8 @@
 #pragma once
-#include "vulkan.hpp"
-#include <ltl/ltl.h>
+#include "RenderPass.h"
+#include "vulkan.h"
+#include <ltl/traits.h>
+#include <ltl/tuple_algos.h>
 
 namespace phx {
 namespace detail {
@@ -10,24 +12,27 @@ template <typename Number> struct SubpassIndex {
   typed_static_assert(ltl::is_number_t(index));
 };
 
-LTL_MAKE_IS_KIND(SubpassIndex, isSubpassIndex);
+LTL_MAKE_IS_KIND(SubpassIndex, is_subpass_index, IsSubpassIndex, typename);
 
 template <typename... As> class CommandBufferWrapperImpl {
   static constexpr ltl::type_list_t<As...> types{};
-  static constexpr auto hasRenderPass = ltl::contains_if_type(types, isRenderPass);
-  static constexpr auto hasSubpassIndex = ltl::contains_if_type(types, isSubpassIndex);
+  static constexpr auto hasRenderPass =
+      ltl::contains_if_type(types, is_render_pass);
+  static constexpr auto hasSubpassIndex =
+      ltl::contains_if_type(types, is_subpass_index);
 
   constexpr auto getSubpassIndex() const {
     typed_static_assert(hasSubpassIndex);
-    constexpr auto subpassIndexIndex = ltl::find_if_type(types, isSubpassIndex);
-    using Index = decltype_t(types[subpassIndexIndex]);
+    constexpr auto subpassIndexIndex =
+        ltl::find_if_type(types, is_subpass_index);
+    using Index = decltype_t(types[*subpassIndexIndex]);
     return Index::index;
   }
 
   constexpr auto getRenderPassType() const {
     typed_static_assert(hasRenderPass);
-    constexpr auto indexRenderPass = ltl::find_if_type(types, isRenderPass);
-    return types[indexRenderPass];
+    constexpr auto indexRenderPass = ltl::find_if_type(types, is_render_pass);
+    return types[*indexRenderPass];
   }
 
   constexpr auto getNumberSubpassFromRenderPass() const {
@@ -36,7 +41,8 @@ template <typename... As> class CommandBufferWrapperImpl {
   }
 
 public:
-  CommandBufferWrapperImpl(vk::CommandBuffer buffer) : m_commandBuffer{buffer} {}
+  CommandBufferWrapperImpl(vk::CommandBuffer buffer)
+      : m_commandBuffer{buffer} {}
 
   template <typename... RP, typename... FB>
   auto withRenderPass(const RenderPass<RP...> &renderPass,
@@ -44,9 +50,10 @@ public:
     typed_static_assert_msg(
         !hasRenderPass,
         "You must not have a RenderPass launched to launch another RenderPass");
-    typed_static_assert_msg(
-        renderPass.number_attachments == framebuffer.number_attachments,
-        "Framebuffer must have the same attachments number as RenderPass attachments.");
+    typed_static_assert_msg(renderPass.number_attachments ==
+                                framebuffer.number_attachments,
+                            "Framebuffer must have the same attachments number "
+                            "as RenderPass attachments.");
 
     vk::RenderPassBeginInfo info;
 
@@ -60,16 +67,19 @@ public:
     info.framebuffer = framebuffer.getHandle();
     m_commandBuffer.beginRenderPass(info, vk::SubpassContents::eInline);
 
-    return CommandBufferWrapperImpl<RenderPass<RP...>, decltype(SubpassIndex{0_n})>{
+    return CommandBufferWrapperImpl<RenderPass<RP...>,
+                                    decltype(SubpassIndex{0_n})>{
         m_commandBuffer};
   }
 
-  template <typename Pass> auto performSubpass(const Pass &pass) const noexcept {
+  template <typename Pass>
+  auto performSubpass(const Pass &pass) const noexcept {
     typed_static_assert_msg(
         hasRenderPass,
         "There is no RenderPass associated or the RenderPass is already ended");
-    typed_static_assert_msg(getNumberSubpassFromRenderPass() > getSubpassIndex(),
-                            "The RenderPass has already performed all its subpasses");
+    typed_static_assert_msg(
+        getNumberSubpassFromRenderPass() > getSubpassIndex(),
+        "The RenderPass has already performed all its subpasses");
     pass(m_commandBuffer);
 
     auto nextSubpassIndex = getSubpassIndex() + 1_n;
@@ -98,7 +108,8 @@ struct CommandBufferWrapperWithEnding : CommandBufferWrapperImpl<> {
 
 } // namespace detail
 
-class CommandBufferWrapperSimultaneous : public detail::CommandBufferWrapperWithEnding {
+class CommandBufferWrapperSimultaneous
+    : public detail::CommandBufferWrapperWithEnding {
 public:
   CommandBufferWrapperSimultaneous(vk::CommandBuffer commandBuffer)
       : detail::CommandBufferWrapperWithEnding{commandBuffer} {

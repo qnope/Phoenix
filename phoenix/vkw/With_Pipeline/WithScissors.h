@@ -1,8 +1,8 @@
 #pragma once
 #include "../../constant.h"
-#include "../vulkan.hpp"
+#include "vulkan.h"
 #include <array>
-#include <ltl/ltl.h>
+#include <ltl/traits.h>
 
 namespace phx {
 namespace scissor {
@@ -12,9 +12,9 @@ protected:
 };
 struct StaticScissor : Scissor {
   StaticScissor(Width width, Height height)
-      : m_scissor{vk::Offset2D{0, 0}, vk::Extent2D{static_cast<uint32_t>(width.get()),
-                                                   static_cast<uint32_t>(height.get())}} {
-  }
+      : m_scissor{vk::Offset2D{0, 0},
+                  vk::Extent2D{static_cast<uint32_t>(width.get()),
+                               static_cast<uint32_t>(height.get())}} {}
 
   vk::Rect2D m_scissor;
 };
@@ -46,7 +46,8 @@ public:
 private:
   void compileTimeCheck() {
     using namespace ltl;
-    typed_static_assert_msg(numberScissors > 0_n, "You must have at least one scissor.");
+    typed_static_assert_msg(numberScissors > 0_n,
+                            "You must have at least one scissor.");
     typed_static_assert_msg(numberDynamicScissors == numberScissors ||
                                 numberStaticScissors == numberScissors,
                             "You can not mix static and dynamic scissors.");
@@ -59,6 +60,6 @@ private:
   std::array<vk::Rect2D, numberScissors.value> m_scissors;
 };
 
-LTL_MAKE_IS_KIND(WithScissors, isWithScissors);
+LTL_MAKE_IS_KIND(WithScissors, is_with_scissors, IsWithScissors, typename);
 
 } // namespace phx

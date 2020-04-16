@@ -1,10 +1,12 @@
 #include "Device.h"
 #include "utility.h"
-#include <ltl/ltl.h>
+#include <ltl/Range/enumerate.h>
+#include <ltl/algos.h>
 
 namespace phx {
 static auto getNeededDeviceExtensions() noexcept {
-  std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+  std::vector<const char *> deviceExtensions = {
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME};
   return deviceExtensions;
 }
 
@@ -37,30 +39,34 @@ static vk::PhysicalDevice choosePhysicalDevice(vk::Instance instance,
   auto physicalDevices = instance.enumeratePhysicalDevices();
 
   if (auto physicalDevice =
-          ltl::find_if_by_value(physicalDevices, hasDeviceSuitable(surface)))
+          ltl::find_if_value(physicalDevices, hasDeviceSuitable(surface)))
     return *physicalDevice;
 
   throw NoDeviceCompatibleException{};
 }
 
-static bool isQueueSuitable(vk::PhysicalDevice device, std::size_t indexQueueFamily,
+static bool isQueueSuitable(vk::PhysicalDevice device,
+                            std::size_t indexQueueFamily,
                             vk::QueueFamilyProperties property,
                             vk::SurfaceKHR surface) noexcept {
   constexpr auto computeGraphicBits =
       vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eCompute;
   const bool supportComputeGraphicOperations =
       (property.queueFlags & computeGraphicBits) == computeGraphicBits;
-  const bool supportPresentationOperation =
-      device.getSurfaceSupportKHR(static_cast<uint32_t>(indexQueueFamily), surface);
+  const bool supportPresentationOperation = device.getSurfaceSupportKHR(
+      static_cast<uint32_t>(indexQueueFamily), surface);
 
   return supportComputeGraphicOperations && supportPresentationOperation;
 }
 
-static uint32_t getQueueFamily(vk::PhysicalDevice device, vk::SurfaceKHR surface) {
+static uint32_t getQueueFamily(vk::PhysicalDevice device,
+                               vk::SurfaceKHR surface) {
   auto queueFamilies = device.getQueueFamilyProperties();
 
-  for (auto [indexQueueFamily, queueFamilyProperty] : ltl::enumerate(queueFamilies)) {
-    if (isQueueSuitable(device, indexQueueFamily, queueFamilyProperty, surface)) {
+  for (auto [indexQueueFamily, queueFamilyProperty] :
+       ltl::enumerate(queueFamilies)) {
+    if (isQueueSuitable(device, indexQueueFamily, queueFamilyProperty,
+                        surface)) {
       return static_cast<uint32_t>(indexQueueFamily);
     }
   }
@@ -79,11 +85,14 @@ static auto createDeviceQueueInfo(uint32_t familyIndex) noexcept {
 
 static constexpr auto createDeviceFeatures() noexcept {
   vk::PhysicalDeviceFeatures features;
+  features.fragmentStoresAndAtomics = true;
+  features.vertexPipelineStoresAndAtomics = true;
   return features;
 }
 
 Device::Device(const Instance &instance, const Surface &surface) {
-  m_physicalDevice = choosePhysicalDevice(instance.getHandle(), surface.getHandle());
+  m_physicalDevice =
+      choosePhysicalDevice(instance.getHandle(), surface.getHandle());
   auto queueFamily = getQueueFamily(m_physicalDevice, surface.getHandle());
   auto queueInfo = createDeviceQueueInfo(queueFamily);
   constexpr auto features = createDeviceFeatures();
@@ -100,12 +109,15 @@ Device::Device(const Instance &instance, const Surface &surface) {
   info.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   info.ppEnabledExtensionNames = extensions.data();
   m_handle = m_physicalDevice.createDeviceUnique(info);
-  m_queue = std::make_unique<Queue>(m_handle->getQueue(queueFamily, 0), queueFamily);
+  m_queue =
+      std::make_unique<Queue>(m_handle->getQueue(queueFamily, 0), queueFamily);
 }
 
 Queue &Device::getQueue() const noexcept { return *m_queue; }
 
-vk::PhysicalDevice Device::getPhysicalDevice() const noexcept { return m_physicalDevice; }
+vk::PhysicalDevice Device::getPhysicalDevice() const noexcept {
+  return m_physicalDevice;
+}
 
 Fence Device::createFence(bool signaledState) const noexcept {
   return Fence(*m_handle, signaledState);

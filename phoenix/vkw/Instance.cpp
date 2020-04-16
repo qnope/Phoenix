@@ -7,10 +7,11 @@
 #include <ltl/ltl.h>
 namespace phx {
 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-    VkDebugUtilsMessageTypeFlagsEXT messageType,
-    const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData) {
+static VKAPI_ATTR VkBool32 VKAPI_CALL
+debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+              VkDebugUtilsMessageTypeFlagsEXT messageType,
+              const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+              void *pUserData) {
   std::cerr << pCallbackData->pMessage << std::endl;
   return VK_FALSE;
 }
@@ -21,7 +22,7 @@ static constexpr auto createApplicationInfo() noexcept {
   info.applicationVersion = VK_MAKE_VERSION(0, 0, 1);
   info.pEngineName = "Phoenix Engine";
   info.engineVersion = VK_MAKE_VERSION(0, 0, 1);
-  info.apiVersion = VK_API_VERSION_1_1;
+  info.apiVersion = VK_API_VERSION_1_2;
   return info;
 }
 
@@ -51,9 +52,8 @@ static auto getExtensions(SDL_Window *window, bool debug) {
 }
 
 static auto getValidationLayers() {
-  std::vector<const char *> layers = {
-      "VK_LAYER_LUNARG_standard_validation",
-  };
+  std::vector<const char *> layers = {"VK_LAYER_KHRONOS_validation"};
+
   auto layerStrings = to_string_vector(layers);
   if (!areAvailable(layerStrings, layerTag)) {
     auto notAvailables = getUnavailables(layerStrings, layerTag);
@@ -63,12 +63,13 @@ static auto getValidationLayers() {
   return layers;
 }
 
-static constexpr auto createDebugMessengerInfo() noexcept {
+static auto createDebugMessengerInfo() noexcept {
   vk::DebugUtilsMessengerCreateInfoEXT info;
   info.messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-                         vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
-                         vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
+                         vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose;
+
+  info.messageSeverity |= vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo;
 
   info.messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
                      vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
@@ -89,7 +90,14 @@ Instance::Instance(SDL_Window *window, bool debug) {
 
   auto layers = ::phx::getValidationLayers();
 
+  vk::ValidationFeatureEnableEXT enables[] = {
+      vk::ValidationFeatureEnableEXT::eGpuAssisted};
+  vk::ValidationFeaturesEXT features;
+  features.enabledValidationFeatureCount = 1;
+  features.pEnabledValidationFeatures = enables;
+
   if (debug) {
+    info.pNext = &features;
     info.enabledLayerCount = static_cast<uint32_t>(layers.size());
     info.ppEnabledLayerNames = layers.data();
     m_validationLayers = layers;
@@ -98,15 +106,17 @@ Instance::Instance(SDL_Window *window, bool debug) {
   m_handle = vk::createInstanceUnique(info);
 
   if (debug) {
-    constexpr auto debugMessengerInfo = createDebugMessengerInfo();
+    auto debugMessengerInfo = createDebugMessengerInfo();
 
-    m_dispatchLoaderDynamic = vk::DispatchLoaderDynamic(*m_handle, vkGetInstanceProcAddr);
+    m_dispatchLoaderDynamic =
+        vk::DispatchLoaderDynamic(*m_handle, vkGetInstanceProcAddr);
     m_debugMessenger = m_handle->createDebugUtilsMessengerEXTUnique(
         debugMessengerInfo, nullptr, m_dispatchLoaderDynamic);
   }
 }
 
-const std::vector<const char *> &Instance::getValidationLayers() const noexcept {
+const std::vector<const char *> &Instance::getValidationLayers() const
+    noexcept {
   return m_validationLayers;
 }
 

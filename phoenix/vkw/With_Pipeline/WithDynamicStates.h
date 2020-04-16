@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../vulkan.hpp"
+#include "vulkan.h"
 #include <ltl/ltl.h>
+#include <ltl/traits.h>
 
 namespace phx {
 namespace dynamic_state {
@@ -25,21 +26,23 @@ template <typename... DynamicStates> struct WithDynamicStates {
 
   auto hasDynamicViewport() {
     using namespace ltl;
-    return contains_type(dynamic_state_types, type_v<dynamic_state::DynamicViewport>);
+    return contains_type(dynamic_state_types,
+                         type_v<dynamic_state::DynamicViewport>);
   }
 
   auto hasDynamicScissor() {
     using namespace ltl;
-    return contains_type(dynamic_state_types, type_v<dynamic_state::DynamicScissor>);
+    return contains_type(dynamic_state_types,
+                         type_v<dynamic_state::DynamicScissor>);
   }
 
   auto getDynamicStates() { return std::array{DynamicStates::state...}; }
 
   constexpr WithDynamicStates(DynamicStates...) {
     using namespace ltl;
-    typed_static_assert_msg(
-        numberDynamicStates > 0_n,
-        "If you specify a WithDynamicStates, you must have at least one dynamic state");
+    typed_static_assert_msg(numberDynamicStates > 0_n,
+                            "If you specify a WithDynamicStates, you must have "
+                            "at least one dynamic state");
 
     typed_static_assert_msg(
         all_of_type(dynamic_state_types,
@@ -47,12 +50,15 @@ template <typename... DynamicStates> struct WithDynamicStates {
         "All dynamic states must be DynamicStates values");
 
     typed_static_assert_msg(
-        count_type(dynamic_state_types, type_v<dynamic_state::DynamicViewport>) <= 1_n &&
-            count_type(dynamic_state_types, type_v<dynamic_state::DynamicScissor>) <= 1_n,
+        count_type(dynamic_state_types,
+                   type_v<dynamic_state::DynamicViewport>) <= 1_n &&
+            count_type(dynamic_state_types,
+                       type_v<dynamic_state::DynamicScissor>) <= 1_n,
         "You cannot specify several times the same dynamic state");
   }
 };
 
-LTL_MAKE_IS_KIND(WithDynamicStates, isWithDynamicStates);
+LTL_MAKE_IS_KIND(WithDynamicStates, is_with_dynamic_states, IsWithDynamicStates,
+                 typename);
 
 } // namespace phx

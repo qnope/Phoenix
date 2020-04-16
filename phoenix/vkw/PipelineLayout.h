@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VulkanResource.h"
-#include "vulkan.hpp"
+#include "vulkan.h"
 
 namespace phx {
 template <typename... Uniforms>

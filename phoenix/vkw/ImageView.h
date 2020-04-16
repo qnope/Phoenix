@@ -2,7 +2,7 @@
 
 #include "Device.h"
 #include "VulkanResource.h"
-#include "vulkan.hpp"
+#include "vulkan.h"
 
 namespace phx {
 template <typename Usage>

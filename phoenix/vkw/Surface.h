@@ -3,7 +3,7 @@
 
 #include "Instance.h"
 #include "VulkanResource.h"
-#include "vulkan.hpp"
+#include "vulkan.h"
 
 namespace phx {
 struct UnableToCreateSurfaceException {};

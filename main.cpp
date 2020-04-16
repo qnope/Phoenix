@@ -12,7 +12,7 @@
 auto make_render_pass(const phx::PhoenixWindow &window) {
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
   auto attachment = ltl::tuple_t{window.getAttachmentDescription()};
-  constexpr auto dependency = phx::buildPresentationDependency();
+  auto dependency = phx::buildPresentationDependency();
 
   return window.getDevice().createRenderPass(attachment, subpass,
                                              ltl::tuple_t{dependency});
@@ -22,7 +22,8 @@ int main(int ac, char **av) {
   constexpr auto width = phx::Width{800u};
   constexpr auto height = phx::Height{600u};
   try {
-    phx::PhoenixWindow window{width, height, phx::WindowTitle("Phoenix Engine")};
+    phx::PhoenixWindow window{width, height,
+                              phx::WindowTitle("Phoenix Engine")};
     phx::Device &device = window.getDevice();
     vk::Device deviceHandle = device.getHandle();
 
@@ -33,8 +34,8 @@ int main(int ac, char **av) {
     window.generateFramebuffer(renderPass.getHandle());
 
     phx::CommandPool pool(deviceHandle, queue.getIndexFamily(), false, true);
-    auto commandBuffers = pool.allocateCommandBuffer(vk::CommandBufferLevel::ePrimary,
-                                                     window.getImageCount());
+    auto commandBuffers = pool.allocateCommandBuffer(
+        vk::CommandBufferLevel::ePrimary, window.getImageCount());
 
     auto &framebuffers = window.getFramebuffers();
 
@@ -70,18 +71,21 @@ int main(int ac, char **av) {
 
   catch (phx::ExtentionInvalidException exception) {
     std::cerr << "The extensions ";
-    ltl::copy(exception.extensions, std::ostream_iterator<std::string>(std::cerr, ","));
+    ltl::copy(exception.extensions,
+              std::ostream_iterator<std::string>(std::cerr, ","));
     std::cerr << " are not available" << std::endl;
   }
 
   catch (phx::LayerInvalidException exception) {
     std::cerr << "The validation layers ";
-    ltl::copy(exception.layers, std::ostream_iterator<std::string>(std::cerr, ","));
+    ltl::copy(exception.layers,
+              std::ostream_iterator<std::string>(std::cerr, ","));
     std::cerr << " are not available" << std::endl;
   }
 
   catch (phx::PhoenixSDLInitializationException exception) {
-    std::cerr << "Unable to open the Phoenix : " << exception.exception << std::endl;
+    std::cerr << "Unable to open the Phoenix : " << exception.exception
+              << std::endl;
   }
 
   catch (phx::PhoenixWindowOpeningException exception) {
@@ -94,7 +98,8 @@ int main(int ac, char **av) {
   }
 
   catch (phx::NoGraphicComputeQueueException) {
-    std::cerr << "The GPU is not compatible with Graphic or Compute queue" << std::endl;
+    std::cerr << "The GPU is not compatible with Graphic or Compute queue"
+              << std::endl;
   }
 
   catch (phx::UnableToCreateSurfaceException) {

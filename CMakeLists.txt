@@ -8,22 +8,12 @@ endif(MSVC)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(LIBRARIES_INCLUDE ./lib/include)
-set(LIBRARIES_LIB ${CMAKE_SOURCE_DIR}/lib/lib)
+include_directories(${LTL_PATH})
+include_directories(${SDL_PATH}/include)
 
-include_directories(${LIBRARIES_INCLUDE})
 include_directories(${VULKAN_SDK_PATH}/Include)
 
 set(MAIN_SRC main.cpp)
-
-set(HEADERS_LPL
-    lib/include/lpl/lpl.h)
-
-set(HEADERS_LTL
-    lib/include/ltl/ltl.h)
-
-set(HEADERS_LOL
-    lib/include/lol/lol.h)
 
 set(HEADERS_PHOENIX_VKW
     phoenix/vkw/Instance.h
@@ -51,6 +41,7 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/CommandPool.h
     phoenix/vkw/CommandBufferWrapper.h
     phoenix/vkw/Fence.h
+    phoenix/vkw/vulkan.h
     )
 
 set(HEADERS_PHOENIX_EXAMPLE
@@ -88,11 +79,12 @@ add_executable(Phoenix
     )
 
 target_link_libraries(Phoenix
-    ${LIBRARIES_LIB}/SDL2main.lib ${LIBRARIES_LIB}/SDL2.lib
+    ${SDL_PATH}/lib/x64/SDL2main.lib
+    ${SDL_PATH}/lib/x64/SDL2.lib
     ${VULKAN_SDK_PATH}/Lib/vulkan-1.lib)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_combinedd.lib)
+    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_shared.lib)
 elseif(CMAKE_BUILD_TYPE MATCHES Release)
-    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_combined.lib )
+    target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_shared.lib )
 endif(CMAKE_BUILD_TYPE MATCHES Debug)

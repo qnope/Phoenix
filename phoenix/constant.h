@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ltl/StrongType.h>
 #include <ltl/ltl.h>
 
 namespace phx {

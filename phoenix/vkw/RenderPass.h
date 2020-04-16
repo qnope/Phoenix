@@ -8,10 +8,11 @@ template <typename... Args> class RenderPass;
 
 template <typename... AttachmentDescriptions, typename... Subpasses,
           typename... Dependencies>
-class RenderPass<ltl::tuple_t<AttachmentDescriptions...>, ltl::tuple_t<Subpasses...>,
-                 ltl::tuple_t<Dependencies...>>
+class RenderPass<ltl::tuple_t<AttachmentDescriptions...>,
+                 ltl::tuple_t<Subpasses...>, ltl::tuple_t<Dependencies...>>
     : public VulkanResource<vk::UniqueRenderPass> {
-  static constexpr ltl::type_list_t<AttachmentDescriptions...> attachment_types{};
+  static constexpr ltl::type_list_t<AttachmentDescriptions...>
+      attachment_types{};
   static constexpr ltl::type_list_t<Subpasses...> subpass_types{};
   static constexpr ltl::type_list_t<Dependencies...> depency_types{};
 
@@ -20,12 +21,14 @@ public:
   static constexpr auto number_subpasses = subpass_types.length;
   static constexpr auto number_dependencies = depency_types.length;
 
-  RenderPass(vk::Device device, ltl::tuple_t<AttachmentDescriptions...> attachments,
+  RenderPass(vk::Device device,
+             ltl::tuple_t<AttachmentDescriptions...> attachments,
              ltl::tuple_t<Subpasses...> subpasses,
              ltl::tuple_t<Dependencies...> dependencies) {
     compileTimeCheck();
     auto toAttachmentDescriptions = [](auto... xs) {
-      return std::array<vk::AttachmentDescription, number_attachments.value>{xs...};
+      return std::array<vk::AttachmentDescription, number_attachments.value>{
+          xs...};
     };
 
     auto toSubpassDescriptions = [](auto &... xs) {
@@ -34,7 +37,8 @@ public:
     };
 
     auto toSubpassDependencies = [subpasses](auto... xs) {
-      return std::array<vk::SubpassDependency, number_dependencies.value>{xs...};
+      return std::array<vk::SubpassDependency, number_dependencies.value>{
+          xs...};
     };
 
     auto toClearValues = [](auto... xs) {
@@ -50,7 +54,8 @@ public:
           return vk::ClearColorValue{std::array{0.0f, 0.0f, 0.0f, 1.0f}};
         }
       };
-      return std::array<vk::ClearValue, number_attachments.value>{toClearValue(xs)...};
+      return std::array<vk::ClearValue, number_attachments.value>{
+          toClearValue(xs)...};
     };
 
     const auto attachmentArray = attachments(toAttachmentDescriptions);
@@ -76,14 +81,15 @@ private:
     using namespace ltl;
 
     typed_static_assert_msg(
-        all_of_type(attachment_types, is_type(type_v<vk::AttachmentDescription>)),
+        all_of_type(attachment_types,
+                    is_type(type_v<vk::AttachmentDescription>)),
         "AttachmentDescriptions must be vk::AttachmentDescriptions");
-    typed_static_assert_msg(all_of_type(subpass_types, isSubpass),
+    typed_static_assert_msg(all_of_type(subpass_types, is_subpass),
                             "Subpasses must be Subpasses");
     typed_static_assert_msg(
         all_of_type(depency_types, is_type(type_v<vk::SubpassDependency>)),
         "Dependencies must be SubpassDependencies");
-    typed_static_assert_msg(count_if_type(subpass_types, isSubpass) > 0_n,
+    typed_static_assert_msg(count_if_type(subpass_types, is_subpass) > 0_n,
                             "RenderPass must have at least one subpass");
 
     auto isSubpassCompatible = [](auto subpass) {
@@ -99,6 +105,6 @@ private:
   std::array<vk::ClearValue, number_attachments.value> m_clearValues;
 };
 
-LTL_MAKE_IS_KIND(RenderPass, isRenderPass);
+LTL_MAKE_IS_KIND(RenderPass, is_render_pass, isRenderPass, typename);
 
 } // namespace phx

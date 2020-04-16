@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 
 #include "VulkanResource.h"
-#include "vulkan.hpp"
+#include "vulkan.h"
 
 namespace phx {
 struct ExtentionInvalidException {
