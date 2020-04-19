@@ -3,11 +3,13 @@
 #include "ex/triangle.h"
 
 #include "phoenix/PhoenixWindow.h"
-#include "phoenix/vkw/CommandBufferWrapper.h"
 #include "phoenix/vkw/CommandPool.h"
 #include "phoenix/vkw/GraphicPipeline.h"
 #include "phoenix/vkw/SubpassBuilder.h"
 #include "phoenix/vkw/utility.h"
+
+#include "phoenix/vkw/RenderPassWrapper.h"
+#include <ltl/Range/Zip.h>
 
 auto make_render_pass(const phx::PhoenixWindow &window) {
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
@@ -33,7 +35,7 @@ int main(int ac, char **av) {
 
     window.generateFramebuffer(renderPass.getHandle());
 
-    phx::CommandPool pool(deviceHandle, queue.getIndexFamily(), false, true);
+    phx::CommandPool pool(deviceHandle, queue.getIndexFamily(), false, false);
     auto commandBuffers = pool.allocateCommandBuffer(
         vk::CommandBufferLevel::ePrimary, window.getImageCount());
 
@@ -47,8 +49,18 @@ int main(int ac, char **av) {
 
     std::vector<phx::Fence> fences;
 
-    for (int i = 0; i < window.getImageCount(); ++i)
+    for (auto i = 0u; i < window.getImageCount(); ++i)
       fences.emplace_back(device.createFence(true));
+
+    for (auto [commandBuffer, framebuffer] :
+         ltl::zip(commandBuffers, framebuffers)) {
+      vk::CommandBufferBeginInfo info;
+      commandBuffer.begin(info);
+
+      commandBuffer << (framebuffer << (renderPass << trianglePass));
+
+      commandBuffer.end();
+    }
 
     while (window.run()) {
       window.update();
@@ -56,10 +68,6 @@ int main(int ac, char **av) {
       uint32_t imgIndex = window.getCurrentImageIndex();
 
       fences[imgIndex].waitAndReset();
-
-      phx::CommandBufferWrapperSimultaneous(commandBuffers[imgIndex])
-          .withRenderPass(renderPass, framebuffers[imgIndex])
-          .performSubpass(trianglePass);
 
       queue << imgAvailable << commandBuffers[imgIndex] << *renderFinished
             << phx::flush(fences[imgIndex]);

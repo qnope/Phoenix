@@ -105,6 +105,14 @@ private:
   std::array<vk::ClearValue, number_attachments.value> m_clearValues;
 };
 
-LTL_MAKE_IS_KIND(RenderPass, is_render_pass, isRenderPass, typename);
+LTL_MAKE_IS_KIND(RenderPass, is_render_pass, IsRenderPass, typename);
+
+struct AbstractSubPass {};
+
+constexpr auto is_sub_pass = [](auto &&t) {
+  return ltl::is_base_of(ltl::type_v<AbstractSubPass>, FWD(t));
+};
+template <typename T>
+constexpr auto IsSubPass = decltype(is_sub_pass(std::declval<T>()))::value;
 
 } // namespace phx

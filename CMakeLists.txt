@@ -35,11 +35,11 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/With_Pipeline/WithOutputs.h
     phoenix/vkw/PipelineLayout.h
     phoenix/vkw/RenderPass.h
+    phoenix/vkw/RenderPassWrapper.h
     phoenix/vkw/Subpass.h
     phoenix/vkw/SubpassBuilder.h
     phoenix/vkw/Framebuffer.h
     phoenix/vkw/CommandPool.h
-    phoenix/vkw/CommandBufferWrapper.h
     phoenix/vkw/Fence.h
     phoenix/vkw/vulkan.h
     )

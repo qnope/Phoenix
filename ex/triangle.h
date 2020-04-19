@@ -4,7 +4,8 @@
 #include "../phoenix/vkw/GraphicPipeline.h"
 #include <ltl/ltl.h>
 
-template <typename Pipeline> class TriangleSubpass {
+template <typename Pipeline>
+class TriangleSubpass : public phx::AbstractSubPass {
   typed_static_assert_msg(
       phx::is_graphic_pipeline(ltl::type_v<Pipeline>),
       "The template paremeter Pipeline must be GraphicPipeline");
@@ -12,10 +13,12 @@ template <typename Pipeline> class TriangleSubpass {
 public:
   TriangleSubpass(Pipeline pipeline) : m_pipeline{std::move(pipeline)} {}
 
-  auto operator()(vk::CommandBuffer cmdBuffer) const noexcept {
+  friend auto operator<<(vk::CommandBuffer cmdBuffer,
+                         const TriangleSubpass &subpass) noexcept {
     cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                           m_pipeline.getHandle());
+                           subpass.m_pipeline.getHandle());
     cmdBuffer.draw(3, 1, 0, 0);
+    return cmdBuffer;
   }
 
 private:
