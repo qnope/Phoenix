@@ -20,12 +20,13 @@ template <typename Index> struct AttachmentReference {
 LTL_MAKE_IS_KIND(AttachmentReference, is_attachment_reference,
                  IsAttachmentReference, typename);
 
-template <typename... Args> class Subpass;
+template <typename... Args> class SubpassDescription;
 
 template <typename... Outputs, typename... Inputs, typename... DepthStencil,
           typename... Preserve>
-class Subpass<ltl::tuple_t<Outputs...>, ltl::tuple_t<Inputs...>,
-              ltl::tuple_t<DepthStencil...>, ltl::tuple_t<Preserve...>> {
+class SubpassDescription<ltl::tuple_t<Outputs...>, ltl::tuple_t<Inputs...>,
+                         ltl::tuple_t<DepthStencil...>,
+                         ltl::tuple_t<Preserve...>> {
   static constexpr ltl::type_list_t<Outputs...> output_types{};
   static constexpr ltl::type_list_t<Inputs...> input_types{};
   static constexpr ltl::type_list_t<DepthStencil...> depth_stencil_type{};
@@ -44,8 +45,10 @@ class Subpass<ltl::tuple_t<Outputs...>, ltl::tuple_t<Inputs...>,
   }
 
 public:
-  Subpass(ltl::tuple_t<Outputs...> outputs, ltl::tuple_t<Inputs...> inputs,
-          ltl::tuple_t<DepthStencil...> depthStencil, ltl::tuple_t<Preserve...>)
+  SubpassDescription(ltl::tuple_t<Outputs...> outputs,
+                     ltl::tuple_t<Inputs...> inputs,
+                     ltl::tuple_t<DepthStencil...> depthStencil,
+                     ltl::tuple_t<Preserve...>)
       : m_outputs{outputs(construct())}, m_inputs{inputs(construct())},
         m_depthStencil{depthStencil(construct())},
         m_preserve{static_cast<uint32_t>(Preserve::value)...} {
@@ -110,7 +113,16 @@ private:
   std::array<uint32_t, sizeof...(Preserve)> m_preserve;
 };
 
-template <typename... Ts> Subpass(Ts...)->Subpass<Ts...>;
+template <typename... Ts> SubpassDescription(Ts...)->SubpassDescription<Ts...>;
 
-LTL_MAKE_IS_KIND(Subpass, is_subpass, IsSubpass, typename);
+LTL_MAKE_IS_KIND(SubpassDescription, is_subpass_description,
+                 IsSubpassDescription, typename);
+
+struct AbstractSubpass {};
+
+constexpr auto is_subpass = [](auto &&t) {
+  return ltl::is_base_of(ltl::type_v<AbstractSubpass>, FWD(t));
+};
+template <typename T>
+constexpr auto IsSubpass = decltype(is_sub_pass(std::declval<T>()))::value;
 } // namespace phx

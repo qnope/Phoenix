@@ -17,7 +17,7 @@ class RenderPassWrapper<RenderPass<RPs...>, Operations...> {
   using Pass = RenderPass<RPs...>;
   static constexpr auto all_operations = ltl::type_list_v<Operations...>;
   static constexpr auto subpass_types =
-      ltl::filter_type(all_operations, is_sub_pass);
+      ltl::filter_type(all_operations, is_subpass);
   static constexpr auto subpass_number = subpass_types.length;
 
 public:

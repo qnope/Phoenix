@@ -74,7 +74,7 @@ int main(int ac, char **av) {
 
       queue.present(*renderFinished, window.getSwapchainHandle(), imgIndex);
     }
-    deviceHandle.waitIdle();
+    ltl::for_each(fences, &phx::Fence::waitAndReset);
   }
 
   catch (phx::ExtentionInvalidException exception) {

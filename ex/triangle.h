@@ -5,7 +5,7 @@
 #include <ltl/ltl.h>
 
 template <typename Pipeline>
-class TriangleSubpass : public phx::AbstractSubPass {
+class TriangleSubpass : public phx::AbstractSubpass {
   typed_static_assert_msg(
       phx::is_graphic_pipeline(ltl::type_v<Pipeline>),
       "The template paremeter Pipeline must be GraphicPipeline");

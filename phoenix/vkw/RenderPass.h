@@ -84,12 +84,12 @@ private:
         all_of_type(attachment_types,
                     is_type(type_v<vk::AttachmentDescription>)),
         "AttachmentDescriptions must be vk::AttachmentDescriptions");
-    typed_static_assert_msg(all_of_type(subpass_types, is_subpass),
+    typed_static_assert_msg(all_of_type(subpass_types, is_subpass_description),
                             "Subpasses must be Subpasses");
     typed_static_assert_msg(
         all_of_type(depency_types, is_type(type_v<vk::SubpassDependency>)),
         "Dependencies must be SubpassDependencies");
-    typed_static_assert_msg(count_if_type(subpass_types, is_subpass) > 0_n,
+    typed_static_assert_msg(!subpass_types.isEmpty,
                             "RenderPass must have at least one subpass");
 
     auto isSubpassCompatible = [](auto subpass) {
@@ -106,13 +106,5 @@ private:
 };
 
 LTL_MAKE_IS_KIND(RenderPass, is_render_pass, IsRenderPass, typename);
-
-struct AbstractSubPass {};
-
-constexpr auto is_sub_pass = [](auto &&t) {
-  return ltl::is_base_of(ltl::type_v<AbstractSubPass>, FWD(t));
-};
-template <typename T>
-constexpr auto IsSubPass = decltype(is_sub_pass(std::declval<T>()))::value;
 
 } // namespace phx

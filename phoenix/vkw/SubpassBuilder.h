@@ -11,7 +11,7 @@ constexpr auto buildNoDepthStencilNoInputColors(Ns... ns) {
   constexpr ltl::tuple_t outputs{
       AttachmentReference{ns, vk::ImageLayout::eColorAttachmentOptimal}...};
 
-  return Subpass{outputs, ltl::tuple_t{}, ltl::tuple_t{}, ltl::tuple_t{}};
+  return SubpassDescription{outputs, ltl::tuple_t{}, ltl::tuple_t{}, ltl::tuple_t{}};
 }
 
 inline auto buildPresentationDependency() {
