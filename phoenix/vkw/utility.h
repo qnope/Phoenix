@@ -82,7 +82,7 @@ struct FileNotFoundException {
 };
 
 inline std::string readFile(const std::string &path) {
-  std::ifstream stream(path, std::ios::ate | std::ios::binary);
+  std::ifstream stream(path, std::ios::binary);
 
   if (stream) {
     return {std::istreambuf_iterator<char>(stream),
