@@ -85,9 +85,6 @@ inline std::string readFile(const std::string &path) {
   std::ifstream stream(path, std::ios::ate | std::ios::binary);
 
   if (stream) {
-    std::string result;
-    result.reserve(stream.tellg());
-    stream.seekg(0);
     return {std::istreambuf_iterator<char>(stream),
             std::istreambuf_iterator<char>()};
   }

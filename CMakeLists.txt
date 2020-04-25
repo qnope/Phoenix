@@ -71,11 +71,16 @@ set(SRC_PHOENIX
     ${SRC_PHOENIX_VKW}
     )
 
+set(SHADER_SRC
+    phoenix/shaders/TriangleTest/triangle.vert
+    phoenix/shaders/TriangleTest/triangle.frag)
+
 add_executable(Phoenix
     ${MAIN_SRC}
     ${SRC_PHOENIX}
     ${HEADERS_LPL} ${HEADERS_LTL} ${HEADERS_LOL}
     ${HEADERS_PHOENIX}
+    ${SHADER_SRC}
     )
 
 target_link_libraries(Phoenix
