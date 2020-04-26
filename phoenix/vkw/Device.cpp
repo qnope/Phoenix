@@ -111,6 +111,9 @@ Device::Device(const Instance &instance, const Surface &surface) {
   m_handle = m_physicalDevice.createDeviceUnique(info);
   m_queue =
       std::make_unique<Queue>(m_handle->getQueue(queueFamily, 0), queueFamily);
+
+  m_allocator = std::make_unique<Allocator>(instance.getHandle(), *m_handle,
+                                            m_physicalDevice);
 }
 
 Queue &Device::getQueue() const noexcept { return *m_queue; }

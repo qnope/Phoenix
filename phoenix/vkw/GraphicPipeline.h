@@ -11,7 +11,6 @@
 namespace phx {
 
 template <typename... Args> class GraphicPipeline;
-
 template <typename... Uniforms, typename... RPs, typename SubpassIndex,
           typename... Args>
 class GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>,
@@ -67,9 +66,11 @@ public:
   static constexpr auto hasDynamicStates =
       contains_if_type(types, is_with_dynamic_states);
 
-  GraphicPipeline(vk::Device device, PipelineLayout<Uniforms...> pipelineLayout,
-                  const RenderPass<RPs...> &renderPass, SubpassIndex,
-                  Args... args)
+  GraphicPipeline(
+      vk::Device device, PipelineLayout<Uniforms...> pipelineLayout,
+      std::vector<vk::VertexInputBindingDescription> bindingDescriptions,
+      std::vector<vk::VertexInputAttributeDescription> attributeDescriptions,
+      const RenderPass<RPs...> &renderPass, SubpassIndex, Args... args)
       : m_args{std::move(args)...}, m_pipelineLayout{
                                         std::move(pipelineLayout)} {
     using namespace ltl;
@@ -88,6 +89,10 @@ public:
     auto inputAssembly = getInputAssembly();
 
     vk::PipelineVertexInputStateCreateInfo inputState;
+    inputState.pVertexBindingDescriptions = bindingDescriptions.data();
+    inputState.vertexBindingDescriptionCount = bindingDescriptions.size();
+    inputState.pVertexAttributeDescriptions = attributeDescriptions.data();
+    inputState.vertexAttributeDescriptionCount = attributeDescriptions.size();
 
     vk::PipelineViewportStateCreateInfo viewportInfo;
     viewportInfo.viewportCount = static_cast<uint32_t>(viewports.size());

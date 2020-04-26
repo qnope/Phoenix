@@ -11,6 +11,10 @@
 #include "phoenix/vkw/RenderPassWrapper.h"
 #include <ltl/Range/Zip.h>
 
+#include "phoenix/vkw/Vertex.h"
+
+#include "phoenix/vkw/Buffer/Buffer.h"
+
 auto make_render_pass(const phx::PhoenixWindow &window) {
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
   auto attachment = ltl::tuple_t{window.getAttachmentDescription()};
@@ -23,15 +27,28 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
 int main(int ac, char **av) {
   constexpr auto width = phx::Width{800u};
   constexpr auto height = phx::Height{600u};
+
+  std::vector<phx::Colored2DVertex> vertices = {
+      {{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+
   try {
     phx::PhoenixWindow window{width, height,
                               phx::WindowTitle("Phoenix Engine")};
     phx::Device &device = window.getDevice();
     vk::Device deviceHandle = device.getHandle();
+    auto buffer =
+        device.createBuffer<phx::CpuVertexBuffer<phx::Colored2DVertex>>(4096);
+
+    for (auto vertex : vertices) {
+      buffer << vertex;
+    }
 
     auto queue = device.getQueue();
     auto renderPass = make_render_pass(window);
-    auto trianglePass = make_triangle_pass(device, width, height, renderPass);
+    auto trianglePass =
+        make_triangle_pass(device, width, height, renderPass, buffer);
 
     window.generateFramebuffer(renderPass.getHandle());
 

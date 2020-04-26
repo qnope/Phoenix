@@ -10,12 +10,30 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(${LTL_PATH})
 include_directories(${SDL_PATH}/include)
-
+include_directories(${GLM_PATH})
 include_directories(${VULKAN_SDK_PATH}/Include)
+include_directories(${VULKAN_MEMORY_ALLOCATOR_PATH}/src)
 
 set(MAIN_SRC main.cpp)
 
-set(HEADERS_PHOENIX_VKW
+set(PHOENIX_VKW_ALLOCATOR
+    phoenix/vkw/Allocator/Allocator.h
+    phoenix/vkw/Allocator/Allocator.cpp
+    phoenix/vkw/Allocator/AllocatorBlock.h
+    )
+
+set(PHOENIX_VKW_BUFFER
+    phoenix/vkw/Buffer/Buffer.h)
+
+set(PHOENIX_VKW_PIPELINE
+    phoenix/vkw/With_Pipeline/WithDynamicStates.h
+    phoenix/vkw/With_Pipeline/WithShaders.h
+    phoenix/vkw/With_Pipeline/WithScissors.h
+    phoenix/vkw/With_Pipeline/WithViewports.h
+    phoenix/vkw/With_Pipeline/WithOutputs.h
+    )
+
+set(PHOENIX_VKW
     phoenix/vkw/Instance.h
     phoenix/vkw/Device.h
     phoenix/vkw/Queue.h
@@ -28,11 +46,6 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/ShaderCompiler.h
     phoenix/vkw/ShaderModule.h
     phoenix/vkw/GraphicPipeline.h
-    phoenix/vkw/With_Pipeline/WithDynamicStates.h
-    phoenix/vkw/With_Pipeline/WithShaders.h
-    phoenix/vkw/With_Pipeline/WithScissors.h
-    phoenix/vkw/With_Pipeline/WithViewports.h
-    phoenix/vkw/With_Pipeline/WithOutputs.h
     phoenix/vkw/PipelineLayout.h
     phoenix/vkw/RenderPass.h
     phoenix/vkw/RenderPassWrapper.h
@@ -40,21 +53,10 @@ set(HEADERS_PHOENIX_VKW
     phoenix/vkw/SubpassBuilder.h
     phoenix/vkw/Framebuffer.h
     phoenix/vkw/CommandPool.h
+    phoenix/vkw/Vertex.h
     phoenix/vkw/Fence.h
     phoenix/vkw/vulkan.h
-    )
 
-set(HEADERS_PHOENIX_EXAMPLE
-    ex/triangle.h)
-
-set(HEADERS_PHOENIX
-    phoenix/constant.h
-    phoenix/PhoenixWindow.h
-    phoenix/SDL_Initializer.h
-    ${HEADERS_PHOENIX_VKW}
-    ${HEADERS_PHOENIX_EXAMPLE})
-
-set(SRC_PHOENIX_VKW
     phoenix/vkw/Instance.cpp
     phoenix/vkw/Device.cpp
     phoenix/vkw/Queue.cpp
@@ -63,13 +65,24 @@ set(SRC_PHOENIX_VKW
     phoenix/vkw/ShaderCompiler.cpp
     phoenix/vkw/CommandPool.cpp
     phoenix/vkw/Fence.cpp
+
+    ${PHOENIX_VKW_BUFFER}
+    ${PHOENIX_VKW_ALLOCATOR}
+    ${PHOENIX_VKW_PIPELINE}
     )
 
-set(SRC_PHOENIX
+set(PHOENIX_EXAMPLE
+    ex/triangle.h)
+
+set(PHOENIX
+    phoenix/constant.h
+    phoenix/PhoenixWindow.h
+    phoenix/SDL_Initializer.h
+
     phoenix/PhoenixWindow.cpp
     phoenix/SDL_Initializer.cpp
-    ${SRC_PHOENIX_VKW}
-    )
+    ${PHOENIX_VKW}
+    ${PHOENIX_EXAMPLE})
 
 set(SHADER_SRC
     phoenix/shaders/TriangleTest/triangle.vert
@@ -77,9 +90,7 @@ set(SHADER_SRC
 
 add_executable(Phoenix
     ${MAIN_SRC}
-    ${SRC_PHOENIX}
-    ${HEADERS_LPL} ${HEADERS_LTL} ${HEADERS_LOL}
-    ${HEADERS_PHOENIX}
+    ${PHOENIX}
     ${SHADER_SRC}
     )
 

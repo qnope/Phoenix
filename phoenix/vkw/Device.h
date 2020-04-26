@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "Allocator/Allocator.h"
 #include "GraphicPipeline.h"
 #include "Instance.h"
 #include "PipelineLayout.h"
@@ -28,7 +29,8 @@ public:
   }
 
   template <typename Type>
-  ShaderModule<Type> createShaderModule(const std::string &path, bool debug) const {
+  ShaderModule<Type> createShaderModule(const std::string &path,
+                                        bool debug) const {
     return {getHandle(), path, debug};
   }
 
@@ -39,15 +41,22 @@ public:
 
   template <typename... Uniforms, typename... RPs, typename SubpassIndex,
             typename... Args>
-  GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>, SubpassIndex, Args...>
-  createGraphicPipeline(PipelineLayout<Uniforms...> pipelineLayout,
-                        const RenderPass<RPs...> &renderPass, SubpassIndex subpassIndex,
-                        Args... args) const {
-    return {getHandle(), std::move(pipelineLayout), renderPass, subpassIndex,
+  GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>, SubpassIndex,
+                  Args...>
+  createGraphicPipeline(
+      PipelineLayout<Uniforms...> pipelineLayout,
+      std::vector<vk::VertexInputBindingDescription> bindingDescriptions,
+      std::vector<vk::VertexInputAttributeDescription> attributeDescriptions,
+      const RenderPass<RPs...> &renderPass, SubpassIndex subpassIndex,
+      Args... args) const {
+    return {getHandle(),         std::move(pipelineLayout),
+            bindingDescriptions, attributeDescriptions,
+            renderPass,          subpassIndex,
             std::move(args)...};
   }
 
-  template <typename... Attachments, typename... Subpasses, typename... Dependencies>
+  template <typename... Attachments, typename... Subpasses,
+            typename... Dependencies>
   RenderPass<ltl::tuple_t<Attachments...>, ltl::tuple_t<Subpasses...>,
              ltl::tuple_t<Dependencies...>>
   createRenderPass(ltl::tuple_t<Attachments...> attachments,
@@ -56,10 +65,15 @@ public:
     return {getHandle(), attachments, subpasses, dependencies};
   }
 
+  template <typename Buffer> Buffer createBuffer(vk::DeviceSize size) const {
+    return {getHandle(), *m_allocator, size};
+  }
+
   Fence createFence(bool signaledState) const noexcept;
 
 private:
   vk::PhysicalDevice m_physicalDevice;
   std::unique_ptr<Queue> m_queue;
+  std::unique_ptr<Allocator> m_allocator;
 };
 } // namespace phx
