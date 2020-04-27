@@ -2,6 +2,7 @@
 
 #include "PipelineLayout.h"
 #include "RenderPass.h"
+#include "With_Pipeline/WithBuffer.h"
 #include "With_Pipeline/WithDynamicStates.h"
 #include "With_Pipeline/WithOutputs.h"
 #include "With_Pipeline/WithScissors.h"
@@ -62,13 +63,23 @@ class GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>,
     return info;
   }
 
+  auto getBindingDescriptions() {
+    auto withBindingDescriptionsIndex =
+        ltl::find_if_type(types, is_with_binding_descriptions);
+    if_constexpr(withBindingDescriptionsIndex.has_value) {
+      return m_args[*withBindingDescriptionsIndex];
+    }
+    else {
+      return WithBindingDescriptions<>{};
+    }
+  }
+
 public:
   static constexpr auto hasDynamicStates =
       contains_if_type(types, is_with_dynamic_states);
 
   GraphicPipeline(
       vk::Device device, PipelineLayout<Uniforms...> pipelineLayout,
-      std::vector<vk::VertexInputBindingDescription> bindingDescriptions,
       std::vector<vk::VertexInputAttributeDescription> attributeDescriptions,
       const RenderPass<RPs...> &renderPass, SubpassIndex, Args... args)
       : m_args{std::move(args)...}, m_pipelineLayout{
@@ -89,6 +100,7 @@ public:
     auto inputAssembly = getInputAssembly();
 
     vk::PipelineVertexInputStateCreateInfo inputState;
+    auto bindingDescriptions = getBindingDescriptions().descriptions;
     inputState.pVertexBindingDescriptions = bindingDescriptions.data();
     inputState.vertexBindingDescriptionCount = bindingDescriptions.size();
     inputState.pVertexAttributeDescriptions = attributeDescriptions.data();

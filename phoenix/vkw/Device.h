@@ -45,14 +45,12 @@ public:
                   Args...>
   createGraphicPipeline(
       PipelineLayout<Uniforms...> pipelineLayout,
-      std::vector<vk::VertexInputBindingDescription> bindingDescriptions,
       std::vector<vk::VertexInputAttributeDescription> attributeDescriptions,
       const RenderPass<RPs...> &renderPass, SubpassIndex subpassIndex,
       Args... args) const {
-    return {getHandle(),         std::move(pipelineLayout),
-            bindingDescriptions, attributeDescriptions,
-            renderPass,          subpassIndex,
-            std::move(args)...};
+    return {getHandle(),           std::move(pipelineLayout),
+            attributeDescriptions, renderPass,
+            subpassIndex,          std::move(args)...};
   }
 
   template <typename... Attachments, typename... Subpasses,

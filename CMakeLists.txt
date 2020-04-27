@@ -31,6 +31,7 @@ set(PHOENIX_VKW_PIPELINE
     phoenix/vkw/With_Pipeline/WithScissors.h
     phoenix/vkw/With_Pipeline/WithViewports.h
     phoenix/vkw/With_Pipeline/WithOutputs.h
+    phoenix/vkw/With_Pipeline/WithBuffer.h
     )
 
 set(PHOENIX_VKW

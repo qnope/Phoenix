@@ -45,11 +45,12 @@ auto make_triangle_pass(phx::Device &device, phx::Width width,
 
   auto pipelineLayout = device.createPipelineLayout();
 
-  auto binding = phx::Colored2DVertex::getBindingDescription();
+  auto binding = phx::WithBindingDescriptions{
+      phx::Colored2DVertex::getBindingDescription(0_n)};
   auto attributes = phx::Colored2DVertex::getAttributeDescriptions();
 
   auto graphicPipeline = device.createGraphicPipeline(
-      std::move(pipelineLayout), {binding}, attributes, renderPass, 0_n,
+      std::move(pipelineLayout), attributes, renderPass, 0_n, binding,
       phx::WithShaders{std::move(vertexShader), std::move(fragmentShader)},
       vk::PrimitiveTopology::eTriangleList,
       phx::WithViewports{phx::viewport::StaticViewport{width, height}},

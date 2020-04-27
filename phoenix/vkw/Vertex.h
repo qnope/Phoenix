@@ -1,5 +1,6 @@
 #pragma once
 
+#include "With_Pipeline/WithBuffer.h"
 #include "vulkan.h"
 #include <glm/glm.hpp>
 #include <ltl/Tuple.h>
@@ -56,11 +57,10 @@ template <typename... types> struct Vertex : types... {
 
   Vertex(types... ts) : types(ts)... {}
 
-  static constexpr auto getBindingDescription() {
-    vk::VertexInputBindingDescription bindingDescription;
-    bindingDescription.binding = 0;
+  template <int N>
+  static constexpr auto getBindingDescription(ltl::number_t<N>) {
+    BindingDescription<ltl::number_t<N>> bindingDescription;
     bindingDescription.stride = (types::byte_number + ...);
-    bindingDescription.inputRate = vk::VertexInputRate::eVertex;
     return bindingDescription;
   }
 
