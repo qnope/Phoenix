@@ -63,14 +63,22 @@ class GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>,
     return info;
   }
 
-  auto getBindingDescriptions() {
+  vk::PipelineVertexInputStateCreateInfo getVertexInputStateInfo() {
     auto withBindingDescriptionsIndex =
         ltl::find_if_type(types, is_with_binding_descriptions);
     if_constexpr(withBindingDescriptionsIndex.has_value) {
-      return m_args[*withBindingDescriptionsIndex];
+      const auto &bindingDescription = m_args[*withBindingDescriptionsIndex];
+      vk::PipelineVertexInputStateCreateInfo info;
+      info.vertexBindingDescriptionCount = bindingDescription.bindings.size();
+      info.pVertexBindingDescriptions = bindingDescription.bindings.data();
+
+      info.vertexAttributeDescriptionCount =
+          bindingDescription.attributes.size();
+      info.pVertexAttributeDescriptions = bindingDescription.attributes.data();
+      return info;
     }
     else {
-      return WithBindingDescriptions<>{};
+      return vk::PipelineVertexInputStateCreateInfo{};
     }
   }
 
@@ -78,10 +86,9 @@ public:
   static constexpr auto hasDynamicStates =
       contains_if_type(types, is_with_dynamic_states);
 
-  GraphicPipeline(
-      vk::Device device, PipelineLayout<Uniforms...> pipelineLayout,
-      std::vector<vk::VertexInputAttributeDescription> attributeDescriptions,
-      const RenderPass<RPs...> &renderPass, SubpassIndex, Args... args)
+  GraphicPipeline(vk::Device device, PipelineLayout<Uniforms...> pipelineLayout,
+                  const RenderPass<RPs...> &renderPass, SubpassIndex,
+                  Args... args)
       : m_args{std::move(args)...}, m_pipelineLayout{
                                         std::move(pipelineLayout)} {
     using namespace ltl;
@@ -99,12 +106,8 @@ public:
     auto stages = m_args[*indexShaders].getStages();
     auto inputAssembly = getInputAssembly();
 
-    vk::PipelineVertexInputStateCreateInfo inputState;
-    auto bindingDescriptions = getBindingDescriptions().descriptions;
-    inputState.pVertexBindingDescriptions = bindingDescriptions.data();
-    inputState.vertexBindingDescriptionCount = bindingDescriptions.size();
-    inputState.pVertexAttributeDescriptions = attributeDescriptions.data();
-    inputState.vertexAttributeDescriptionCount = attributeDescriptions.size();
+    vk::PipelineVertexInputStateCreateInfo inputState =
+        getVertexInputStateInfo();
 
     vk::PipelineViewportStateCreateInfo viewportInfo;
     viewportInfo.viewportCount = static_cast<uint32_t>(viewports.size());

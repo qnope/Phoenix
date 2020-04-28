@@ -57,32 +57,29 @@ template <typename... types> struct Vertex : types... {
 
   Vertex(types... ts) : types(ts)... {}
 
-  template <int N>
-  static constexpr auto getBindingDescription(ltl::number_t<N>) {
-    BindingDescription<ltl::number_t<N>> bindingDescription;
-    bindingDescription.stride = (types::byte_number + ...);
-    return bindingDescription;
-  }
-
   template <typename Index>
-  static constexpr auto getAttributeDescription(Index index) {
+  static constexpr auto getAttributeDescription(uint32_t binding, Index index) {
     using current = decltype_t(all_types[index]);
     auto indexer = ltl::build_index_sequence(index);
 
-    return indexer([](auto... index) {
+    return indexer([binding](auto... index) {
       uint32_t location =
           (0u + ... + (decltype_t(all_types[index])::locationSize));
       uint32_t offset =
           (0u + ... + (decltype_t(all_types[index])::byte_number));
-      return vk::VertexInputAttributeDescription(location, 0, current::format,
-                                                 offset);
+      return vk::VertexInputAttributeDescription(location, binding,
+                                                 current::format, offset);
     });
   }
 
-  static constexpr auto getAttributeDescriptions() {
+  template <int N>
+  static constexpr auto getBindingDescription(ltl::number_t<N> n) {
     auto indexer = ltl::build_index_sequence(all_types.length);
-    return indexer([](auto... indices) {
-      return std::vector{getAttributeDescription(indices)...};
+
+    return indexer([n](auto... index) {
+      return BindingDescription{n, ltl::type_v<Vertex>,
+                                (types::byte_number + ...),
+                                getAttributeDescription(n.value, index)...};
     });
   }
 };
