@@ -21,6 +21,8 @@ public:
     std::memcpy(ptr, &t, sizeof(T));
   }
 
+  auto size() const { return m_maxSize; }
+
   VmaAllocation getAllocation() const noexcept { return m_allocation; }
 
 private:

@@ -1,5 +1,5 @@
 #pragma once
-#include "../Phoenix/vkw/Buffer/Buffer.h"
+#include "../Phoenix/vkw/Buffer/BufferRef.h"
 #include "../phoenix/constant.h"
 #include "../phoenix/vkw/Device.h"
 #include "../phoenix/vkw/GraphicPipeline.h"
@@ -14,7 +14,7 @@ class TriangleSubpass : public phx::AbstractSubpass {
 
 public:
   TriangleSubpass(Pipeline pipeline,
-                  phx::CpuVertexBuffer<phx::Colored2DVertex> &buffer)
+                  phx::VertexBufferRef<phx::Colored2DVertex> buffer)
       : m_pipeline{std::move(pipeline)}, m_buffer{buffer} {}
 
   friend auto operator<<(vk::CommandBuffer cmdBuffer,
@@ -29,14 +29,14 @@ public:
 
 private:
   Pipeline m_pipeline;
-  phx::CpuVertexBuffer<phx::Colored2DVertex> &m_buffer;
+  phx::VertexBufferRef<phx::Colored2DVertex> m_buffer;
 };
 
 template <typename... RP>
 auto make_triangle_pass(phx::Device &device, phx::Width width,
                         phx::Height height,
                         const phx::RenderPass<RP...> &renderPass,
-                        phx::CpuVertexBuffer<phx::Colored2DVertex> &buffer) {
+                        phx::VertexBufferRef<phx::Colored2DVertex> buffer) {
   auto vertexShader = device.createShaderModule<phx::VertexShaderType>(
       "../phoenix/shaders/TriangleTest/triangle.vert", true);
 

@@ -23,7 +23,9 @@ set(PHOENIX_VKW_ALLOCATOR
     )
 
 set(PHOENIX_VKW_BUFFER
-    phoenix/vkw/Buffer/Buffer.h)
+    phoenix/vkw/Buffer/Buffer.h
+    phoenix/vkw/Buffer/BufferRef.h
+    )
 
 set(PHOENIX_VKW_PIPELINE
     phoenix/vkw/With_Pipeline/WithDynamicStates.h

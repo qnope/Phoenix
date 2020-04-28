@@ -4,35 +4,57 @@
 #include "../vulkan.h"
 
 #include "../Vertex.h"
+#include <ltl/traits.h>
 
 namespace phx {
-template <typename T, vk::BufferUsageFlagBits _bufferType,
+template <typename T, vk::BufferUsageFlagBits _bufferUsage,
           VmaMemoryUsage _memoryType>
 class Buffer final {
 public:
-  using value_type = T;
-  static constexpr auto bufferType = _bufferType;
+  static constexpr auto type = ltl::type_v<T>;
+  static constexpr auto bufferUsage = _bufferUsage;
   static constexpr auto memoryType = _memoryType;
 
   Buffer(vk::Device device, Allocator &allocator, vk::DeviceSize size)
       : m_allocator{allocator} {
     vk::BufferCreateInfo infoBuffer;
     infoBuffer.size = size;
-    infoBuffer.usage = bufferType;
+    infoBuffer.usage = bufferUsage;
     infoBuffer.sharingMode = vk::SharingMode::eExclusive;
 
     ltl::tie(m_buffer, m_block) =
         allocator.allocateBuffer(infoBuffer, memoryType);
   }
 
-  void clear() { m_block.clear(); }
+  Buffer(Buffer &&buffer) noexcept
+      : m_allocator(buffer.m_allocator), m_buffer(buffer.m_buffer),
+        m_block(buffer.m_block) {
+    buffer.m_block = std::nullopt;
+  }
 
-  auto getHandle() const { return m_buffer; }
+  Buffer &operator=(Buffer &&buffer) noexcept {
+    deallocate();
+    m_buffer = buffer.m_buffer;
+    m_block = buffer.m_block;
+    buffer.m_block = std::nullopt;
+    return *this;
+  }
 
-  ~Buffer() { m_allocator.deallocateBuffer(m_buffer, m_block); }
+  void clear() {
+    assert(m_block);
+    m_block->clear();
+  }
+
+  auto getHandle() const {
+    assert(m_block);
+    return m_buffer;
+  }
+
+  ~Buffer() { deallocate(); }
 
   template <typename T> friend Buffer &operator<<(Buffer &buffer, T x) {
-    buffer.m_block.push_back(x);
+    assert(buffer.m_block);
+    buffer.m_block->push_back(x);
     return buffer;
   }
 
@@ -42,10 +64,21 @@ public:
     return buffer;
   }
 
+  vk::DeviceSize size() const {
+    assert(m_block);
+    return m_block->size();
+  }
+
+private:
+  void deallocate() {
+    if (m_block)
+      m_allocator.deallocateBuffer(m_buffer, *m_block);
+  }
+
 private:
   Allocator &m_allocator;
   vk::Buffer m_buffer;
-  AllocatorBlock m_block;
+  std::optional<AllocatorBlock> m_block;
 };
 
 template <typename T>
