@@ -69,11 +69,12 @@ class GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>,
     if_constexpr(withBindingDescriptionsIndex.has_value) {
       const auto &bindingDescription = m_args[*withBindingDescriptionsIndex];
       vk::PipelineVertexInputStateCreateInfo info;
-      info.vertexBindingDescriptionCount = bindingDescription.bindings.size();
+      info.vertexBindingDescriptionCount =
+          uint32_t(bindingDescription.bindings.size());
       info.pVertexBindingDescriptions = bindingDescription.bindings.data();
 
       info.vertexAttributeDescriptionCount =
-          bindingDescription.attributes.size();
+          uint32_t(bindingDescription.attributes.size());
       info.pVertexAttributeDescriptions = bindingDescription.attributes.data();
       return info;
     }

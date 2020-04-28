@@ -9,8 +9,17 @@ public:
 
   BufferRef(const BufferRef &) = default;
 
+  template <typename T, vk::BufferUsageFlagBits usage>
+  BufferRef(const BufferRef<T, usage> &buffer) {
+    typed_static_assert(buffer.type == type);
+    typed_static_assert((buffer.bufferUsage & bufferUsage) == bufferUsage);
+    m_buffer = buffer.m_buffer;
+    m_offset = buffer.m_offset;
+    m_size = buffer.m_size;
+  }
+
   template <typename T, vk::BufferUsageFlagBits usage, VmaMemoryUsage memUsage>
-  BufferRef(Buffer<T, usage, memUsage> &buffer) {
+  BufferRef(const Buffer<T, usage, memUsage> &buffer) {
     typed_static_assert_msg(buffer.type == type,
                             "Buffer must be of the good type");
     static_assert((buffer.bufferUsage & bufferUsage) == bufferUsage,
