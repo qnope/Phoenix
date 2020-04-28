@@ -29,8 +29,7 @@ Allocator::allocateBuffer(vk::BufferCreateInfo _infoBuffer,
 
   return {buffer,
           AllocatorBlock(allocation,
-                         reinterpret_cast<char *>(blockInfo.pMappedData) +
-                             blockInfo.offset,
+                         reinterpret_cast<char *>(blockInfo.pMappedData),
                          _infoBuffer.size)};
 }
 
