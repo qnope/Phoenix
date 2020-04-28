@@ -29,26 +29,35 @@ int main(int ac, char **av) {
   constexpr auto height = phx::Height{600u};
 
   std::vector<phx::Colored2DVertex> vertices = {
-      {{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-      {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-      {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+      {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+      {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+      {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+      {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+
+  std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
 
   try {
     phx::PhoenixWindow window{width, height,
                               phx::WindowTitle("Phoenix Engine")};
     phx::Device &device = window.getDevice();
     vk::Device deviceHandle = device.getHandle();
-    auto buffer =
+    auto vertexBuffer =
         device.createBuffer<phx::CpuVertexBuffer<phx::Colored2DVertex>>(4096);
 
+    auto indexBuffer = device.createBuffer<phx::CpuIndexBuffer<uint32_t>>(4096);
+
     for (auto vertex : vertices) {
-      buffer << vertex;
+      vertexBuffer << vertex;
+    }
+
+    for (auto index : indices) {
+      indexBuffer << index;
     }
 
     auto queue = device.getQueue();
     auto renderPass = make_render_pass(window);
-    auto trianglePass =
-        make_triangle_pass(device, width, height, renderPass, buffer);
+    auto trianglePass = make_triangle_pass(device, width, height, renderPass,
+                                           vertexBuffer, indexBuffer);
 
     window.generateFramebuffer(renderPass.getHandle());
 

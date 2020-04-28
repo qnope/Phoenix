@@ -14,29 +14,36 @@ class TriangleSubpass : public phx::AbstractSubpass {
 
 public:
   TriangleSubpass(Pipeline pipeline,
-                  phx::VertexBufferRef<phx::Colored2DVertex> buffer)
-      : m_pipeline{std::move(pipeline)}, m_buffer{buffer} {}
+                  phx::VertexBufferRef<phx::Colored2DVertex> vertexBuffer,
+                  phx::IndexBufferRef<uint32_t> indexBuffer)
+      : m_pipeline{std::move(pipeline)}, //
+        m_vertexBuffer{vertexBuffer},    //
+        m_indexBuffer{indexBuffer} {}
 
   friend auto operator<<(vk::CommandBuffer cmdBuffer,
                          const TriangleSubpass &subpass) noexcept {
     cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                            subpass.m_pipeline.getHandle());
-    cmdBuffer.bindVertexBuffers(0, subpass.m_buffer.getHandle(),
+    cmdBuffer.bindVertexBuffers(0, subpass.m_vertexBuffer.getHandle(),
                                 vk::DeviceSize(0));
-    cmdBuffer.draw(3, 1, 0, 0);
+    cmdBuffer.bindIndexBuffer(subpass.m_indexBuffer.getHandle(), 0,
+                              vk::IndexType::eUint32);
+    cmdBuffer.drawIndexed(6, 1, 0, 0, 0);
     return cmdBuffer;
   }
 
 private:
   Pipeline m_pipeline;
-  phx::VertexBufferRef<phx::Colored2DVertex> m_buffer;
+  phx::VertexBufferRef<phx::Colored2DVertex> m_vertexBuffer;
+  phx::IndexBufferRef<uint32_t> m_indexBuffer;
 };
 
 template <typename... RP>
 auto make_triangle_pass(phx::Device &device, phx::Width width,
                         phx::Height height,
                         const phx::RenderPass<RP...> &renderPass,
-                        phx::VertexBufferRef<phx::Colored2DVertex> buffer) {
+                        phx::VertexBufferRef<phx::Colored2DVertex> vertexBuffer,
+                        phx::IndexBufferRef<uint32_t> indexBuffer) {
   auto vertexShader = device.createShaderModule<phx::VertexShaderType>(
       "../phoenix/shaders/TriangleTest/triangle.vert", true);
 
@@ -57,5 +64,5 @@ auto make_triangle_pass(phx::Device &device, phx::Width width,
       vk::CullModeFlagBits::eNone, vk::PolygonMode::eFill,
       phx::WithOutputs{phx::output::normal_attachment});
 
-  return TriangleSubpass{std::move(graphicPipeline), buffer};
+  return TriangleSubpass{std::move(graphicPipeline), vertexBuffer, indexBuffer};
 }
