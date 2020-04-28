@@ -18,7 +18,7 @@ public:
   Buffer(vk::Device device, Allocator &allocator, vk::DeviceSize size)
       : m_allocator{allocator} {
     vk::BufferCreateInfo infoBuffer;
-    infoBuffer.size = size;
+    infoBuffer.size = size * sizeof(T);
     infoBuffer.usage = bufferUsage;
     infoBuffer.sharingMode = vk::SharingMode::eExclusive;
 
@@ -81,7 +81,12 @@ private:
   std::optional<AllocatorBlock> m_block;
 };
 
+template <typename T, vk::BufferUsageFlagBits usage>
+using CpuBuffer = Buffer<T, usage, VMA_MEMORY_USAGE_CPU_COPY>;
+
 template <typename T>
-using CpuVertexBuffer = Buffer<T, vk::BufferUsageFlagBits::eVertexBuffer,
-                               VmaMemoryUsage::VMA_MEMORY_USAGE_CPU_ONLY>;
+using CpuVertexBuffer = CpuBuffer<T, vk::BufferUsageFlagBits::eVertexBuffer>;
+
+template <typename T>
+using CpuIndexBuffer = CpuBuffer<T, vk::BufferUsageFlagBits::eIndexBuffer>;
 } // namespace phx

@@ -40,4 +40,7 @@ private:
 template <typename T>
 using VertexBufferRef = BufferRef<T, vk::BufferUsageFlagBits::eVertexBuffer>;
 
+template <typename T>
+using IndexBufferRef = BufferRef<T, vk::BufferUsageFlagBits::eIndexBuffer>;
+
 } // namespace phx
