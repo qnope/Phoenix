@@ -15,7 +15,7 @@ public:
   static constexpr auto bufferUsage = _bufferUsage;
   static constexpr auto memoryType = _memoryType;
 
-  Buffer(vk::Device device, Allocator &allocator, vk::DeviceSize size)
+  Buffer(vk::Device device, Allocator &allocator, vk::DeviceSize size) noexcept
       : m_allocator{allocator} {
     vk::BufferCreateInfo infoBuffer;
     infoBuffer.size = size * sizeof(T);
@@ -40,33 +40,44 @@ public:
     return *this;
   }
 
-  void clear() {
+  void clear() noexcept {
     assert(m_block);
     m_block->clear();
   }
 
-  auto getHandle() const {
+  auto getHandle() const noexcept {
     assert(m_block);
     return m_buffer;
   }
 
   ~Buffer() { deallocate(); }
 
-  template <typename T> friend Buffer &operator<<(Buffer &buffer, T x) {
+  template <typename T>
+  friend Buffer &operator<<(Buffer &buffer, T x) noexcept {
     assert(buffer.m_block);
     buffer.m_block->push_back(x);
     return buffer;
   }
 
   template <typename... Ts>
-  friend Buffer &operator<<(Buffer &buffer, Vertex<Ts...> x) {
+  friend Buffer &operator<<(Buffer &buffer, Vertex<Ts...> x) noexcept {
     ((buffer << static_cast<const Ts &>(x)), ...);
     return buffer;
   }
 
-  vk::DeviceSize size() const {
+  vk::DeviceSize size() const noexcept {
     assert(m_block);
     return m_block->size();
+  }
+
+  vk::DeviceSize capacity() const noexcept {
+    assert(m_block);
+    return m_block->capacity();
+  }
+
+  vk::DeviceSize *sizePtr() {
+    assert(m_block);
+    return m_block->sizePtr();
   }
 
 private:
