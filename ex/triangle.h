@@ -1,6 +1,7 @@
 #pragma once
 #include "../Phoenix/vkw/Buffer/BufferRef.h"
 #include "../phoenix/constant.h"
+#include "../phoenix/vkw/CommandBufferWrapper.h"
 #include "../phoenix/vkw/Device.h"
 #include "../phoenix/vkw/GraphicPipeline.h"
 #include "../phoenix/vkw/Vertex.h"
@@ -22,12 +23,14 @@ public:
 
   friend auto operator<<(vk::CommandBuffer cmdBuffer,
                          const TriangleSubpass &subpass) noexcept {
-    cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
-                           subpass.m_pipeline.getHandle());
-    cmdBuffer.bindVertexBuffers(0, subpass.m_vertexBuffer.getHandle(),
-                                vk::DeviceSize(0));
-    cmdBuffer.bindIndexBuffer(subpass.m_indexBuffer.getHandle(), 0,
-                              vk::IndexType::eUint32);
+    phx::CommandBufferWrapper commandBufferWrapper{cmdBuffer};
+
+    commandBufferWrapper.bindVertexBuffersToGraphicPipeline(
+        subpass.m_pipeline, subpass.m_vertexBuffer);
+
+    commandBufferWrapper.bindIndexBufferToGraphicPipeline(
+        subpass.m_pipeline, subpass.m_indexBuffer);
+
     cmdBuffer.drawIndexed(6, 1, 0, 0, 0);
     return cmdBuffer;
   }

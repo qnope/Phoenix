@@ -59,6 +59,7 @@ set(PHOENIX_VKW
     phoenix/vkw/Vertex.h
     phoenix/vkw/Fence.h
     phoenix/vkw/vulkan.h
+    phoenix/vkw/CommandBufferWrapper.h
 
     phoenix/vkw/Instance.cpp
     phoenix/vkw/Device.cpp

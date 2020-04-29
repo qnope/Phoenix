@@ -42,6 +42,7 @@ struct WithBindingDescriptions<BindingDescription<
     ((ltl::copy(descriptions.attributes, std::back_inserter(attributes))), ...);
   }
 
+  static constexpr auto types = ltl::type_list_v<Types...>;
   std::array<vk::VertexInputBindingDescription, sizeof...(Bindings)> bindings;
   std::vector<vk::VertexInputAttributeDescription> attributes;
 };

@@ -83,9 +83,22 @@ class GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>,
     }
   }
 
+  static constexpr auto getVertexBufferTypes() {
+    constexpr auto withBindingDescriptionsIndex =
+        ltl::find_if_type(types, is_with_binding_descriptions);
+    if_constexpr(withBindingDescriptionsIndex.has_value) {
+      return decltype_t(types[*withBindingDescriptionsIndex])::types;
+    }
+    else {
+      return ltl::type_list_v<>;
+    }
+  }
+
 public:
   static constexpr auto hasDynamicStates =
       contains_if_type(types, is_with_dynamic_states);
+
+  static constexpr auto vertexBufferTypes = getVertexBufferTypes();
 
   GraphicPipeline(vk::Device device, PipelineLayout<Uniforms...> pipelineLayout,
                   const RenderPass<RPs...> &renderPass, SubpassIndex,
