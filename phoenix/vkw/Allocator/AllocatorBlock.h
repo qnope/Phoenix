@@ -22,11 +22,6 @@ public:
     std::memcpy(ptr, &t, sizeof(T));
   }
 
-  auto size() const { return m_currentOffset; }
-  auto capacity() const { return m_capacity; }
-
-  auto sizePtr() { return std::addressof(m_currentOffset); }
-
   VmaAllocation getAllocation() const noexcept { return m_allocation; }
 
 private:

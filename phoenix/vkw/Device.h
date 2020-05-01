@@ -61,7 +61,7 @@ public:
   }
 
   template <typename Buffer> Buffer createBuffer(vk::DeviceSize size) const {
-    return {getHandle(), *m_allocator, size};
+    return {*m_allocator, size};
   }
 
   Fence createFence(bool signaledState) const noexcept;

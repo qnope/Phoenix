@@ -36,7 +36,7 @@ public:
 
 private:
   vk::Buffer m_buffer;
-  vk::DeviceSize *m_size;
+  const vk::DeviceSize *m_size;
   vk::DeviceSize m_capacity;
 };
 

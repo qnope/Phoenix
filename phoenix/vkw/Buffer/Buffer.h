@@ -15,8 +15,9 @@ public:
   static constexpr auto bufferUsage = _bufferUsage;
   static constexpr auto memoryType = _memoryType;
 
-  Buffer(vk::Device device, Allocator &allocator, vk::DeviceSize size) noexcept
-      : m_allocator{allocator} {
+  Buffer(Allocator &allocator, vk::DeviceSize size) noexcept
+      : m_allocator{allocator}, //
+        m_capacity{size} {
     vk::BufferCreateInfo infoBuffer;
     infoBuffer.size = size * sizeof(T);
     infoBuffer.usage = bufferUsage;
@@ -27,15 +28,21 @@ public:
   }
 
   Buffer(Buffer &&buffer) noexcept
-      : m_allocator(buffer.m_allocator), m_buffer(buffer.m_buffer),
+      : m_allocator(buffer.m_allocator),  //
+        m_buffer(buffer.m_buffer),        //
+        m_size{std::move(buffer.m_size)}, //
+        m_capacity{buffer.m_capacity},    //
         m_block(buffer.m_block) {
     buffer.m_block = std::nullopt;
+    buffer.m_capacity = 0;
   }
 
   Buffer &operator=(Buffer &&buffer) noexcept {
     deallocate();
     m_buffer = buffer.m_buffer;
     m_block = buffer.m_block;
+    m_capacity = buffer.m_capacity;
+    m_size = std::move(buffer.m_size);
     buffer.m_block = std::nullopt;
     return *this;
   }
@@ -52,35 +59,35 @@ public:
 
   ~Buffer() { deallocate(); }
 
-  template <typename T>
-  friend Buffer &operator<<(Buffer &buffer, T x) noexcept {
-    assert(buffer.m_block);
-    buffer.m_block->push_back(x);
-    return buffer;
-  }
-
-  template <typename... Ts>
-  friend Buffer &operator<<(Buffer &buffer, Vertex<Ts...> x) noexcept {
-    ((buffer << static_cast<const Ts &>(x)), ...);
-    return buffer;
-  }
-
-  vk::DeviceSize size() const noexcept {
+  Buffer &operator<<(T x) noexcept {
     assert(m_block);
-    return m_block->size();
+    constexpr auto has_types = IS_VALID((x), x.types);
+
+    if_constexpr(has_types(x)) {
+      auto types = x.types;
+      types([this, &x](auto... types) {
+        ((*this << static_cast<const decltype_t(types) &>(x)), ...);
+      });
+    }
+    else {
+      m_block->push_back(x);
+    }
+    ++(*m_size);
+    return *this;
   }
 
-  vk::DeviceSize capacity() const noexcept {
-    assert(m_block);
-    return m_block->capacity();
-  }
+  vk::DeviceSize size() const noexcept { return *m_size; }
 
-  vk::DeviceSize *sizePtr() {
-    assert(m_block);
-    return m_block->sizePtr();
-  }
+  vk::DeviceSize capacity() const noexcept { return m_capacity; }
+
+  const vk::DeviceSize *sizePtr() const noexcept { return m_size.get(); }
 
 private:
+  template <typename _T> Buffer &operator<<(_T x) noexcept {
+    m_block->push_back(x);
+    return *this;
+  }
+
   void deallocate() {
     if (m_block)
       m_allocator.deallocateBuffer(m_buffer, *m_block);
@@ -89,6 +96,8 @@ private:
 private:
   Allocator &m_allocator;
   vk::Buffer m_buffer;
+  std::unique_ptr<vk::DeviceSize> m_size = std::make_unique<vk::DeviceSize>(0);
+  vk::DeviceSize m_capacity;
   std::optional<AllocatorBlock> m_block;
 };
 

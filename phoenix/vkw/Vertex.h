@@ -52,21 +52,19 @@ using Position4D = details::Position<glm::vec4>;
 using RgbColor = details::Color<glm::vec3>;
 using RgbaColor = details::Color<glm::vec4>;
 
-template <typename... types> struct Vertex : types... {
-  static constexpr auto all_types = ltl::type_list_v<types...>;
+template <typename... Types> struct Vertex : Types... {
+  static constexpr auto types = ltl::type_list_v<Types...>;
 
-  Vertex(types... ts) : types(ts)... {}
+  Vertex(Types... ts) : Types(ts)... {}
 
   template <typename Index>
   static constexpr auto getAttributeDescription(uint32_t binding, Index index) {
-    using current = decltype_t(all_types[index]);
+    using current = decltype_t(types[index]);
     auto indexer = ltl::build_index_sequence(index);
 
     return indexer([binding](auto... index) {
-      uint32_t location =
-          (0u + ... + (decltype_t(all_types[index])::locationSize));
-      uint32_t offset =
-          (0u + ... + (decltype_t(all_types[index])::byte_number));
+      uint32_t location = (0u + ... + (decltype_t(types[index])::locationSize));
+      uint32_t offset = (0u + ... + (decltype_t(types[index])::byte_number));
       return vk::VertexInputAttributeDescription(location, binding,
                                                  current::format, offset);
     });
@@ -74,11 +72,11 @@ template <typename... types> struct Vertex : types... {
 
   template <int N>
   static constexpr auto getBindingDescription(ltl::number_t<N> n) {
-    auto indexer = ltl::build_index_sequence(all_types.length);
+    auto indexer = ltl::build_index_sequence(types.length);
 
     return indexer([n](auto... index) {
       return BindingDescription{n, ltl::type_v<Vertex>,
-                                (types::byte_number + ...),
+                                (Types::byte_number + ...),
                                 getAttributeDescription(n.value, index)...};
     });
   }
