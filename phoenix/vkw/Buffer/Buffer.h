@@ -35,6 +35,7 @@ public:
         m_block(buffer.m_block) {
     buffer.m_block = std::nullopt;
     buffer.m_capacity = 0;
+    buffer.m_buffer = vk::Buffer();
   }
 
   Buffer &operator=(Buffer &&buffer) noexcept {
@@ -44,6 +45,8 @@ public:
     m_capacity = buffer.m_capacity;
     m_size = std::move(buffer.m_size);
     buffer.m_block = std::nullopt;
+    buffer.m_capacity = 0;
+    buffer.m_buffer = vk::Buffer();
     return *this;
   }
 
