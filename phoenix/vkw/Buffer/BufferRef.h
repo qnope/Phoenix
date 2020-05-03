@@ -2,14 +2,14 @@
 #include "Buffer.h"
 
 namespace phx {
-template <typename T, vk::BufferUsageFlagBits _bufferUsage> class BufferRef {
+template <typename T, VkBufferUsageFlags _bufferUsage> class BufferRef {
 public:
   static constexpr auto type = ltl::type_v<T>;
-  static constexpr auto bufferUsage = _bufferUsage;
+  static constexpr auto bufferUsage = vk::BufferUsageFlags(_bufferUsage);
 
   BufferRef(const BufferRef &) = default;
 
-  template <typename T, vk::BufferUsageFlagBits usage>
+  template <typename T, VkBufferUsageFlags usage>
   BufferRef(const BufferRef<T, usage> &buffer) {
     typed_static_assert(buffer.type == type);
     typed_static_assert((buffer.bufferUsage & bufferUsage) == bufferUsage);
@@ -18,7 +18,7 @@ public:
     m_capacity = buffer.m_capacity;
   }
 
-  template <typename T, vk::BufferUsageFlagBits usage, VmaMemoryUsage memUsage>
+  template <typename T, VkBufferUsageFlags usage, VmaMemoryUsage memUsage>
   BufferRef(Buffer<T, usage, memUsage> &buffer) {
     typed_static_assert_msg(buffer.type == type,
                             "Buffer must be of the good type");
@@ -31,8 +31,10 @@ public:
 
   auto getHandle() const noexcept { return m_buffer; }
 
-  auto getSize() const noexcept { return *m_size; }
-  auto getCapacity() const noexcept { return m_capacity; }
+  auto size() const noexcept { return *m_size; }
+  auto capacity() const noexcept { return m_capacity; }
+
+  vk::DeviceSize sizeInBytes() const noexcept { return size() * sizeof(T); }
 
 private:
   vk::Buffer m_buffer;
@@ -41,9 +43,9 @@ private:
 };
 
 template <typename T>
-using VertexBufferRef = BufferRef<T, vk::BufferUsageFlagBits::eVertexBuffer>;
+using VertexBufferRef = BufferRef<T, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT>;
 
 template <typename T>
-using IndexBufferRef = BufferRef<T, vk::BufferUsageFlagBits::eIndexBuffer>;
+using IndexBufferRef = BufferRef<T, VK_BUFFER_USAGE_INDEX_BUFFER_BIT>;
 
 } // namespace phx

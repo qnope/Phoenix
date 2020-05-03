@@ -7,12 +7,12 @@
 #include <ltl/traits.h>
 
 namespace phx {
-template <typename T, vk::BufferUsageFlagBits _bufferUsage,
+template <typename T, VkBufferUsageFlags _bufferUsage,
           VmaMemoryUsage _memoryType>
 class Buffer final {
 public:
   static constexpr auto type = ltl::type_v<T>;
-  static constexpr auto bufferUsage = _bufferUsage;
+  static constexpr auto bufferUsage = vk::BufferUsageFlags(_bufferUsage);
   static constexpr auto memoryType = _memoryType;
 
   Buffer(Allocator &allocator, vk::DeviceSize size) noexcept
@@ -80,6 +80,9 @@ public:
   }
 
   vk::DeviceSize size() const noexcept { return *m_size; }
+  void setSize(vk::DeviceSize size) const noexcept { *m_size = size; }
+
+  vk::DeviceSize sizeInBytes() const noexcept { return size() * sizeof(T); }
 
   vk::DeviceSize capacity() const noexcept { return m_capacity; }
 
@@ -104,12 +107,26 @@ private:
   std::optional<AllocatorBlock> m_block;
 };
 
-template <typename T, vk::BufferUsageFlagBits usage>
+template <typename T, VkBufferUsageFlags usage>
 using CpuBuffer = Buffer<T, usage, VMA_MEMORY_USAGE_CPU_COPY>;
 
-template <typename T>
-using CpuVertexBuffer = CpuBuffer<T, vk::BufferUsageFlagBits::eVertexBuffer>;
+template <typename T, VkBufferUsageFlags usage>
+using GpuBuffer = Buffer<T, usage, VMA_MEMORY_USAGE_GPU_ONLY>;
 
 template <typename T>
-using CpuIndexBuffer = CpuBuffer<T, vk::BufferUsageFlagBits::eIndexBuffer>;
+using StagingBuffer = CpuBuffer<T, VK_BUFFER_USAGE_TRANSFER_SRC_BIT>;
+
+template <typename T>
+using VertexBuffer = GpuBuffer<T, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+                                      VK_BUFFER_USAGE_TRANSFER_DST_BIT>;
+
+template <typename T>
+using IndexBuffer = GpuBuffer<T, VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+                                     VK_BUFFER_USAGE_TRANSFER_DST_BIT>;
+
+template <vk::BufferUsageFlagBits usage, typename B>
+constexpr auto doesBufferSupport(B &&) noexcept {
+  return ltl::bool_v<(std::decay_t<B>::bufferUsage & usage) == usage>;
+}
+
 } // namespace phx

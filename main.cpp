@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "phoenix/vkw/MemoryTransfer.h"
+
 #include "ex/triangle.h"
 
 #include "phoenix/PhoenixWindow.h"
@@ -41,18 +43,33 @@ int main(int ac, char **av) {
                               phx::WindowTitle("Phoenix Engine")};
     phx::Device &device = window.getDevice();
     vk::Device deviceHandle = device.getHandle();
-    auto vertexBuffer =
-        device.createBuffer<phx::CpuVertexBuffer<phx::Colored2DVertex>>(4096);
+    auto vertexStagingBuffer =
+        device.createBuffer<phx::StagingBuffer<phx::Colored2DVertex>>(4096);
 
-    auto indexBuffer = device.createBuffer<phx::CpuIndexBuffer<uint32_t>>(4096);
+    auto indexStagingBuffer =
+        device.createBuffer<phx::StagingBuffer<uint32_t>>(4096);
 
     for (auto vertex : vertices) {
-      vertexBuffer << vertex;
+      vertexStagingBuffer << vertex;
     }
 
     for (auto index : indices) {
-      indexBuffer << index;
+      indexStagingBuffer << index;
     }
+
+    phx::MemoryTransfer memoryTransfer(device);
+
+    auto vertexBuffer =
+        device.createBuffer<phx::VertexBuffer<phx::Colored2DVertex>>(4096);
+    auto indexBuffer = device.createBuffer<phx::IndexBuffer<uint32_t>>(4096);
+
+    vertexBuffer.setSize(4 * sizeof(phx::Colored2DVertex));
+    indexBuffer.setSize(6 * sizeof(uint32_t));
+
+    memoryTransfer.copyBuffer(vertexStagingBuffer, vertexBuffer);
+    memoryTransfer.copyBuffer(indexStagingBuffer, indexBuffer);
+
+    memoryTransfer.flush();
 
     auto queue = device.getQueue();
     auto renderPass = make_render_pass(window);
