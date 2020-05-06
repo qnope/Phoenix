@@ -80,7 +80,11 @@ public:
   }
 
   vk::DeviceSize size() const noexcept { return *m_size; }
-  void setSize(vk::DeviceSize size) const noexcept { *m_size = size; }
+
+  void setSize(vk::DeviceSize size) const noexcept {
+    assert(size <= capacity());
+    *m_size = size;
+  }
 
   vk::DeviceSize sizeInBytes() const noexcept { return size() * sizeof(T); }
 
