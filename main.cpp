@@ -63,13 +63,13 @@ int main(int ac, char **av) {
         device.createBuffer<phx::VertexBuffer<phx::Colored2DVertex>>(4096);
     auto indexBuffer = device.createBuffer<phx::IndexBuffer<uint32_t>>(4096);
 
-    vertexBuffer.setSize(4 * sizeof(phx::Colored2DVertex));
-    indexBuffer.setSize(6 * sizeof(uint32_t));
+    auto barrier = phx::BufferTransferBarrier{
+        vk::PipelineStageFlagBits::eVertexInput,
+        vk::AccessFlagBits::eIndexRead |
+            vk::AccessFlagBits::eVertexAttributeRead};
 
-    memoryTransfer.copyBuffer(vertexStagingBuffer, vertexBuffer);
-    memoryTransfer.copyBuffer(indexStagingBuffer, indexBuffer);
-
-    memoryTransfer.flush();
+    memoryTransfer.to(vertexBuffer) << vertexStagingBuffer;
+    memoryTransfer.to(indexBuffer) << indexStagingBuffer << barrier;
 
     auto queue = device.getQueue();
     auto renderPass = make_render_pass(window);

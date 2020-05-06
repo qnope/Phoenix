@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Barriers.h"
 #include "CommandPool.h"
 #include "Device.h"
 #include "Queue.h"
@@ -11,7 +12,42 @@
 #include <ltl/operator.h>
 
 namespace phx {
+
+struct BufferTransferBarrier {
+  vk::PipelineStageFlags dstStage;
+  vk::AccessFlags dstMask;
+};
+
 class MemoryTransfer {
+  template <typename T> class MemoryTransferToBuffer {
+  public:
+    MemoryTransferToBuffer(MemoryTransfer &memoryTransfer, T &buffer)
+        : memoryTransfer{memoryTransfer}, buffer{buffer} {}
+
+    MemoryTransferToBuffer &operator<<(Barrier barrier) const noexcept {
+      memoryTransfer.applyBarrier(barrier);
+    }
+
+    MemoryTransferToBuffer &operator<<(BufferTransferBarrier barrier) noexcept {
+      memoryTransfer.applyMemoryBarrier(barrier.dstStage, barrier.dstMask);
+      return *this;
+    }
+
+    template <typename _T>
+    MemoryTransferToBuffer &operator<<(const _T &bufferToCopy) noexcept {
+      vk::BufferCopy range(0, buffer.sizeInBytes(), bufferToCopy.sizeInBytes());
+      buffer.setSize(buffer.size() + bufferToCopy.size());
+      memoryTransfer.copyBufferRange(bufferToCopy, buffer, range);
+      return *this;
+    }
+
+    ~MemoryTransferToBuffer() { memoryTransfer.flush(); }
+
+  private:
+    MemoryTransfer &memoryTransfer;
+    T &buffer;
+  };
+
 public:
   MemoryTransfer(Device &device) noexcept
       : m_queue{device.getQueue()}, //
@@ -49,6 +85,20 @@ public:
                                          range);
   }
 
+  void applyBarrier(Barrier barrier) {
+    ::phx::applyBarrier(getCurrentCommandBuffer(), barrier);
+  }
+
+  void applyMemoryBarrier(vk::PipelineStageFlags dstStage,
+                          vk::AccessFlags dstMasks) {
+    MemoryBarrier barrier;
+    barrier.srcStage = vk::PipelineStageFlagBits::eTransfer;
+    barrier.dstStage = dstStage;
+    barrier.srcMask = vk::AccessFlagBits::eTransferWrite;
+    barrier.dstMask = dstMasks;
+    ::phx::applyBarrier(getCurrentCommandBuffer(), barrier);
+  }
+
   void flush() {
     if (auto it = ltl::find_if(m_commandBuffers, isLaunched)) {
       auto cmdBuffers = ltl::Range{*it, end(m_commandBuffers)} | ltl::values();
@@ -59,6 +109,10 @@ public:
       ltl::for_each(cmdBuffers, endAndQueue);
       m_commandBuffers.erase(*it, end(m_commandBuffers));
     }
+  }
+
+  template <typename T, auto... enums> auto to(Buffer<T, enums...> &buffer) {
+    return MemoryTransferToBuffer{*this, buffer};
   }
 
 private:
@@ -99,4 +153,5 @@ private:
   CommandPool m_commandPool;
   std::vector<ltl::tuple_t<bool, vk::CommandBuffer>> m_commandBuffers;
 };
+
 } // namespace phx

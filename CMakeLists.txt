@@ -61,6 +61,7 @@ set(PHOENIX_VKW
     phoenix/vkw/vulkan.h
     phoenix/vkw/CommandBufferWrapper.h
     phoenix/vkw/MemoryTransfer.h
+    phoenix/vkw/Barriers.h
 
     phoenix/vkw/Instance.cpp
     phoenix/vkw/Device.cpp
@@ -70,6 +71,7 @@ set(PHOENIX_VKW
     phoenix/vkw/ShaderCompiler.cpp
     phoenix/vkw/CommandPool.cpp
     phoenix/vkw/Fence.cpp
+    phoenix/vkw/Barriers.cpp
 
     ${PHOENIX_VKW_BUFFER}
     ${PHOENIX_VKW_ALLOCATOR}
