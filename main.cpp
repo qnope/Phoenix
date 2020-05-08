@@ -17,6 +17,12 @@
 
 #include "phoenix/vkw/Buffer/Buffer.h"
 
+struct UniformBufferObject {
+  glm::mat4 model;
+  glm::mat4 view;
+  glm::mat4 proj;
+};
+
 auto make_render_pass(const phx::PhoenixWindow &window) {
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
   auto attachment = ltl::tuple_t{window.getAttachmentDescription()};
@@ -26,7 +32,23 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
                                              ltl::tuple_t{dependency});
 }
 
-int main(int ac, char **av) {
+auto create_uniform_buffer(const phx::PhoenixWindow &window) {
+  auto uniformBuffer =
+      window.getDevice()
+          .createBuffer<phx::CpuUniformBuffer<UniformBufferObject>>(1);
+  uniformBuffer.setSize(1);
+
+  UniformBufferObject *values = uniformBuffer.ptr();
+  values->model = glm::mat4(1.0f);
+  values->proj =
+      glm::perspective(glm::radians(45.0f), window.getAspect(), 0.1f, 10.0f);
+  values->view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f),
+                             glm::vec3(0.0f, 0.0f, 1.0f));
+
+  return uniformBuffer;
+}
+
+int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
   constexpr auto width = phx::Width{800u};
   constexpr auto height = phx::Height{600u};
 
@@ -72,6 +94,7 @@ int main(int ac, char **av) {
     memoryTransfer.to(indexBuffer) << indexStagingBuffer << barrier;
 
     auto queue = device.getQueue();
+    auto uniformBuffer = create_uniform_buffer(window);
     auto renderPass = make_render_pass(window);
     auto trianglePass = make_triangle_pass(device, width, height, renderPass,
                                            vertexBuffer, indexBuffer);

@@ -12,6 +12,8 @@
 #include "Surface.h"
 #include "VulkanResource.h"
 
+#include "Descriptor/DescriptorSetLayout.h"
+
 namespace phx {
 struct NoDeviceCompatibleException {};
 struct NoGraphicComputeQueueException {};
@@ -34,9 +36,10 @@ public:
     return {getHandle(), path, debug};
   }
 
-  template <typename... Uniforms>
-  PipelineLayout<Uniforms...> createPipelineLayout(Uniforms... uniforms) const {
-    return {getHandle(), std::move(uniforms)...};
+  template <typename... SetLayout>
+  PipelineLayout<SetLayout...>
+  createPipelineLayout(SetLayout... setLayouts) const {
+    return {getHandle(), std::move(setLayouts)...};
   }
 
   template <typename... Uniforms, typename... RPs, typename SubpassIndex,
@@ -62,6 +65,12 @@ public:
 
   template <typename Buffer> Buffer createBuffer(vk::DeviceSize size) const {
     return {*m_allocator, size};
+  }
+
+  template <typename... Bindings>
+  DescriptorSetLayout<Bindings...>
+  createDescriptorSetLayout(Bindings... bindings) const {
+    return {getHandle(), bindings...};
   }
 
   Fence createFence(bool signaledState) const noexcept;

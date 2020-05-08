@@ -1,7 +1,8 @@
 #pragma once
-#include "../Phoenix/vkw/Buffer/BufferRef.h"
 #include "../phoenix/constant.h"
+#include "../phoenix/vkw/Buffer/BufferRef.h"
 #include "../phoenix/vkw/CommandBufferWrapper.h"
+#include "../phoenix/vkw/Descriptor/DescriptorSetLayout.h"
 #include "../phoenix/vkw/Device.h"
 #include "../phoenix/vkw/GraphicPipeline.h"
 #include "../phoenix/vkw/Vertex.h"
@@ -41,6 +42,13 @@ private:
   phx::IndexBufferRef<uint32_t> m_indexBuffer;
 };
 
+inline auto make_triangle_pipeline_layout(phx::Device &device) {
+  auto binding = phx::DescriptorBinding<vk::DescriptorType::eUniformBuffer, 1>(
+      vk::ShaderStageFlagBits::eVertex);
+  auto layout = device.createDescriptorSetLayout(binding);
+  return device.createPipelineLayout();
+}
+
 template <typename... RP>
 auto make_triangle_pass(phx::Device &device, phx::Width width,
                         phx::Height height,
@@ -53,13 +61,13 @@ auto make_triangle_pass(phx::Device &device, phx::Width width,
   auto fragmentShader = device.createShaderModule<phx::FragmentShaderType>(
       "../phoenix/shaders/TriangleTest/triangle.frag", true);
 
-  auto pipelineLayout = device.createPipelineLayout();
+  auto pipelineLayout = make_triangle_pipeline_layout(device);
 
-  auto binding = phx::Colored2DVertex::getBindingDescription(0_n);
+  auto vertexBinding = phx::Colored2DVertex::getBindingDescription(0_n);
 
   auto graphicPipeline = device.createGraphicPipeline(
       std::move(pipelineLayout), renderPass, 0_n,
-      phx::WithBindingDescriptions{binding},
+      phx::WithBindingDescriptions{vertexBinding},
       phx::WithShaders{std::move(vertexShader), std::move(fragmentShader)},
       vk::PrimitiveTopology::eTriangleList,
       phx::WithViewports{phx::viewport::StaticViewport{width, height}},

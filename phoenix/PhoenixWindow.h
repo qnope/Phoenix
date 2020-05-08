@@ -27,6 +27,7 @@ public:
 
   Width getWidth() const noexcept;
   Height getHeight() const noexcept;
+  float getAspect() const noexcept;
 
   Device &getDevice() noexcept;
   const Device &getDevice() const noexcept;
@@ -40,8 +41,10 @@ public:
   uint32_t getImageCount() const noexcept;
   uint32_t getCurrentImageIndex() const noexcept;
   const Framebuffer<vk::ImageView> &getCurrentFramebuffer() const noexcept;
-  const Framebuffer<vk::ImageView> &getFramebuffer(uint32_t index) const noexcept;
-  const std::vector<Framebuffer<vk::ImageView>> &getFramebuffers() const noexcept;
+  const Framebuffer<vk::ImageView> &getFramebuffer(uint32_t index) const
+      noexcept;
+  const std::vector<Framebuffer<vk::ImageView>> &getFramebuffers() const
+      noexcept;
 
   vk::Semaphore getImageAvailableSemaphore() const noexcept;
 

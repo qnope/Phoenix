@@ -2,7 +2,6 @@
 
 #include "With_Pipeline/WithBuffer.h"
 #include "vulkan.h"
-#include <glm/glm.hpp>
 #include <ltl/Tuple.h>
 
 namespace phx {

@@ -92,6 +92,11 @@ public:
 
   const vk::DeviceSize *sizePtr() const noexcept { return m_size.get(); }
 
+  auto ptr() {
+    assert(m_block);
+    return reinterpret_cast<T *>(m_block->ptr());
+  };
+
 private:
   template <typename _T> Buffer &operator<<(_T x) noexcept {
     m_block->push_back(x);
@@ -127,6 +132,9 @@ using VertexBuffer = GpuBuffer<T, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
 template <typename T>
 using IndexBuffer = GpuBuffer<T, VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
                                      VK_BUFFER_USAGE_TRANSFER_DST_BIT>;
+
+template <typename T>
+using CpuUniformBuffer = CpuBuffer<T, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT>;
 
 template <vk::BufferUsageFlagBits usage, typename B>
 constexpr auto doesBufferSupport(B &&) noexcept {

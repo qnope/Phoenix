@@ -16,6 +16,11 @@ include_directories(${VULKAN_MEMORY_ALLOCATOR_PATH}/src)
 
 set(MAIN_SRC main.cpp)
 
+set(PHOENIX_VKW_DESCRIPTOR
+    phoenix/vkw/Descriptor/DescriptorBinding.h
+    phoenix/vkw/Descriptor/DescriptorSetLayout.h
+    )
+
 set(PHOENIX_VKW_ALLOCATOR
     phoenix/vkw/Allocator/Allocator.h
     phoenix/vkw/Allocator/Allocator.cpp
@@ -76,6 +81,7 @@ set(PHOENIX_VKW
     ${PHOENIX_VKW_BUFFER}
     ${PHOENIX_VKW_ALLOCATOR}
     ${PHOENIX_VKW_PIPELINE}
+    ${PHOENIX_VKW_DESCRIPTOR}
     )
 
 set(PHOENIX_EXAMPLE

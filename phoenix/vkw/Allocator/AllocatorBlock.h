@@ -24,6 +24,8 @@ public:
 
   VmaAllocation getAllocation() const noexcept { return m_allocation; }
 
+  auto ptr() { return m_mappedMemory; }
+
 private:
   VmaAllocation m_allocation;
   vk::DeviceSize m_currentOffset = 0;
