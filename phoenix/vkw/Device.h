@@ -12,6 +12,7 @@
 #include "Surface.h"
 #include "VulkanResource.h"
 
+#include "Descriptor/DescriptorPool.h"
 #include "Descriptor/DescriptorSetLayout.h"
 
 namespace phx {
@@ -38,8 +39,8 @@ public:
 
   template <typename... SetLayout>
   PipelineLayout<SetLayout...>
-  createPipelineLayout(SetLayout... setLayouts) const {
-    return {getHandle(), std::move(setLayouts)...};
+  createPipelineLayout(const SetLayout &... setLayouts) const {
+    return {getHandle(), setLayouts...};
   }
 
   template <typename... Uniforms, typename... RPs, typename SubpassIndex,
@@ -73,7 +74,12 @@ public:
     return {getHandle(), bindings...};
   }
 
-  Fence createFence(bool signaledState) const noexcept;
+  template <typename SetLayout>
+  DescriptorPool<SetLayout> createDescriptorPool(SetLayout layout) const {
+    return {getHandle(), std::move(layout)};
+  }
+
+  Fence createFence(bool signaledState) const;
 
 private:
   vk::PhysicalDevice m_physicalDevice;

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "phoenix/vkw/Descriptor/DescriptorPool.h"
 #include "phoenix/vkw/MemoryTransfer.h"
 
 #include "ex/triangle.h"
@@ -32,6 +33,13 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
                                              ltl::tuple_t{dependency});
 }
 
+auto createDescriptorPool(phx::Device &device) {
+  auto binding = phx::DescriptorBinding<vk::DescriptorType::eUniformBuffer, 1>(
+      vk::ShaderStageFlagBits::eVertex);
+  auto layout = device.createDescriptorSetLayout(binding);
+  return device.createDescriptorPool(std::move(layout));
+}
+
 auto create_uniform_buffer(const phx::PhoenixWindow &window) {
   auto uniformBuffer =
       window.getDevice()
@@ -44,6 +52,8 @@ auto create_uniform_buffer(const phx::PhoenixWindow &window) {
       glm::perspective(glm::radians(45.0f), window.getAspect(), 0.1f, 10.0f);
   values->view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f),
                              glm::vec3(0.0f, 0.0f, 1.0f));
+
+  values->proj[1][1] *= -1.0f;
 
   return uniformBuffer;
 }
@@ -93,11 +103,31 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     memoryTransfer.to(vertexBuffer) << vertexStagingBuffer;
     memoryTransfer.to(indexBuffer) << indexStagingBuffer << barrier;
 
+    auto descriptorPool = createDescriptorPool(device);
+    auto descriptorSet = descriptorPool.allocate();
+
     auto queue = device.getQueue();
     auto uniformBuffer = create_uniform_buffer(window);
+
+    vk::DescriptorBufferInfo bufferInfo;
+    bufferInfo.buffer = uniformBuffer.getHandle();
+    bufferInfo.offset = 0;
+    bufferInfo.range = uniformBuffer.sizeInBytes();
+
+    vk::WriteDescriptorSet writeSet;
+    writeSet.descriptorCount = 1;
+    writeSet.descriptorType = vk::DescriptorType::eUniformBuffer;
+    writeSet.dstSet = descriptorSet;
+    writeSet.dstBinding = 0;
+    writeSet.dstArrayElement = 0;
+    writeSet.pBufferInfo = &bufferInfo;
+
+    deviceHandle.updateDescriptorSets(writeSet, {});
+
     auto renderPass = make_render_pass(window);
-    auto trianglePass = make_triangle_pass(device, width, height, renderPass,
-                                           vertexBuffer, indexBuffer);
+    auto trianglePass =
+        make_triangle_pass(device, width, height, renderPass, vertexBuffer,
+                           indexBuffer, descriptorPool, descriptorSet);
 
     window.generateFramebuffer(renderPass.getHandle());
 

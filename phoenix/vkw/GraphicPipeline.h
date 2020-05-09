@@ -169,6 +169,8 @@ public:
     m_handle = device.createGraphicsPipelineUnique(vk::PipelineCache(), info);
   }
 
+  const auto &pipelineLayout() const noexcept { return m_pipelineLayout; }
+
 private:
   void compileTimeCheck() {
     using namespace ltl;

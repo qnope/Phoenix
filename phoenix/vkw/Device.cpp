@@ -122,7 +122,7 @@ vk::PhysicalDevice Device::getPhysicalDevice() const noexcept {
   return m_physicalDevice;
 }
 
-Fence Device::createFence(bool signaledState) const noexcept {
+Fence Device::createFence(bool signaledState) const {
   return Fence(*m_handle, signaledState);
 }
 

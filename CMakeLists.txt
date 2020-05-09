@@ -19,6 +19,7 @@ set(MAIN_SRC main.cpp)
 set(PHOENIX_VKW_DESCRIPTOR
     phoenix/vkw/Descriptor/DescriptorBinding.h
     phoenix/vkw/Descriptor/DescriptorSetLayout.h
+    phoenix/vkw/Descriptor/DescriptorPool.h
     )
 
 set(PHOENIX_VKW_ALLOCATOR
