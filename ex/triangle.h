@@ -46,7 +46,7 @@ inline auto make_triangle_pipeline_layout(phx::Device &device) {
   auto binding = phx::DescriptorBinding<vk::DescriptorType::eUniformBuffer, 1>(
       vk::ShaderStageFlagBits::eVertex);
   auto layout = device.createDescriptorSetLayout(binding);
-  return device.createPipelineLayout();
+  return device.createPipelineLayout(std::move(layout));
 }
 
 template <typename... RP>
