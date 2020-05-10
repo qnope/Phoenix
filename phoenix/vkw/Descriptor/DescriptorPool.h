@@ -3,6 +3,7 @@
 #include "../VulkanResource.h"
 #include "../vulkan.h"
 
+#include "DescriptorSet.h"
 #include "DescriptorSetLayout.h"
 
 #include <ltl/ltl.h>
@@ -24,14 +25,15 @@ public:
 
     info.maxSets = MAX_SET_BY_POOL * sizeof...(Bindings);
     std::array poolSizes = {vk::DescriptorPoolSize(
-        Bindings::type, MAX_SET_BY_POOL * Bindings::count.value)...};
+        Bindings::descriptorType, MAX_SET_BY_POOL * Bindings::count.value)...};
 
     info.poolSizeCount = uint32_t(poolSizes.size());
     info.pPoolSizes = poolSizes.data();
     m_handle = device.createDescriptorPoolUnique(info);
   }
 
-  auto allocate() noexcept {
+  DescriptorSet<DescriptorSetLayout<Bindings...>>
+  allocate(DescriptorBindingTypes<Bindings>... values) noexcept {
     ++m_numberOfAllocation;
 
     vk::DescriptorSetAllocateInfo info;
@@ -39,7 +41,7 @@ public:
     info.descriptorPool = getHandle();
     info.descriptorSetCount = 1;
 
-    return m_device.allocateDescriptorSets(info)[0];
+    return {m_device, m_device.allocateDescriptorSets(info)[0], values...};
   }
 
   const auto &layout() const noexcept { return m_layout; }

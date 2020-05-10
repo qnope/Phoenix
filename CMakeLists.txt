@@ -17,6 +17,7 @@ include_directories(${VULKAN_MEMORY_ALLOCATOR_PATH}/src)
 set(MAIN_SRC main.cpp)
 
 set(PHOENIX_VKW_DESCRIPTOR
+    phoenix/vkw/Descriptor/DescriptorSet.h
     phoenix/vkw/Descriptor/DescriptorBinding.h
     phoenix/vkw/Descriptor/DescriptorSetLayout.h
     phoenix/vkw/Descriptor/DescriptorPool.h

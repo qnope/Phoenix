@@ -1,4 +1,5 @@
 #pragma once
+#include <ltl/concept.h>
 #include <utility>
 
 namespace phx {
@@ -12,5 +13,12 @@ protected:
 };
 
 inline auto getHandle = [](const auto &value) { return value.getHandle(); };
+
+#define MAKE_IS_VULKAN_RESOURCE(vkType, name, conceptName)                     \
+  template <typename T> constexpr auto name(T &&t) noexcept {                  \
+    return ltl::type_v<vkType> == type_from(t.getHandle());                    \
+  }                                                                            \
+  template <typename T>                                                        \
+  constexpr auto conceptName = decltype(name(std::declval<T>()))::value
 
 } // namespace phx

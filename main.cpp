@@ -34,8 +34,9 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
 }
 
 auto createDescriptorPool(phx::Device &device) {
-  auto binding = phx::DescriptorBinding<vk::DescriptorType::eUniformBuffer, 1>(
-      vk::ShaderStageFlagBits::eVertex);
+  auto binding = phx::DescriptorBinding<VK_SHADER_STAGE_VERTEX_BIT,
+                                        vk::DescriptorType::eUniformBuffer, 1,
+                                        UniformBufferObject>{};
   auto layout = device.createDescriptorSetLayout(binding);
   return device.createDescriptorPool(std::move(layout));
 }
@@ -103,26 +104,11 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     memoryTransfer.to(vertexBuffer) << vertexStagingBuffer;
     memoryTransfer.to(indexBuffer) << indexStagingBuffer << barrier;
 
+    auto uniformBuffer = create_uniform_buffer(window);
     auto descriptorPool = createDescriptorPool(device);
-    auto descriptorSet = descriptorPool.allocate();
+    auto descriptorSet = descriptorPool.allocate({uniformBuffer});
 
     auto queue = device.getQueue();
-    auto uniformBuffer = create_uniform_buffer(window);
-
-    vk::DescriptorBufferInfo bufferInfo;
-    bufferInfo.buffer = uniformBuffer.getHandle();
-    bufferInfo.offset = 0;
-    bufferInfo.range = uniformBuffer.sizeInBytes();
-
-    vk::WriteDescriptorSet writeSet;
-    writeSet.descriptorCount = 1;
-    writeSet.descriptorType = vk::DescriptorType::eUniformBuffer;
-    writeSet.dstSet = descriptorSet;
-    writeSet.dstBinding = 0;
-    writeSet.dstArrayElement = 0;
-    writeSet.pBufferInfo = &bufferInfo;
-
-    deviceHandle.updateDescriptorSets(writeSet, {});
 
     auto renderPass = make_render_pass(window);
     auto trianglePass =

@@ -4,6 +4,7 @@
 #include "../vulkan.h"
 
 #include "../Vertex.h"
+#include "../VulkanResource.h"
 #include <ltl/traits.h>
 
 namespace phx {
@@ -136,9 +137,16 @@ using IndexBuffer = GpuBuffer<T, VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
 template <typename T>
 using CpuUniformBuffer = CpuBuffer<T, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT>;
 
+MAKE_IS_VULKAN_RESOURCE(vk::Buffer, is_buffer, IsBuffer);
+
 template <vk::BufferUsageFlagBits usage, typename B>
-constexpr auto doesBufferSupport(B &&) noexcept {
+constexpr auto doesBufferSupport(B &b) noexcept {
+  typed_static_assert_msg(is_buffer(b), "b must be a buffer");
   return ltl::bool_v<(std::decay_t<B>::bufferUsage & usage) == usage>;
+}
+
+template <typename B, requires_f(IsBuffer<B>)> auto getDescriptorInfo(B &b) {
+  return vk::DescriptorBufferInfo(b.getHandle(), 0, b.sizeInBytes());
 }
 
 } // namespace phx

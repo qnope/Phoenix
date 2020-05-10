@@ -48,4 +48,10 @@ using VertexBufferRef = BufferRef<T, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT>;
 template <typename T>
 using IndexBufferRef = BufferRef<T, VK_BUFFER_USAGE_INDEX_BUFFER_BIT>;
 
+template <typename T>
+using UniformBufferRef = BufferRef<T, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT>;
+
+template <typename T>
+using StorageBufferRef = BufferRef<T, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT>;
+
 } // namespace phx

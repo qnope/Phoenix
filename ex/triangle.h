@@ -9,7 +9,7 @@
 #include "../phoenix/vkw/Vertex.h"
 #include <ltl/ltl.h>
 
-template <typename Pipeline>
+template <typename Pipeline, typename DescriptorSet>
 class TriangleSubpass : public phx::AbstractSubpass {
   typed_static_assert_msg(
       phx::is_graphic_pipeline(ltl::type_v<Pipeline>),
@@ -18,8 +18,7 @@ class TriangleSubpass : public phx::AbstractSubpass {
 public:
   TriangleSubpass(Pipeline pipeline,
                   phx::VertexBufferRef<phx::Colored2DVertex> vertexBuffer,
-                  phx::IndexBufferRef<uint32_t> indexBuffer,
-                  vk::DescriptorSet set)
+                  phx::IndexBufferRef<uint32_t> indexBuffer, DescriptorSet set)
       : m_pipeline{std::move(pipeline)}, //
         m_vertexBuffer{vertexBuffer},    //
         m_indexBuffer{indexBuffer},      //
@@ -38,8 +37,8 @@ public:
     const auto &pipelineLayout = subpass.m_pipeline.pipelineLayout();
 
     cmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                 pipelineLayout.getHandle(), 0, subpass.m_set,
-                                 {});
+                                 pipelineLayout.getHandle(), 0,
+                                 subpass.m_set.getHandle(), {});
 
     cmdBuffer.drawIndexed(6, 1, 0, 0, 0);
     return cmdBuffer;
@@ -49,16 +48,16 @@ private:
   Pipeline m_pipeline;
   phx::VertexBufferRef<phx::Colored2DVertex> m_vertexBuffer;
   phx::IndexBufferRef<uint32_t> m_indexBuffer;
-  vk::DescriptorSet m_set;
+  DescriptorSet m_set;
 };
 
-template <typename... RP, typename DescriptorPool>
+template <typename... RP, typename DescriptorPool, typename DescriptorSet>
 auto make_triangle_pass(phx::Device &device, phx::Width width,
                         phx::Height height,
                         const phx::RenderPass<RP...> &renderPass,
                         phx::VertexBufferRef<phx::Colored2DVertex> vertexBuffer,
                         phx::IndexBufferRef<uint32_t> indexBuffer,
-                        const DescriptorPool &pool, vk::DescriptorSet set) {
+                        const DescriptorPool &pool, DescriptorSet set) {
   auto vertexShader = device.createShaderModule<phx::VertexShaderType>(
       "../phoenix/shaders/TriangleTest/triangle.vert", true);
 

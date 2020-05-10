@@ -18,7 +18,7 @@ public:
 
     ltl::for_each(indexer, [&](auto index) {
       bindingArray[index.value] =
-          bindings[index].toDescriptorBinding(binding_association[index][0_n]);
+          bindings[index].toDescriptorBinding(index_list[index]);
     });
 
     vk::DescriptorSetLayoutCreateInfo info;
@@ -27,25 +27,27 @@ public:
     m_handle = device.createDescriptorSetLayoutUnique(info);
   }
 
-  static constexpr auto binding_count = number_v<sizeof...(Bindings)>;
+  static constexpr auto binding_list = ltl::tuple_t<Bindings...>{};
+  static constexpr auto binding_count = binding_list.length;
 
 private:
-  static constexpr auto make_association() {
+  static constexpr auto make_index_list() {
     using namespace ltl;
-    auto binding_types = type_list_v<Bindings...>;
     auto indexer = build_index_sequence(binding_count);
 
-    auto computer = [binding_types](auto indice) {
+    auto computer = [](auto indice) {
       auto sub_indexer = build_index_sequence(indice);
-      auto binding_index = sub_indexer([binding_types](auto... is) {
-        return (0_n + ... + (decltype_t(binding_types[is])::count));
-      });
-      return ltl::tuple_t{binding_index, binding_types[indice]};
+      auto binding_index = sub_indexer(
+          [](auto... is) { return (0_n + ... + (binding_list[is].count)); });
+      return binding_index;
     };
     return ltl::transform_type(indexer, computer);
   }
 
 public:
-  static constexpr auto binding_association = decltype(make_association()){};
+  static constexpr auto index_list = make_index_list();
+  static constexpr auto type_list =
+      ltl::type_v<ltl::tuple_t<decltype_t(Bindings::types)...>>;
 };
+
 } // namespace phx
