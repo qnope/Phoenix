@@ -18,6 +18,8 @@ template <typename... Bindings>
 class DescriptorPool<DescriptorSetLayout<Bindings...>>
     : public VulkanResource<vk::UniqueDescriptorPool> {
 
+  using SetLayout = DescriptorSetLayout<Bindings...>;
+
 public:
   DescriptorPool(vk::Device device, DescriptorSetLayout<Bindings...> layout)
       : m_device{device}, m_layout{std::move(layout)} {
@@ -32,7 +34,7 @@ public:
     m_handle = device.createDescriptorPoolUnique(info);
   }
 
-  DescriptorSet<DescriptorSetLayout<Bindings...>>
+  DescriptorSet<SetLayout>
   allocate(DescriptorBindingTypes<Bindings>... values) noexcept {
     ++m_numberOfAllocation;
 
@@ -48,7 +50,7 @@ public:
 
 private:
   vk::Device m_device;
-  DescriptorSetLayout<Bindings...> m_layout;
+  SetLayout m_layout;
   std::size_t m_numberOfAllocation = 0;
 };
 } // namespace phx

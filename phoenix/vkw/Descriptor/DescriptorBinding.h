@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../vulkan.h"
-#include <ltl/Tuple.h>
+#include <ltl/tuple_algos.h>
 
 #include "../Buffer/BufferRef.h"
 #include <ltl/condition.h>
@@ -30,7 +30,7 @@ struct DescriptorBinding {
     }
   }
 
-  static constexpr auto types = compute_tuple_types();
+  static constexpr auto types = decltype(compute_tuple_types()){};
 
   static_assert(sizeof...(Types), "Types must not be empty");
 

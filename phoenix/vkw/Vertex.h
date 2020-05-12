@@ -2,7 +2,8 @@
 
 #include "With_Pipeline/WithBuffer.h"
 #include "vulkan.h"
-#include <ltl/Tuple.h>
+#include <ltl/operator.h>
+#include <ltl/tuple_algos.h>
 
 namespace phx {
 namespace details {
@@ -10,9 +11,9 @@ constexpr auto getCardinality(ltl::type_t<glm::vec2>) { return 2_n; }
 constexpr auto getCardinality(ltl::type_t<glm::vec3>) { return 3_n; }
 constexpr auto getCardinality(ltl::type_t<glm::vec4>) { return 4_n; }
 
-constexpr auto getLocationSize(ltl::type_t<glm::vec2>) { return 1u; }
-constexpr auto getLocationSize(ltl::type_t<glm::vec3>) { return 1u; }
-constexpr auto getLocationSize(ltl::type_t<glm::vec4>) { return 1u; }
+constexpr auto getLocationSize(ltl::type_t<glm::vec2>) { return 1_n; }
+constexpr auto getLocationSize(ltl::type_t<glm::vec3>) { return 1_n; }
+constexpr auto getLocationSize(ltl::type_t<glm::vec4>) { return 1_n; }
 
 constexpr auto getFormat(ltl::type_t<glm::vec2>) {
   return vk::Format::eR32G32Sfloat;
@@ -28,10 +29,10 @@ constexpr auto getFormat(ltl::type_t<glm::vec4>) {
 
 #define MAKE_ATTRIBUTE(Name, name)                                             \
   template <typename Vec> struct Name {                                        \
-    static constexpr auto byte_number = sizeof(Vec);                           \
+    static constexpr auto byte_number = number_v<sizeof(Vec)>;                 \
     static constexpr auto format = getFormat(ltl::type_v<Vec>);                \
     static constexpr auto cardinality = getCardinality(ltl::type_v<Vec>);      \
-    static constexpr auto locationSize = getLocationSize(ltl::type_v<Vec>);    \
+    static constexpr auto location_size = getLocationSize(ltl::type_v<Vec>);   \
     template <typename... Xs> Name(Xs... xs) : name(xs...) {}                  \
     Vec name;                                                                  \
   }
@@ -58,27 +59,36 @@ template <typename... Types> struct Vertex : Types... {
 
   template <typename Index>
   static constexpr auto getAttributeDescription(uint32_t binding, Index index) {
-    using current = decltype_t(types[index]);
-    auto indexer = ltl::build_index_sequence(index);
+    auto format = decltype_t(types[index])::format;
 
-    return indexer([binding](auto... index) {
-      uint32_t location = (0u + ... + (decltype_t(types[index])::locationSize));
-      uint32_t offset = (0u + ... + (decltype_t(types[index])::byte_number));
-      return vk::VertexInputAttributeDescription(location, binding,
-                                                 current::format, offset);
-    });
+    return vk::VertexInputAttributeDescription(location_indices[index].value,
+                                               binding, format,
+                                               offset_list[index].value);
   }
 
   template <int N>
   static constexpr auto getBindingDescription(ltl::number_t<N> n) {
-    auto indexer = ltl::build_index_sequence(types.length);
+    auto indexer = types.make_indexer();
 
     return indexer([n](auto... index) {
-      return BindingDescription{n, ltl::type_v<Vertex>,
-                                (Types::byte_number + ...),
+      return BindingDescription{n, ltl::type_v<Vertex>, stride,
                                 getAttributeDescription(n.value, index)...};
     });
   }
+
+  static constexpr auto compute_location_indices() {
+    return ltl::scanl(_((x, y), x + decltype_t(y)::location_size), 0_n, types)
+        .pop_back();
+  }
+
+  static constexpr auto compute_offset_list() {
+    return ltl::scanl(_((x, y), x + decltype_t(y)::byte_number), 0_n, types)
+        .pop_back();
+  }
+
+  static inline uint32_t stride = (... + Types::byte_number).value;
+  static inline auto location_indices = compute_location_indices();
+  static inline auto offset_list = compute_offset_list();
 };
 
 using Colored2DVertex = Vertex<Position2D, RgbColor>;

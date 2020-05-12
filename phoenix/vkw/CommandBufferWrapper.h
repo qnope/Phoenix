@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Buffer/Buffer.h"
 #include "GraphicPipeline.h"
 #include <ltl/Tuple.h>
 #include <ltl/condition.h>
@@ -18,6 +19,11 @@ public:
                             "Pipeline must be a graphic pipeline");
     static_assert(sizeof...(VertexBuffers) < MAX_BINDING,
                   "Unable to have more than MAX_BINDING bindings");
+    typed_static_assert_msg(
+        (true_v && ... &&
+         doesBufferSupport<vk::BufferUsageFlagBits::eVertexBuffer>(
+             vertexBuffers)),
+        "Buffers must be vertex buffers");
 
     auto pipelineVertexBufferTypes = pipeline.vertexBufferTypes;
     auto vertexBufferTypes = ltl::tuple_t{vertexBuffers.type...};
@@ -29,24 +35,24 @@ public:
 
     auto vertexBuffersTuple =
         ltl::tuple_t<VertexBuffers &...>{vertexBuffers...};
-    auto indexer =
-        ltl::build_index_sequence(number_v<sizeof...(VertexBuffers)>);
+
+    auto enumerated_buffers = ltl::enumerate_type(vertexBuffersTuple);
 
     bindGraphicPipeline(pipeline);
 
-    indexer([this, &vertexBuffersTuple](auto index) {
-      if (m_boundVertexBuffers[index.value] !=
-          vertexBuffersTuple[index].getHandle()) {
-        m_boundVertexBuffers[index.value] =
-            vertexBuffersTuple[index].getHandle();
-        m_buffer.bindVertexBuffers(
-            index.value, m_boundVertexBuffers[index.value], vk::DeviceSize{0});
+    enumerated_buffers([this](auto index, auto &vertexBuffer) {
+      if (m_boundVertexBuffers[index.value] != vertexBuffer.getHandle()) {
+        m_boundVertexBuffers[index.value] = vertexBuffer.getHandle();
+        m_buffer.bindVertexBuffers(index.value, vertexBuffer.getHandle(),
+                                   vk::DeviceSize{0});
       }
     });
   }
 
   template <typename Pipeline, typename Buffer>
   void bindIndexBufferToGraphicPipeline(Pipeline &pipeline, Buffer &buffer) {
+    typed_static_assert_msg(is_graphic_pipeline(pipeline),
+                            "Pipeline must be a graphic pipeline");
     bindGraphicPipeline(pipeline);
     typed_static_assert_msg(
         (buffer.type ==
@@ -65,9 +71,6 @@ public:
 
 private:
   template <typename Pipeline> void bindGraphicPipeline(Pipeline &pipeline) {
-    typed_static_assert_msg(is_graphic_pipeline(pipeline),
-                            "Pipeline must be a graphic pipeline");
-
     if (m_boundGraphicPipeline != pipeline.getHandle()) {
       m_boundGraphicPipeline = pipeline.getHandle();
       m_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics,

@@ -1,23 +1,16 @@
 #pragma once
 
 #include "DescriptorBinding.h"
+#include <ltl/functional.h>
 
 namespace phx {
 template <typename SetLayout> class DescriptorSet {
 public:
   DescriptorSet(vk::Device device, vk::DescriptorSet set,
-                decltype_t(SetLayout::type_list) values) noexcept
+                decltype_t(SetLayout::type_list) value_list) noexcept
       : m_set{set} {
-
-    values([set, device](auto... values) {
-      constexpr auto indices = SetLayout::index_list;
-      indices([set, device, values...](auto... indices) {
-        constexpr auto bindings = SetLayout::binding_list;
-        bindings([set, device, indices..., values...](auto... bindings) {
-          (writeDescriptorSet(device, set, indices, bindings, values), ...);
-        });
-      });
-    });
+    ltl::zip_with(ltl::curry(lift(writeDescriptorSet), device, set),
+                  SetLayout::offset_list, SetLayout::binding_list, value_list);
   }
 
   auto getHandle() const noexcept { return m_set; }
