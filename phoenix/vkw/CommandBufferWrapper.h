@@ -36,17 +36,17 @@ public:
     auto vertexBuffersTuple =
         ltl::tuple_t<VertexBuffers &...>{vertexBuffers...};
 
-    auto enumerated_buffers = ltl::enumerate_type(vertexBuffersTuple);
-
     bindGraphicPipeline(pipeline);
 
-    enumerated_buffers([this](auto index, auto &vertexBuffer) {
-      if (m_boundVertexBuffers[index.value] != vertexBuffer.getHandle()) {
-        m_boundVertexBuffers[index.value] = vertexBuffer.getHandle();
-        m_buffer.bindVertexBuffers(index.value, vertexBuffer.getHandle(),
-                                   vk::DeviceSize{0});
-      }
-    });
+    ltl::enumerate_with(
+        [this](auto index, auto &vertexBuffer) {
+          if (m_boundVertexBuffers[index.value] != vertexBuffer.getHandle()) {
+            m_boundVertexBuffers[index.value] = vertexBuffer.getHandle();
+            m_buffer.bindVertexBuffers(index.value, vertexBuffer.getHandle(),
+                                       vk::DeviceSize{0});
+          }
+        },
+        vertexBuffersTuple);
   }
 
   template <typename Pipeline, typename Buffer>
