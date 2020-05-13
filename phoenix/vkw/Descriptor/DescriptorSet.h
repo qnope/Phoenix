@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../VulkanResource.h"
 #include "DescriptorBinding.h"
 #include <ltl/functional.h>
 
@@ -15,7 +16,12 @@ public:
 
   auto getHandle() const noexcept { return m_set; }
 
+  static constexpr auto layout = ltl::type_v<SetLayout>;
+
 private:
   vk::DescriptorSet m_set;
 };
+
+MAKE_IS_VULKAN_RESOURCE(vk::DescriptorSet, is_descriptor_set, IsDescriptorSet);
+
 } // namespace phx

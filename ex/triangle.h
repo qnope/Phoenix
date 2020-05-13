@@ -36,9 +36,8 @@ public:
 
     const auto &pipelineLayout = subpass.m_pipeline.pipelineLayout();
 
-    cmdBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                 pipelineLayout.getHandle(), 0,
-                                 subpass.m_set.getHandle(), {});
+    commandBufferWrapper.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                            pipelineLayout, subpass.m_set);
 
     cmdBuffer.drawIndexed(6, 1, 0, 0, 0);
     return cmdBuffer;

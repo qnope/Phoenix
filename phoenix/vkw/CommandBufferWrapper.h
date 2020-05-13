@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Buffer/Buffer.h"
+#include "Descriptor/DescriptorSet.h"
 #include "GraphicPipeline.h"
+#include "PipelineLayout.h"
 #include <ltl/Tuple.h>
 #include <ltl/condition.h>
 
@@ -67,6 +69,24 @@ public:
         m_buffer.bindIndexBuffer(m_boundIndexBuffer, 0, vk::IndexType::eUint32);
       }
     }
+  }
+
+  template <typename PipelineLayout, typename... Sets>
+  void bindDescriptorSets(vk::PipelineBindPoint bindingPoint,
+                          const PipelineLayout &layout, Sets... sets) {
+    typed_static_assert_msg(is_pipeline_layout(layout),
+                            "PipelineLayout must be a PipelineLayout");
+    typed_static_assert_msg((true_v && ... && is_descriptor_set(sets)),
+                            "Sets must be DescriptorSets");
+
+    constexpr auto setLayouts = ltl::type_list_v<decltype_t(Sets::layout)...>;
+
+    typed_static_assert_msg(
+        setLayouts == layout.layouts,
+        "DescriptorSets's layouts must match Pipeline Layout's");
+
+    m_buffer.bindDescriptorSets(bindingPoint, layout.getHandle(), 0,
+                                std::array{sets.getHandle()...}, {});
   }
 
 private:

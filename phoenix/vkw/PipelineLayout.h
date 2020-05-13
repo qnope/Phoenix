@@ -10,7 +10,7 @@ template <typename... SetLayouts>
 class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
 public:
   PipelineLayout(vk::Device device, const SetLayouts &... setLayouts) noexcept {
-    std::array<vk::DescriptorSetLayout, descriptor_types.length.value>
+    std::array<vk::DescriptorSetLayout, layouts.length.value>
         descriptorSetLayouts = {setLayouts.getHandle()...};
 
     vk::PipelineLayoutCreateInfo info;
@@ -21,6 +21,9 @@ public:
   }
 
 public:
-  static constexpr auto descriptor_types = ltl::type_list_v<SetLayouts...>;
+  static constexpr auto layouts = ltl::type_list_v<SetLayouts...>;
 };
+
+MAKE_IS_VULKAN_RESOURCE(vk::PipelineLayout, is_pipeline_layout,
+                        IsPipelineLayout);
 } // namespace phx
