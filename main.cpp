@@ -59,6 +59,15 @@ auto create_uniform_buffer(const phx::PhoenixWindow &window) {
   return uniformBuffer;
 }
 
+auto create_buffer_image(phx::Device &device, std::string path) {
+  auto [width, height, data] = phx::loadImage(path);
+  auto buffer =
+      device.createBuffer<phx::StagingBuffer<unsigned char>>(data.size());
+  for (auto x : data)
+    buffer << x;
+  return ltl::tuple_t{width, height, std::move(buffer)};
+}
+
 int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
   constexpr auto width = phx::Width{800u};
   constexpr auto height = phx::Height{600u};

@@ -67,7 +67,7 @@ template <typename T> static constexpr auto getInfos(T values) {
 template <int bindingIndex, typename Binding>
 void writeDescriptorSet(vk::Device device, vk::DescriptorSet set,
                         ltl::number_t<bindingIndex>, Binding binding,
-                        DescriptorBindingTypes<Binding> values) {
+                        decltype_t(Binding::types) values) {
   vk::WriteDescriptorSet write;
   write.dstSet = set;
   write.dstBinding = bindingIndex;

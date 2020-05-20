@@ -26,11 +26,7 @@ public:
   uint32_t getMipLevels() const noexcept { return m_mipLevels; }
   uint32_t getArrayLayers() const noexcept { return m_arrayLayers; }
 
-  vk::Image getHandle() const noexcept {
-    ltl::overloader visitor{[](vk::Image img) { return img; },
-                            [](const vk::UniqueImage &img) { return *img; }};
-    return std::visit(visitor, m_handle);
-  }
+  vk::Image getHandle() const noexcept { return m_handle; }
 
   ImageView<Usage> createImageView(vk::ImageViewType type, vk::Format format,
                                    vk::ImageSubresourceRange range) const
@@ -40,7 +36,7 @@ public:
 
 private:
   vk::Device m_device;
-  std::variant<vk::Image, vk::UniqueImage> m_handle;
+  vk::Image m_handle;
   vk::Format m_format;
   vk::Extent3D m_extent;
   uint32_t m_mipLevels;

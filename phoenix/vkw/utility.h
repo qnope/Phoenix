@@ -10,25 +10,16 @@
 #include <utility>
 #include <vector>
 
+#include <ltl/Tuple.h>
+
+#include "../constant.h"
 #include "vulkan.h"
 
 namespace phx {
 
-inline std::vector<const char *>
-to_const_char_vector(const std::vector<std::string> &strings) noexcept {
-  std::vector<const char *> ptrs;
-  auto to_const_char = [](const std::string &s) { return s.c_str(); };
-  ltl::transform(strings, std::back_inserter(ptrs), to_const_char);
-  return ptrs;
-}
-
-inline std::vector<std::string>
-to_string_vector(std::vector<const char *> &ptrs) noexcept {
-  std::vector<std::string> strings;
-  auto to_string = [](const char *p) -> std::string { return p; };
-  ltl::transform(ptrs, std::back_inserter(strings), to_string);
-  return strings;
-}
+struct FileNotFoundException {
+  std::string path;
+};
 
 constexpr struct ExtensionTag {
 } extensionTag;
@@ -36,7 +27,13 @@ constexpr struct ExtensionTag {
 constexpr struct LayerTag {
 } layerTag;
 
-inline auto getProperties(ExtensionTag) {
+std::vector<const char *>
+to_const_char_vector(const std::vector<std::string> &strings) noexcept;
+
+std::vector<std::string>
+to_string_vector(std::vector<const char *> &ptrs) noexcept;
+
+inline auto getProperties(ExtensionTag) noexcept {
   return vk::enumerateInstanceExtensionProperties();
 }
 
@@ -77,23 +74,11 @@ std::vector<std::string> getUnavailables(std::vector<std::string> &values,
   return differences;
 }
 
-struct FileNotFoundException {
-  std::string path;
-};
+std::string readFile(const std::string &path);
 
-inline std::string readFile(const std::string &path) {
-  std::ifstream stream(path, std::ios::binary);
+std::string getBaseDirectory(std::string_view path) noexcept;
 
-  if (stream) {
-    return {std::istreambuf_iterator<char>(stream),
-            std::istreambuf_iterator<char>()};
-  }
-
-  throw FileNotFoundException{path};
-}
-
-inline std::string getBaseDirectory(std::string_view path) noexcept {
-  return std::filesystem::path(path).parent_path().string();
-}
+ltl::tuple_t<Width, Height, std::vector<unsigned char>>
+loadImage(std::string path);
 
 } // namespace phx

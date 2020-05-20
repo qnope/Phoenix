@@ -79,6 +79,7 @@ set(PHOENIX_VKW
     phoenix/vkw/CommandPool.cpp
     phoenix/vkw/Fence.cpp
     phoenix/vkw/Barriers.cpp
+    phoenix/vkw/utility.cpp
 
     ${PHOENIX_VKW_BUFFER}
     ${PHOENIX_VKW_ALLOCATOR}
@@ -112,6 +113,7 @@ add_executable(Phoenix
 target_link_libraries(Phoenix
     ${SDL_PATH}/lib/x64/SDL2main.lib
     ${SDL_PATH}/lib/x64/SDL2.lib
+    ${SDL_PATH}/lib/x64/SDL2_image.lib
     ${VULKAN_SDK_PATH}/Lib/vulkan-1.lib)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
