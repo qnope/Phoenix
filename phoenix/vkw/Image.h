@@ -7,8 +7,10 @@
 
 namespace phx {
 
-template <vk::Format Format, VkImageUsageFlags Usage> class Image {
+template <vk::ImageType Type, vk::Format Format, VkImageUsageFlags Usage>
+class Image {
 public:
+  static constexpr auto type = Type;
   static constexpr auto usage = vk::ImageUsageFlags(Usage);
   static constexpr auto format = Format;
 
@@ -23,10 +25,13 @@ public:
 
   vk::Image getHandle() const noexcept { return m_handle; }
 
-  template <vk::ImageViewType Type>
-  ImageView<Type, Format, Usage>
+  template <vk::ImageViewType ImageViewType>
+  ImageView<ImageViewType, Format, Usage>
   createImageView(vk::ImageSubresourceRange range) const noexcept {
-    return ImageView<Type, Format, Usage>{m_device, getHandle(), range};
+    static_assert(isImageTypeCompatibleWithImageViewType(Type, ImageViewType),
+                  "ImageViewType must be compatible with ImageType");
+    return ImageView<ImageViewType, Format, Usage>{m_device, getHandle(),
+                                                   range};
   }
 
 private:

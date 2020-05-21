@@ -3,8 +3,21 @@
 #include "Device.h"
 #include "VulkanResource.h"
 #include "vulkan.h"
+#include <ltl/condition.h>
 
 namespace phx {
+
+inline constexpr auto
+isImageTypeCompatibleWithImageViewType(vk::ImageType type,
+                                       vk::ImageViewType viewType) {
+  if (type == vk::ImageType::e2D) {
+    return viewType == ltl::AnyOf{vk::ImageViewType::e2D};
+  } else if (type == vk::ImageType::e3D) {
+  }
+
+  throw 0; // compile time error
+}
+
 template <vk::ImageViewType Type, vk::Format Format, VkImageUsageFlags Usage>
 class ImageView : public VulkanResource<vk::UniqueImageView> {
 public:
