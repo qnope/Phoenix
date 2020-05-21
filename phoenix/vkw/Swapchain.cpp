@@ -93,10 +93,8 @@ Swapchain::Swapchain(Device &device, Surface &surface, Width width,
 
   for (auto vkimage : images) {
     ImageSubresourceRange range(ImageAspectFlagBits::eColor, 0, 1, 0, 1);
-    SwapchainImage image{m_device, vkimage, m_surfaceFormat.format,
-                         m_extent, 1u,      1u};
-    auto imageView = image.createImageView(ImageViewType::e2D,
-                                           m_surfaceFormat.format, range);
+    SwapchainImage image{m_device, vkimage, m_extent, 1u, 1u};
+    auto imageView = image.createImageView<ImageViewType::e2D>(range);
 
     m_swapchainImages.emplace_back(std::move(image), std::move(imageView));
   }

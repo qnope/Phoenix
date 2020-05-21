@@ -5,13 +5,15 @@
 #include "vulkan.h"
 
 namespace phx {
-template <typename Usage>
+template <vk::ImageViewType Type, vk::Format Format, VkImageUsageFlags Usage>
 class ImageView : public VulkanResource<vk::UniqueImageView> {
 public:
-  static constexpr auto usage = Usage::usage;
+  static constexpr auto type = Type;
+  static constexpr auto format = Format;
+  static constexpr auto usage = vk::ImageUsageFlags(Usage);
 
-  ImageView(vk::Device device, vk::Image image, vk::ImageViewType type,
-            vk::Format format, vk::ImageSubresourceRange range) {
+  ImageView(vk::Device device, vk::Image image,
+            vk::ImageSubresourceRange range) {
     vk::ImageViewCreateInfo info;
     info.image = image;
     info.viewType = type;
