@@ -70,6 +70,10 @@ set(PHOENIX_VKW
     phoenix/vkw/MemoryTransfer.h
     phoenix/vkw/Barriers.h
 
+    phoenix/vkw/SampledImage.h
+    phoenix/vkw/Sampler.h
+    phoenix/vkw/Sampler.cpp
+
     phoenix/vkw/Instance.cpp
     phoenix/vkw/Device.cpp
     phoenix/vkw/Queue.cpp

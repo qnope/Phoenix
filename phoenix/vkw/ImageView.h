@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Device.h"
 #include "VulkanResource.h"
 #include "vulkan.h"
 #include <ltl/condition.h>
@@ -23,7 +22,7 @@ class ImageView : public VulkanResource<vk::UniqueImageView> {
 public:
   static constexpr auto type = Type;
   static constexpr auto format = Format;
-  static constexpr auto usage = vk::ImageUsageFlags(Usage);
+  static constexpr auto imageUsage = vk::ImageUsageFlags(Usage);
 
   ImageView(vk::Device device, vk::Image image,
             vk::ImageSubresourceRange range) {
@@ -34,8 +33,6 @@ public:
     info.subresourceRange = range;
     m_handle = device.createImageViewUnique(info);
   }
-
-private:
 };
 
 } // namespace phx

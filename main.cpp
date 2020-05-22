@@ -16,7 +16,7 @@
 
 #include "phoenix/vkw/Vertex.h"
 
-#include "phoenix/vkw/Buffer/Buffer.h"
+#include "phoenix/vkw/SampledImage.h"
 
 struct UniformBufferObject {
   glm::mat4 model;
@@ -34,10 +34,14 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
 }
 
 auto createDescriptorPool(phx::Device &device) {
-  auto binding = phx::DescriptorBinding<VK_SHADER_STAGE_VERTEX_BIT,
-                                        vk::DescriptorType::eUniformBuffer, 1,
-                                        UniformBufferObject>{};
-  auto layout = device.createDescriptorSetLayout(binding);
+  auto uboBinding = phx::DescriptorBinding<VK_SHADER_STAGE_VERTEX_BIT,
+                                           vk::DescriptorType::eUniformBuffer,
+                                           1, UniformBufferObject>{};
+  auto samplerBinding =
+      phx::DescriptorBinding<VK_SHADER_STAGE_FRAGMENT_BIT,
+                             vk::DescriptorType::eCombinedImageSampler, 1,
+                             phx::SampledImageType>{};
+  auto layout = device.createDescriptorSetLayout(uboBinding, samplerBinding);
   return device.createDescriptorPool(std::move(layout));
 }
 
@@ -63,9 +67,19 @@ auto create_buffer_image(phx::Device &device, std::string path) {
   auto [width, height, data] = phx::loadImage(path);
   auto buffer =
       device.createBuffer<phx::StagingBuffer<unsigned char>>(data.size());
+
   for (auto x : data)
     buffer << x;
-  return ltl::tuple_t{width, height, std::move(buffer)};
+
+  auto image =
+      device.createImage<phx::SampledImage>(width.get(), height.get(), 1u);
+
+  auto imageView = image.createImageView<vk::ImageViewType::e2D>();
+  auto sampler =
+      device.createSampler(vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear);
+
+  return ltl::tuple_t{std::move(buffer), std::move(image), std::move(imageView),
+                      std::move(sampler)};
 }
 
 int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
@@ -73,10 +87,10 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
   constexpr auto height = phx::Height{600u};
 
   std::vector<phx::Colored2DVertex> vertices = {
-      {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-      {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-      {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-      {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+      {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+      {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+      {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+      {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}};
 
   std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
 
@@ -99,8 +113,6 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
       indexStagingBuffer << index;
     }
 
-    phx::MemoryTransfer memoryTransfer(device);
-
     auto vertexBuffer =
         device.createBuffer<phx::VertexBuffer<phx::Colored2DVertex>>(4096);
     auto indexBuffer = device.createBuffer<phx::IndexBuffer<uint32_t>>(4096);
@@ -110,12 +122,28 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
         vk::AccessFlagBits::eIndexRead |
             vk::AccessFlagBits::eVertexAttributeRead};
 
+    auto [bufferImage, image, imageView, sampler] =
+        create_buffer_image(device, "../resources/images/texture.jpg");
+
+    auto transitionToTransferBarrier =
+        phx::LayoutTransitionUndefinedToTransferSrcBarrier{
+            image.getHandle(), image.getSubresourceRange()};
+    auto transitionToSampledBarrier =
+        phx::LayoutTransitionTransferToSampledBarrier{
+            image.getHandle(), vk::PipelineStageFlagBits::eFragmentShader,
+            image.getSubresourceRange()};
+    phx::MemoryTransfer memoryTransfer(device);
+
     memoryTransfer.to(vertexBuffer) << vertexStagingBuffer;
     memoryTransfer.to(indexBuffer) << indexStagingBuffer << barrier;
+    memoryTransfer.to(image) << transitionToTransferBarrier << bufferImage
+                             << transitionToSampledBarrier;
 
+    auto sampledImage = phx::SampledImageType{imageView, sampler};
     auto uniformBuffer = create_uniform_buffer(window);
     auto descriptorPool = createDescriptorPool(device);
-    auto descriptorSet = descriptorPool.allocate({uniformBuffer});
+    auto descriptorSet =
+        descriptorPool.allocate({uniformBuffer}, {sampledImage});
 
     auto queue = device.getQueue();
 

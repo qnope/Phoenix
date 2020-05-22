@@ -52,6 +52,8 @@ using Position4D = details::Position<glm::vec4>;
 using RgbColor = details::Color<glm::vec3>;
 using RgbaColor = details::Color<glm::vec4>;
 
+using TexCoord = details::TexCoord<glm::vec2>;
+
 template <typename... Types> struct Vertex : Types... {
   static constexpr auto types = ltl::type_list_v<Types...>;
 
@@ -91,6 +93,6 @@ template <typename... Types> struct Vertex : Types... {
   static inline auto offset_list = compute_offset_list();
 };
 
-using Colored2DVertex = Vertex<Position2D, RgbColor>;
+using Colored2DVertex = Vertex<Position2D, RgbColor, TexCoord>;
 
 } // namespace phx

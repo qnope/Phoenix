@@ -43,7 +43,7 @@ public:
     info.descriptorPool = getHandle();
     info.descriptorSetCount = 1;
 
-    return {m_device, m_device.allocateDescriptorSets(info)[0], values...};
+    return {m_device, m_device.allocateDescriptorSets(info)[0], {values...}};
   }
 
   const auto &layout() const noexcept { return m_layout; }

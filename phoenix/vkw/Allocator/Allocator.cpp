@@ -4,12 +4,29 @@
 namespace phx {
 
 Allocator::Allocator(vk::Instance instance, vk::Device device,
-                     vk::PhysicalDevice physicalDevice) {
+                     vk::PhysicalDevice physicalDevice)
+    : m_device{device} {
   VmaAllocatorCreateInfo info{};
   info.device = device;
   info.instance = instance;
   info.physicalDevice = physicalDevice;
   vmaCreateAllocator(&info, &m_allocator);
+}
+
+vk::Device Allocator::device() const noexcept { return m_device; }
+
+ltl::tuple_t<vk::Image, VmaAllocation>
+Allocator::allocateImage(vk::ImageCreateInfo _infoImage, VmaMemoryUsage usage) {
+  VkImage image{};
+
+  VmaAllocationCreateInfo infoAlloc{};
+  infoAlloc.usage = usage;
+
+  VmaAllocation allocation{};
+  VkImageCreateInfo infoImage = _infoImage;
+  vmaCreateImage(m_allocator, &infoImage, &infoAlloc, &image, &allocation,
+                 nullptr);
+  return {image, allocation};
 }
 
 ltl::tuple_t<vk::Buffer, AllocatorBlock>
@@ -31,6 +48,10 @@ Allocator::allocateBuffer(vk::BufferCreateInfo _infoBuffer,
           AllocatorBlock(allocation,
                          reinterpret_cast<char *>(blockInfo.pMappedData),
                          _infoBuffer.size)};
+}
+
+void Allocator::deallocateImage(vk::Image image, VmaAllocation allocation) {
+  vmaDestroyImage(m_allocator, image, allocation);
 }
 
 void Allocator::deallocateBuffer(vk::Buffer buffer, AllocatorBlock block) {

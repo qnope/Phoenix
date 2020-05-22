@@ -4,6 +4,8 @@
 #include <ltl/tuple_algos.h>
 
 #include "../Buffer/BufferRef.h"
+#include "../Image.h"
+
 #include <ltl/condition.h>
 
 namespace phx {
@@ -28,6 +30,11 @@ struct DescriptorBinding {
     else if constexpr (DescriptorType == vk::DescriptorType::eStorageBuffer) {
       return ltl::type_v<ltl::tuple_t<StorageBufferRef<Types>...>>;
     }
+
+    else if constexpr (DescriptorType ==
+                       vk::DescriptorType::eCombinedImageSampler) {
+      return ltl::type_v<ltl::tuple_t<Types...>>;
+    }
   }
 
   static constexpr auto types = decltype(compute_tuple_types()){};
@@ -46,15 +53,9 @@ static constexpr auto is_buffer(vk::DescriptorType type) {
                             vk::DescriptorType::eStorageBuffer};
 }
 
-template <typename T, vk::DescriptorType type>
-static constexpr auto is_valid(const T &obj) {
-  if constexpr (type == vk::DescriptorType::eUniformBuffer) {
-    return doesBufferSupport<vk::BufferUsageFlagBits::eUniformBuffer>(obj);
-  }
-
-  else if constexpr (type == vk::DescriptorType::eStorageBuffer) {
-    return doesBufferSupport<vk::BufferUsageFlagBits::eStorageBuffer>(obj);
-  }
+static constexpr auto is_image(vk::DescriptorType type) {
+  return type == ltl::AnyOf{vk::DescriptorType::eCombinedImageSampler,
+                            vk::DescriptorType::eSampledImage};
 }
 
 template <typename T> static constexpr auto getInfos(T values) {
@@ -79,6 +80,10 @@ void writeDescriptorSet(vk::Device device, vk::DescriptorSet set,
 
   if constexpr (details::is_buffer(binding.descriptorType)) {
     write.pBufferInfo = infos.data();
+  }
+
+  else if constexpr (details::is_image(binding.descriptorType)) {
+    write.pImageInfo = infos.data();
   }
 
   device.updateDescriptorSets(write, {});

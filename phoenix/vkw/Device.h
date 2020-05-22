@@ -8,6 +8,7 @@
 #include "PipelineLayout.h"
 #include "Queue.h"
 #include "RenderPass.h"
+#include "Sampler.h"
 #include "ShaderModule.h"
 #include "Surface.h"
 #include "VulkanResource.h"
@@ -75,8 +76,18 @@ public:
   }
 
   template <typename SetLayout>
-  DescriptorPool<SetLayout> createDescriptorPool(SetLayout layout) const {
-    return {getHandle(), std::move(layout)};
+  auto createDescriptorPool(SetLayout layout) const {
+    return DescriptorPool<SetLayout>(
+        getHandle(), std::move(layout)); //{getHandle(), std::move(layout)};
+  }
+
+  template <typename Image, typename... Ts> Image createImage(Ts... ts) const {
+    return {*m_allocator, ts...};
+  }
+
+  Sampler createSampler(vk::Filter filterMinMag,
+                        vk::SamplerMipmapMode mipmapMode) const noexcept {
+    return {getHandle(), filterMinMag, mipmapMode};
   }
 
   Fence createFence(bool signaledState) const;

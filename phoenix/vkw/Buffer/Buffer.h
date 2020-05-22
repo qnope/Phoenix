@@ -39,7 +39,7 @@ public:
     buffer.m_buffer = vk::Buffer();
   }
 
-  Buffer &operator=(Buffer &&buffer) noexcept {
+  Buffer &operator=(Buffer buffer) noexcept {
     deallocate();
     m_buffer = buffer.m_buffer;
     m_block = buffer.m_block;

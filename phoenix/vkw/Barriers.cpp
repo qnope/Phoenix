@@ -1,4 +1,5 @@
 #include "Barriers.h"
+#include "Image.h"
 
 namespace phx {
 
@@ -18,6 +19,40 @@ void applyBarrier(vk::CommandBuffer cmd, MemoryBarrier barrier) {
   cmd.pipelineBarrier(barrier.srcStage, barrier.dstStage, vk::DependencyFlags(),
                       memoryBarrier, {}, {});
 }
+
+void applyBarrier(vk::CommandBuffer cmd, LayoutTransitionBarrier barrier) {
+  vk::ImageMemoryBarrier memoryBarrier(
+      barrier.srcAccess, barrier.dstAccess, barrier.oldLayout,
+      barrier.newLayout, VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
+      barrier.image, barrier.range);
+
+  cmd.pipelineBarrier(barrier.srcStage, barrier.dstStage,
+                      vk::DependencyFlagBits(), {}, {}, memoryBarrier);
+}
+
+void applyBarrier(vk::CommandBuffer cmd,
+                  LayoutTransitionTransferToSampledBarrier barrier) {
+  vk::ImageMemoryBarrier memoryBarrier(
+      vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead,
+      vk::ImageLayout::eTransferDstOptimal,
+      vk::ImageLayout::eShaderReadOnlyOptimal, VK_QUEUE_FAMILY_IGNORED,
+      VK_QUEUE_FAMILY_IGNORED, barrier.image, barrier.range);
+  cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, barrier.dstStage,
+                      vk::DependencyFlags(), {}, {}, memoryBarrier);
+}
+
+void applyBarrier(vk::CommandBuffer cmd,
+                  LayoutTransitionUndefinedToTransferSrcBarrier barrier) {
+  vk::ImageMemoryBarrier memoryBarrier(
+      vk::AccessFlags(), vk::AccessFlagBits::eTransferWrite,
+      vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal,
+      VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED, barrier.image,
+      barrier.range);
+  cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                      vk::PipelineStageFlagBits::eTransfer,
+                      vk::DependencyFlags(), {}, {}, memoryBarrier);
+}
+
 } // namespace details
 
 } // namespace phx

@@ -6,6 +6,7 @@
 #include "Queue.h"
 
 #include "Buffer/Buffer.h"
+#include "Image.h"
 #include <ltl/Range/DefaultView.h>
 #include <ltl/algos.h>
 #include <ltl/ltl.h>
@@ -18,6 +19,13 @@ struct BufferTransferBarrier {
   vk::AccessFlags dstMask;
 };
 
+struct ImageTransferBarrier {
+  vk::PipelineStageFlags dstStage;
+  vk::AccessFlags dstMask;
+  vk::ImageLayout newLayout;
+  vk::ImageSubresourceRange range;
+};
+
 class MemoryTransfer {
   template <typename T> class MemoryTransferToBuffer {
   public:
@@ -26,6 +34,7 @@ class MemoryTransfer {
 
     MemoryTransferToBuffer &operator<<(Barrier barrier) const noexcept {
       memoryTransfer.applyBarrier(barrier);
+      return *this;
     }
 
     MemoryTransferToBuffer &operator<<(BufferTransferBarrier barrier) noexcept {
@@ -48,6 +57,29 @@ class MemoryTransfer {
     T &buffer;
   };
 
+  template <typename T> class MemoryTransferToImage {
+  public:
+    MemoryTransferToImage(MemoryTransfer &memoryTransfer, T &image) noexcept
+        : memoryTransfer{memoryTransfer}, image{image} {}
+
+    MemoryTransferToImage &operator<<(Barrier barrier) noexcept {
+      memoryTransfer.applyBarrier(barrier);
+      return *this;
+    }
+
+    template <typename _T, requires_f(IsBuffer<_T>)>
+    MemoryTransferToImage &operator<<(const _T &bufferToCopy) noexcept {
+      memoryTransfer.copyBufferToImage(bufferToCopy, image);
+      return *this;
+    }
+
+    ~MemoryTransferToImage() { memoryTransfer.flush(); }
+
+  private:
+    MemoryTransfer &memoryTransfer;
+    T &image;
+  };
+
 public:
   MemoryTransfer(Device &device) noexcept
       : m_queue{device.getQueue()}, //
@@ -64,6 +96,30 @@ public:
     vk::BufferCopy copy;
     copy.size = src.sizeInBytes();
     copyBufferRange(src, dst, copy);
+  }
+
+  template <typename B, typename I>
+  void copyBufferToImage(const B &buffer, const I &image) {
+    typed_static_assert_msg(
+        doesBufferSupport<vk::BufferUsageFlagBits::eTransferSrc>(buffer),
+        "Src Buffer must be a transferable source");
+
+    typed_static_assert_msg(
+        doesImageSupport<vk::ImageUsageFlagBits::eTransferDst>(image),
+        "image must be a transferable destination");
+    // assert(src.sizeInBytes() == )
+
+    vk::BufferImageCopy region{};
+
+    region.imageExtent = image.getExtent();
+    region.imageSubresource.mipLevel = 0;
+    region.imageSubresource.layerCount = 1;
+    region.imageSubresource.aspectMask = image.aspectMask;
+    region.imageSubresource.baseArrayLayer = 0;
+
+    getCurrentCommandBuffer().copyBufferToImage(
+        buffer.getHandle(), image.getHandle(),
+        vk::ImageLayout::eTransferDstOptimal, region);
   }
 
   template <typename B1, typename B2>
@@ -109,6 +165,11 @@ public:
       ltl::for_each(cmdBuffers, endAndQueue);
       m_commandBuffers.erase(*it, end(m_commandBuffers));
     }
+  }
+
+  template <typename Image, requires_f(IsImage<Image>)>
+  auto to(const Image &image) {
+    return MemoryTransferToImage{*this, image};
   }
 
   template <typename T, auto... enums> auto to(Buffer<T, enums...> &buffer) {
