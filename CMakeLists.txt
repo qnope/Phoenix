@@ -34,6 +34,14 @@ set(PHOENIX_VKW_BUFFER
     phoenix/vkw/Buffer/BufferRef.h
     )
 
+set(PHOENIX_VKW_IMAGE
+    phoenix/vkw/Image/Image.h
+    phoenix/vkw/Image/ImageView.h
+    phoenix/vkw/Image/SampledImage.h
+    phoenix/vkw/Image/Sampler.h
+    phoenix/vkw/Image/Sampler.cpp
+    )
+
 set(PHOENIX_VKW_PIPELINE
     phoenix/vkw/With_Pipeline/WithDynamicStates.h
     phoenix/vkw/With_Pipeline/WithShaders.h
@@ -51,8 +59,6 @@ set(PHOENIX_VKW
     phoenix/vkw/VulkanResource.h
     phoenix/vkw/utility.h
     phoenix/vkw/Swapchain.h
-    phoenix/vkw/Image.h
-    phoenix/vkw/ImageView.h
     phoenix/vkw/ShaderCompiler.h
     phoenix/vkw/ShaderModule.h
     phoenix/vkw/GraphicPipeline.h
@@ -70,10 +76,6 @@ set(PHOENIX_VKW
     phoenix/vkw/MemoryTransfer.h
     phoenix/vkw/Barriers.h
 
-    phoenix/vkw/SampledImage.h
-    phoenix/vkw/Sampler.h
-    phoenix/vkw/Sampler.cpp
-
     phoenix/vkw/Instance.cpp
     phoenix/vkw/Device.cpp
     phoenix/vkw/Queue.cpp
@@ -85,9 +87,10 @@ set(PHOENIX_VKW
     phoenix/vkw/Barriers.cpp
     phoenix/vkw/utility.cpp
 
+    ${PHOENIX_VKW_IMAGE}
     ${PHOENIX_VKW_BUFFER}
-    ${PHOENIX_VKW_ALLOCATOR}
     ${PHOENIX_VKW_PIPELINE}
+    ${PHOENIX_VKW_ALLOCATOR}
     ${PHOENIX_VKW_DESCRIPTOR}
     )
 

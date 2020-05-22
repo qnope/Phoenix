@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VulkanResource.h"
-#include "vulkan.h"
+#include "../VulkanResource.h"
+#include "../vulkan.h"
 
 namespace phx {
 class Sampler : public VulkanResource<vk::UniqueSampler> {

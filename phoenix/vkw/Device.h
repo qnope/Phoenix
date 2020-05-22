@@ -4,11 +4,11 @@
 
 #include "Allocator/Allocator.h"
 #include "GraphicPipeline.h"
+#include "Image/Sampler.h"
 #include "Instance.h"
 #include "PipelineLayout.h"
 #include "Queue.h"
 #include "RenderPass.h"
-#include "Sampler.h"
 #include "ShaderModule.h"
 #include "Surface.h"
 #include "VulkanResource.h"

@@ -5,9 +5,8 @@
 #include <variant>
 
 #include "ImageView.h"
-#include "VulkanResource.h"
 
-#include "Allocator/Allocator.h"
+#include "../Allocator/Allocator.h"
 
 namespace phx {
 

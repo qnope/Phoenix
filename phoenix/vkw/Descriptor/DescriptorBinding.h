@@ -4,7 +4,7 @@
 #include <ltl/tuple_algos.h>
 
 #include "../Buffer/BufferRef.h"
-#include "../Image.h"
+#include "../Image/Image.h"
 
 #include <ltl/condition.h>
 

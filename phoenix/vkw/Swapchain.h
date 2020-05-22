@@ -2,7 +2,7 @@
 #include "../constant.h"
 #include "Device.h"
 #include "Framebuffer.h"
-#include "Image.h"
+#include "Image/Image.h"
 #include "Surface.h"
 #include "VulkanResource.h"
 #include "vulkan.h"

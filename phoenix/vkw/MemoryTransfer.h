@@ -6,7 +6,7 @@
 #include "Queue.h"
 
 #include "Buffer/Buffer.h"
-#include "Image.h"
+#include "Image/Image.h"
 #include <ltl/Range/DefaultView.h>
 #include <ltl/algos.h>
 #include <ltl/ltl.h>

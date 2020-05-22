@@ -16,7 +16,7 @@
 
 #include "phoenix/vkw/Vertex.h"
 
-#include "phoenix/vkw/SampledImage.h"
+#include "phoenix/vkw/Image/SampledImage.h"
 
 struct UniformBufferObject {
   glm::mat4 model;

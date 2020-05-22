@@ -1,5 +1,5 @@
 #include "Barriers.h"
-#include "Image.h"
+#include "Image/Image.h"
 
 namespace phx {
 
