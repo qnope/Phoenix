@@ -136,6 +136,7 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
 
     memoryTransfer.to(vertexBuffer) << vertexStagingBuffer;
     memoryTransfer.to(indexBuffer) << indexStagingBuffer << barrier;
+
     memoryTransfer.to(image) << transitionToTransferBarrier << bufferImage
                              << transitionToSampledBarrier;
 
