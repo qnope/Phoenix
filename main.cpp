@@ -18,12 +18,6 @@
 
 #include "phoenix/vkw/Image/SampledImage.h"
 
-struct UniformBufferObject {
-  glm::mat4 model;
-  glm::mat4 view;
-  glm::mat4 proj;
-};
-
 auto make_render_pass(const phx::PhoenixWindow &window) {
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
   auto attachment = ltl::tuple_t{window.getAttachmentDescription()};
@@ -40,24 +34,6 @@ auto createDescriptorPool(phx::Device &device) {
                              phx::SampledImageType>{};
   auto layout = device.createDescriptorSetLayout(samplerBinding);
   return device.createDescriptorPool(std::move(layout));
-}
-
-auto create_uniform_buffer(const phx::PhoenixWindow &window) {
-  auto uniformBuffer =
-      window.getDevice()
-          .createBuffer<phx::CpuUniformBuffer<UniformBufferObject>>(1);
-  uniformBuffer.setSize(1);
-
-  UniformBufferObject *values = uniformBuffer.ptr();
-  values->model = glm::mat4(1.0f);
-  values->proj =
-      glm::perspective(glm::radians(45.0f), window.getAspect(), 0.1f, 10.0f);
-  values->view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f),
-                             glm::vec3(0.0f, 0.0f, 1.0f));
-
-  values->proj[1][1] *= -1.0f;
-
-  return uniformBuffer;
 }
 
 auto create_buffer_image(phx::Device &device, std::string path) {
@@ -137,7 +113,6 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
                              << transitionToSampledBarrier;
 
     auto sampledImage = phx::SampledImageType{imageView, sampler};
-    auto uniformBuffer = create_uniform_buffer(window);
     auto descriptorPool = createDescriptorPool(device);
     auto descriptorSet = descriptorPool.allocate({sampledImage});
 
