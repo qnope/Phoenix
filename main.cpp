@@ -16,6 +16,8 @@
 
 #include "phoenix/vkw/Vertex.h"
 
+#include "phoenix/vkw/Buffer/BufferList.h"
+#include "phoenix/vkw/Descriptor/DescriptorPoolList.h"
 #include "phoenix/vkw/Image/SampledImage.h"
 
 auto make_render_pass(const phx::PhoenixWindow &window) {
@@ -28,12 +30,7 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
 }
 
 auto createDescriptorPool(phx::Device &device) {
-  auto samplerBinding =
-      phx::DescriptorBinding<VK_SHADER_STAGE_FRAGMENT_BIT,
-                             vk::DescriptorType::eCombinedImageSampler, 1,
-                             phx::SampledImageType>{};
-  auto layout = device.createDescriptorSetLayout(samplerBinding);
-  return device.createDescriptorPool(std::move(layout));
+  return device.createDescriptorPool<phx::SampledImage2dRgbaBinding>();
 }
 
 auto create_buffer_image(phx::Device &device, std::string path) {
@@ -71,28 +68,15 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
                               phx::WindowTitle("Phoenix Engine")};
     phx::Device &device = window.getDevice();
     vk::Device deviceHandle = device.getHandle();
-    auto vertexStagingBuffer =
-        device.createBuffer<phx::StagingBuffer<phx::Textured2dVertex>>(4096);
+    phx::BufferList<phx::IndexBufferInfo> indexBufferList(device);
+    phx::BufferList<phx::VertexBufferInfo> vertexBufferList(device);
 
-    auto indexStagingBuffer =
-        device.createBuffer<phx::StagingBuffer<uint32_t>>(4096);
-
-    for (auto vertex : vertices) {
-      vertexStagingBuffer << vertex;
-    }
-
-    for (auto index : indices) {
-      indexStagingBuffer << index;
-    }
-
-    auto vertexBuffer =
-        device.createBuffer<phx::VertexBuffer<phx::Textured2dVertex>>(4096);
-    auto indexBuffer = device.createBuffer<phx::IndexBuffer<uint32_t>>(4096);
-
-    auto barrier = phx::BufferTransferBarrier{
-        vk::PipelineStageFlagBits::eVertexInput,
-        vk::AccessFlagBits::eIndexRead |
-            vk::AccessFlagBits::eVertexAttributeRead};
+    auto indexInfo = indexBufferList.send(indices);
+    auto vertexInfo = vertexBufferList.send(vertices);
+    vertexBufferList.flush(vk::PipelineStageFlagBits::eVertexInput,
+                           vk::AccessFlagBits::eVertexAttributeRead);
+    indexBufferList.flush(vk::PipelineStageFlagBits::eVertexInput,
+                          vk::AccessFlagBits::eIndexRead);
 
     auto [bufferImage, image, imageView, sampler] =
         create_buffer_image(device, "../resources/images/texture.jpg");
@@ -106,13 +90,10 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
             image.getSubresourceRange()};
     phx::MemoryTransfer memoryTransfer(device);
 
-    memoryTransfer.to(vertexBuffer) << vertexStagingBuffer;
-    memoryTransfer.to(indexBuffer) << indexStagingBuffer << barrier;
-
     memoryTransfer.to(image) << transitionToTransferBarrier << bufferImage
                              << transitionToSampledBarrier;
 
-    auto sampledImage = phx::SampledImageType{imageView, sampler};
+    auto sampledImage = phx::SampledImage2DRgba{imageView, sampler};
     auto descriptorPool = createDescriptorPool(device);
     auto descriptorSet = descriptorPool.allocate({sampledImage});
 
@@ -120,8 +101,8 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
 
     auto renderPass = make_render_pass(window);
     auto trianglePass =
-        make_triangle_pass(device, width, height, renderPass, vertexBuffer,
-                           indexBuffer, descriptorPool, descriptorSet);
+        make_triangle_pass(device, width, height, renderPass, vertexInfo,
+                           indexInfo, descriptorPool, descriptorSet);
 
     window.generateFramebuffer(renderPass.getHandle());
 

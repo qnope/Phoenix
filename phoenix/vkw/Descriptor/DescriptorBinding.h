@@ -5,6 +5,7 @@
 
 #include "../Buffer/BufferRef.h"
 #include "../Image/Image.h"
+#include "../Image/SampledImage.h"
 
 #include <ltl/condition.h>
 
@@ -88,5 +89,10 @@ void writeDescriptorSet(vk::Device device, vk::DescriptorSet set,
 
   device.updateDescriptorSets(write, {});
 }
+
+using SampledImage2dRgbaBinding =
+    DescriptorBinding<VK_SHADER_STAGE_FRAGMENT_BIT,
+                      vk::DescriptorType::eCombinedImageSampler, 1,
+                      SampledImage2DRgba>;
 
 } // namespace phx

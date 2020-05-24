@@ -117,6 +117,7 @@ Device::Device(const Instance &instance, const Surface &surface) {
 }
 
 Queue &Device::getQueue() const noexcept { return *m_queue; }
+Allocator &Device::getAllocator() const noexcept { return *m_allocator; }
 
 vk::PhysicalDevice Device::getPhysicalDevice() const noexcept {
   return m_physicalDevice;

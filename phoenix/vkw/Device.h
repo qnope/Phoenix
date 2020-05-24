@@ -13,7 +13,7 @@
 #include "Surface.h"
 #include "VulkanResource.h"
 
-#include "Descriptor/DescriptorPool.h"
+#include "Descriptor/DescriptorPoolList.h"
 #include "Descriptor/DescriptorSetLayout.h"
 
 namespace phx {
@@ -25,6 +25,7 @@ public:
   Device(const Instance &instance, const Surface &surface);
 
   Queue &getQueue() const noexcept;
+  Allocator &getAllocator() const noexcept;
 
   vk::PhysicalDevice getPhysicalDevice() const noexcept;
 
@@ -70,15 +71,13 @@ public:
   }
 
   template <typename... Bindings>
-  DescriptorSetLayout<Bindings...>
-  createDescriptorSetLayout(Bindings... bindings) const {
-    return {getHandle(), bindings...};
+  DescriptorSetLayout<Bindings...> createDescriptorSetLayout() const {
+    return {getHandle()};
   }
 
-  template <typename SetLayout>
-  auto createDescriptorPool(SetLayout layout) const {
-    return DescriptorPool<SetLayout>(
-        getHandle(), std::move(layout)); //{getHandle(), std::move(layout)};
+  template <typename... Bindings>
+  DescriptorPoolList<Bindings...> createDescriptorPool() const {
+    return {getHandle(), DescriptorSetLayout<Bindings...>{getHandle()}};
   }
 
   template <typename Image, typename... Ts> Image createImage(Ts... ts) const {

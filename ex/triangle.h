@@ -1,9 +1,8 @@
 #pragma once
 #include "../phoenix/constant.h"
-#include "../phoenix/vkw/Buffer/BufferRef.h"
 #include "../phoenix/vkw/CommandBufferWrapper.h"
 
-#include "../phoenix/vkw/Descriptor/DescriptorSetLayout.h"
+#include "../phoenix/vkw/Buffer/BufferInfo.h"
 #include "../phoenix/vkw/Device.h"
 #include "../phoenix/vkw/GraphicPipeline.h"
 #include "../phoenix/vkw/Vertex.h"
@@ -16,9 +15,8 @@ class TriangleSubpass : public phx::AbstractSubpass {
       "The template paremeter Pipeline must be GraphicPipeline");
 
 public:
-  TriangleSubpass(Pipeline pipeline,
-                  phx::VertexBufferRef<phx::Textured2dVertex> vertexBuffer,
-                  phx::IndexBufferRef<uint32_t> indexBuffer, DescriptorSet set)
+  TriangleSubpass(Pipeline pipeline, phx::VertexBufferInfo vertexBuffer,
+                  phx::IndexBufferInfo indexBuffer, DescriptorSet set)
       : m_pipeline{std::move(pipeline)}, //
         m_vertexBuffer{vertexBuffer},    //
         m_indexBuffer{indexBuffer},      //
@@ -29,34 +27,34 @@ public:
     phx::CommandBufferWrapper commandBufferWrapper{cmdBuffer};
 
     commandBufferWrapper.bindVertexBuffersToGraphicPipeline(
-        subpass.m_pipeline, subpass.m_vertexBuffer);
+        subpass.m_pipeline, subpass.m_vertexBuffer.buffer);
 
     commandBufferWrapper.bindIndexBufferToGraphicPipeline(
-        subpass.m_pipeline, subpass.m_indexBuffer);
+        subpass.m_pipeline, subpass.m_indexBuffer.buffer);
 
     const auto &pipelineLayout = subpass.m_pipeline.pipelineLayout();
 
     commandBufferWrapper.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                             pipelineLayout, subpass.m_set);
 
-    cmdBuffer.drawIndexed(6, 1, 0, 0, 0);
+    cmdBuffer.drawIndexed(subpass.m_indexBuffer.size, 1, 0, 0, 0);
     return cmdBuffer;
   }
 
 private:
   Pipeline m_pipeline;
-  phx::VertexBufferRef<phx::Textured2dVertex> m_vertexBuffer;
-  phx::IndexBufferRef<uint32_t> m_indexBuffer;
+  phx::VertexBufferInfo m_vertexBuffer;
+  phx::IndexBufferInfo m_indexBuffer;
   DescriptorSet m_set;
 };
 
 template <typename... RP, typename DescriptorPool, typename DescriptorSet>
-auto make_triangle_pass(
-    phx::Device &device, phx::Width width, phx::Height height,
-    const phx::RenderPass<RP...> &renderPass,
-    phx::VertexBufferRef<phx::Textured2dVertex> vertexBuffer,
-    phx::IndexBufferRef<uint32_t> indexBuffer, const DescriptorPool &pool,
-    DescriptorSet set) {
+auto make_triangle_pass(phx::Device &device, phx::Width width,
+                        phx::Height height,
+                        const phx::RenderPass<RP...> &renderPass,
+                        phx::VertexBufferInfo vertexBuffer,
+                        phx::IndexBufferInfo indexBuffer,
+                        const DescriptorPool &pool, DescriptorSet set) {
   auto vertexShader = device.createShaderModule<phx::VertexShaderType>(
       "../phoenix/shaders/TriangleTest/triangle.vert", true);
 

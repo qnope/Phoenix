@@ -21,8 +21,9 @@ class DescriptorPool<DescriptorSetLayout<Bindings...>>
   using SetLayout = DescriptorSetLayout<Bindings...>;
 
 public:
-  DescriptorPool(vk::Device device, DescriptorSetLayout<Bindings...> layout)
-      : m_device{device}, m_layout{std::move(layout)} {
+  DescriptorPool(vk::Device device,
+                 const DescriptorSetLayout<Bindings...> &layout)
+      : m_device{device}, m_layout{layout.getHandle()} {
     vk::DescriptorPoolCreateInfo info;
 
     info.maxSets = MAX_SET_BY_POOL * sizeof...(Bindings);
@@ -36,21 +37,24 @@ public:
 
   DescriptorSet<SetLayout>
   allocate(DescriptorBindingTypes<Bindings>... values) noexcept {
+    assert(m_numberOfAllocation < MAX_SET_BY_POOL);
     ++m_numberOfAllocation;
 
     vk::DescriptorSetAllocateInfo info;
-    info.pSetLayouts = m_layout.getHandlePtr();
+    info.pSetLayouts = &m_layout;
     info.descriptorPool = getHandle();
     info.descriptorSetCount = 1;
 
     return {m_device, m_device.allocateDescriptorSets(info)[0], {values...}};
   }
 
-  const auto &layout() const noexcept { return m_layout; }
+  bool isFull() const noexcept {
+    return m_numberOfAllocation == MAX_SET_BY_POOL;
+  }
 
 private:
   vk::Device m_device;
-  SetLayout m_layout;
+  vk::DescriptorSetLayout m_layout;
   std::size_t m_numberOfAllocation = 0;
 };
 } // namespace phx

@@ -21,6 +21,7 @@ set(PHOENIX_VKW_DESCRIPTOR
     phoenix/vkw/Descriptor/DescriptorBinding.h
     phoenix/vkw/Descriptor/DescriptorSetLayout.h
     phoenix/vkw/Descriptor/DescriptorPool.h
+    phoenix/vkw/Descriptor/DescriptorPoolList.h
     )
 
 set(PHOENIX_VKW_ALLOCATOR
@@ -32,6 +33,8 @@ set(PHOENIX_VKW_ALLOCATOR
 set(PHOENIX_VKW_BUFFER
     phoenix/vkw/Buffer/Buffer.h
     phoenix/vkw/Buffer/BufferRef.h
+    phoenix/vkw/Buffer/BufferList.h
+    phoenix/vkw/Buffer/BufferInfo.h
     )
 
 set(PHOENIX_VKW_IMAGE

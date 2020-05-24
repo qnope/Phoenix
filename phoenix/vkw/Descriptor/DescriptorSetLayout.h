@@ -10,7 +10,7 @@ template <typename... Bindings>
 class DescriptorSetLayout
     : public VulkanResource<vk::UniqueDescriptorSetLayout> {
 public:
-  DescriptorSetLayout(vk::Device device, Bindings...) {
+  DescriptorSetLayout(vk::Device device) {
     auto zipped = ltl::zip_type(binding_list, offset_list);
     auto bindingArray = zipped([](auto... zipped) {
       return std::array{zipped[0_n].toDescriptorBinding(zipped[1_n])...};
