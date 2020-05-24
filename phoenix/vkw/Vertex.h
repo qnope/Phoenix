@@ -93,6 +93,6 @@ template <typename... Types> struct Vertex : Types... {
   static inline auto offset_list = compute_offset_list();
 };
 
-using Colored2DVertex = Vertex<Position2D, RgbColor, TexCoord>;
+using Textured2dVertex = Vertex<Position2D, TexCoord>;
 
 } // namespace phx

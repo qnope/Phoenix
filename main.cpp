@@ -34,14 +34,11 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
 }
 
 auto createDescriptorPool(phx::Device &device) {
-  auto uboBinding = phx::DescriptorBinding<VK_SHADER_STAGE_VERTEX_BIT,
-                                           vk::DescriptorType::eUniformBuffer,
-                                           1, UniformBufferObject>{};
   auto samplerBinding =
       phx::DescriptorBinding<VK_SHADER_STAGE_FRAGMENT_BIT,
                              vk::DescriptorType::eCombinedImageSampler, 1,
                              phx::SampledImageType>{};
-  auto layout = device.createDescriptorSetLayout(uboBinding, samplerBinding);
+  auto layout = device.createDescriptorSetLayout(samplerBinding);
   return device.createDescriptorPool(std::move(layout));
 }
 
@@ -83,14 +80,13 @@ auto create_buffer_image(phx::Device &device, std::string path) {
 }
 
 int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
-  constexpr auto width = phx::Width{800u};
-  constexpr auto height = phx::Height{600u};
+  constexpr auto width = phx::Width{1024u};
+  constexpr auto height = phx::Height{768u};
 
-  std::vector<phx::Colored2DVertex> vertices = {
-      {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-      {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-      {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-      {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}};
+  std::vector<phx::Textured2dVertex> vertices = {{{-1.f, -1.f}, {0.0f, 0.0f}},
+                                                 {{1.f, -1.f}, {1.0f, 0.0f}},
+                                                 {{1.f, 1.f}, {1.0f, 1.0f}},
+                                                 {{-1.f, 1.f}, {0.0f, 1.0f}}};
 
   std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
 
@@ -100,7 +96,7 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     phx::Device &device = window.getDevice();
     vk::Device deviceHandle = device.getHandle();
     auto vertexStagingBuffer =
-        device.createBuffer<phx::StagingBuffer<phx::Colored2DVertex>>(4096);
+        device.createBuffer<phx::StagingBuffer<phx::Textured2dVertex>>(4096);
 
     auto indexStagingBuffer =
         device.createBuffer<phx::StagingBuffer<uint32_t>>(4096);
@@ -114,7 +110,7 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     }
 
     auto vertexBuffer =
-        device.createBuffer<phx::VertexBuffer<phx::Colored2DVertex>>(4096);
+        device.createBuffer<phx::VertexBuffer<phx::Textured2dVertex>>(4096);
     auto indexBuffer = device.createBuffer<phx::IndexBuffer<uint32_t>>(4096);
 
     auto barrier = phx::BufferTransferBarrier{
@@ -143,8 +139,7 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     auto sampledImage = phx::SampledImageType{imageView, sampler};
     auto uniformBuffer = create_uniform_buffer(window);
     auto descriptorPool = createDescriptorPool(device);
-    auto descriptorSet =
-        descriptorPool.allocate({uniformBuffer}, {sampledImage});
+    auto descriptorSet = descriptorPool.allocate({sampledImage});
 
     auto queue = device.getQueue();
 
