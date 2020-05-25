@@ -24,7 +24,7 @@ public:
   vk::Sampler sampler;
 };
 
-using SampledImage2DRgba =
-    SampledImageRef<vk::ImageViewType::e2D, vk::Format::eR8G8B8A8Unorm,
+using SampledImage2dRgbaSrgbRef =
+    SampledImageRef<vk::ImageViewType::e2D, vk::Format::eR8G8B8A8Srgb,
                     VK_IMAGE_USAGE_SAMPLED_BIT>;
 } // namespace phx

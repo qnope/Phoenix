@@ -8,11 +8,11 @@ static vk::SurfaceFormatKHR chooseSwapchainFormat(vk::PhysicalDevice device,
   auto formats = device.getSurfaceFormatsKHR(surface);
 
   if (formats.size() == 1 && formats[0].format == vk::Format::eUndefined) {
-    return {vk::Format::eB8G8R8A8Unorm, vk::ColorSpaceKHR::eSrgbNonlinear};
+    return {vk::Format::eB8G8R8A8Srgb, vk::ColorSpaceKHR::eSrgbNonlinear};
   }
 
   for (auto format : formats) {
-    if (format.format == vk::Format::eB8G8R8A8Unorm &&
+    if (format.format == vk::Format::eB8G8R8A8Srgb &&
         format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
       return format;
     }

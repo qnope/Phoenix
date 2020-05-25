@@ -90,9 +90,9 @@ void writeDescriptorSet(vk::Device device, vk::DescriptorSet set,
   device.updateDescriptorSets(write, {});
 }
 
-using SampledImage2dRgbaBinding =
+using SampledImage2dRgbaSrgbBinding =
     DescriptorBinding<VK_SHADER_STAGE_FRAGMENT_BIT,
                       vk::DescriptorType::eCombinedImageSampler, 1,
-                      SampledImage2DRgba>;
+                      SampledImage2dRgbaSrgbRef>;
 
 } // namespace phx

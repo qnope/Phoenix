@@ -127,8 +127,8 @@ constexpr auto is_image = [](const auto &t) {
 template <typename T>
 constexpr auto IsImage = decltype(is_image(std::declval<T>()))::value;
 
-using SampledImage =
-    Image<vk::ImageType::e2D, vk::Format::eR8G8B8A8Unorm,
+using SampledImage2dRgbaSrgb =
+    Image<vk::ImageType::e2D, vk::Format::eR8G8B8A8Srgb,
           VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
               VK_IMAGE_USAGE_TRANSFER_SRC_BIT>;
 

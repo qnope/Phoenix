@@ -26,10 +26,10 @@ public:
       noexcept;
 
 private:
-  using SwapchainImage = Image<vk::ImageType::e2D, vk::Format::eB8G8R8A8Unorm,
+  using SwapchainImage = Image<vk::ImageType::e2D, vk::Format::eB8G8R8A8Srgb,
                                VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT>;
   using SwapchainImageView =
-      ImageView<vk::ImageViewType::e2D, vk::Format::eB8G8R8A8Unorm,
+      ImageView<vk::ImageViewType::e2D, vk::Format::eB8G8R8A8Srgb,
                 VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT>;
 
   vk::Device m_device;

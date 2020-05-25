@@ -30,7 +30,7 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
 }
 
 auto createDescriptorPool(phx::Device &device) {
-  return device.createDescriptorPool<phx::SampledImage2dRgbaBinding>();
+  return device.createDescriptorPool<phx::SampledImage2dRgbaSrgbBinding>();
 }
 
 auto create_buffer_image(phx::Device &device, std::string path) {
@@ -41,8 +41,8 @@ auto create_buffer_image(phx::Device &device, std::string path) {
   for (auto x : data)
     buffer << x;
 
-  auto image =
-      device.createImage<phx::SampledImage>(width.get(), height.get(), 1u);
+  auto image = device.createImage<phx::SampledImage2dRgbaSrgb>(
+      width.get(), height.get(), 1u);
 
   auto imageView = image.createImageView<vk::ImageViewType::e2D>();
   auto sampler =
@@ -53,8 +53,8 @@ auto create_buffer_image(phx::Device &device, std::string path) {
 }
 
 int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
-  constexpr auto width = phx::Width{1024u};
-  constexpr auto height = phx::Height{768u};
+  constexpr auto width = phx::Width{512u};
+  constexpr auto height = phx::Height{512u};
 
   std::vector<phx::Textured2dVertex> vertices = {{{-1.f, -1.f}, {0.0f, 0.0f}},
                                                  {{1.f, -1.f}, {1.0f, 0.0f}},
@@ -93,7 +93,7 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     memoryTransfer.to(image) << transitionToTransferBarrier << bufferImage
                              << transitionToSampledBarrier;
 
-    auto sampledImage = phx::SampledImage2DRgba{imageView, sampler};
+    auto sampledImage = phx::SampledImage2dRgbaSrgbRef{imageView, sampler};
     auto descriptorPool = createDescriptorPool(device);
     auto descriptorSet = descriptorPool.allocate({sampledImage});
 
