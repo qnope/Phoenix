@@ -78,7 +78,6 @@ std::string readFile(const std::string &path);
 
 std::string getBaseDirectory(std::string_view path) noexcept;
 
-ltl::tuple_t<Width, Height, std::vector<unsigned char>>
-loadImage(std::string path);
+ltl::tuple_t<Width, Height, std::vector<std::byte>> loadImage(std::string path);
 
 } // namespace phx

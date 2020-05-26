@@ -9,7 +9,6 @@
 #include "../Allocator/Allocator.h"
 
 namespace phx {
-
 template <vk::ImageType Type, vk::Format Format, VkImageUsageFlags Usage>
 class Image {
 public:
@@ -96,8 +95,9 @@ public:
 
   template <vk::ImageViewType ImageViewType>
   ImageView<ImageViewType, Format, Usage> createImageView() const noexcept {
-    static_assert(isImageTypeCompatibleWithImageViewType(Type, ImageViewType),
-                  "ImageViewType must be compatible with ImageType");
+    typed_static_assert_msg(
+        (isImageTypeCompatibleWithImageViewType<Type, ImageViewType>()),
+        "ImageViewType must be compatible with ImageType");
     return ImageView<ImageViewType, Format, Usage>{m_device, getHandle(),
                                                    getSubresourceRange()};
   }

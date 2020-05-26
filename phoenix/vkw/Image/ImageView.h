@@ -6,15 +6,12 @@
 
 namespace phx {
 
-inline constexpr auto
-isImageTypeCompatibleWithImageViewType(vk::ImageType type,
-                                       vk::ImageViewType viewType) {
-  if (type == vk::ImageType::e2D) {
-    return viewType == ltl::AnyOf{vk::ImageViewType::e2D};
+template <vk::ImageType type, vk::ImageViewType viewType>
+constexpr auto isImageTypeCompatibleWithImageViewType() {
+  if constexpr (type == vk::ImageType::e2D) {
+    return ltl::bool_v<viewType == vk::ImageViewType::e2D>;
   } else if (type == vk::ImageType::e3D) {
   }
-
-  throw 0; // compile time error
 }
 
 template <vk::ImageViewType Type, vk::Format Format, VkImageUsageFlags Usage>

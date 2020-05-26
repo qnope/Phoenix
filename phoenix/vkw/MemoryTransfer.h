@@ -100,15 +100,6 @@ public:
 
   template <typename B, typename I>
   void copyBufferToImage(const B &buffer, const I &image) {
-    typed_static_assert_msg(
-        doesBufferSupport<vk::BufferUsageFlagBits::eTransferSrc>(buffer),
-        "Src Buffer must be a transferable source");
-
-    typed_static_assert_msg(
-        doesImageSupport<vk::ImageUsageFlagBits::eTransferDst>(image),
-        "image must be a transferable destination");
-    // assert(src.sizeInBytes() == )
-
     vk::BufferImageCopy region{};
 
     region.imageExtent = image.getExtent();
@@ -117,9 +108,23 @@ public:
     region.imageSubresource.aspectMask = image.aspectMask;
     region.imageSubresource.baseArrayLayer = 0;
 
+    copyBufferToImage(buffer, image, region);
+  }
+
+  template <typename B, typename I>
+  void copyBufferToImage(const B &buffer, const I &image,
+                         vk::BufferImageCopy range) {
+    typed_static_assert_msg(
+        doesBufferSupport<vk::BufferUsageFlagBits::eTransferSrc>(buffer),
+        "Src Buffer must be a transferable source");
+
+    typed_static_assert_msg(
+        doesImageSupport<vk::ImageUsageFlagBits::eTransferDst>(image),
+        "image must be a transferable destination");
+
     getCurrentCommandBuffer().copyBufferToImage(
         buffer.getHandle(), image.getHandle(),
-        vk::ImageLayout::eTransferDstOptimal, region);
+        vk::ImageLayout::eTransferDstOptimal, range);
   }
 
   template <typename B1, typename B2>

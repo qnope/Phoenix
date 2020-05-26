@@ -53,12 +53,12 @@ static surface_ptr loadSurface(std::string path) {
   return {SDL_ConvertSurface(img.get(), &format, SDL_SWSURFACE), deleter};
 }
 
-ltl::tuple_t<Width, Height, std::vector<unsigned char>>
+ltl::tuple_t<Width, Height, std::vector<std::byte>>
 loadImage(std::string path) {
   auto img = loadSurface(std::move(path));
   Width width{uint32_t(img->w)};
   Height height{uint32_t(img->h)};
-  std::vector<unsigned char> values(img->pitch * img->h);
+  std::vector<std::byte> values(img->pitch * img->h);
   memcpy(values.data(), img->pixels, values.size());
   return {width, height, std::move(values)};
 }

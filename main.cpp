@@ -18,6 +18,7 @@
 
 #include "phoenix/vkw/Buffer/BufferList.h"
 #include "phoenix/vkw/Descriptor/DescriptorPoolList.h"
+#include "phoenix/vkw/Image/ImageLoader.h"
 #include "phoenix/vkw/Image/SampledImage.h"
 
 auto make_render_pass(const phx::PhoenixWindow &window) {
@@ -31,25 +32,6 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
 
 auto createDescriptorPool(phx::Device &device) {
   return device.createDescriptorPool<phx::SampledImage2dRgbaSrgbBinding>();
-}
-
-auto create_buffer_image(phx::Device &device, std::string path) {
-  auto [width, height, data] = phx::loadImage(path);
-  auto buffer =
-      device.createBuffer<phx::StagingBuffer<unsigned char>>(data.size());
-
-  for (auto x : data)
-    buffer << x;
-
-  auto image = device.createImage<phx::SampledImage2dRgbaSrgb>(
-      width.get(), height.get(), 1u);
-
-  auto imageView = image.createImageView<vk::ImageViewType::e2D>();
-  auto sampler =
-      device.createSampler(vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear);
-
-  return ltl::tuple_t{std::move(buffer), std::move(image), std::move(imageView),
-                      std::move(sampler)};
 }
 
 int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
@@ -70,30 +52,21 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     vk::Device deviceHandle = device.getHandle();
     phx::BufferList<phx::IndexBufferInfo> indexBufferList(device);
     phx::BufferList<phx::VertexBufferInfo> vertexBufferList(device);
+    phx::ImageLoader<phx::SampledImage2dRgbaSrgbRef> imageLoader(device);
 
     auto indexInfo = indexBufferList.send(indices);
     auto vertexInfo = vertexBufferList.send(vertices);
+
+    auto sampledImage =
+        imageLoader.load("../resources/images/texture.jpg",
+                         vk::PipelineStageFlagBits::eFragmentShader);
+
     vertexBufferList.flush(vk::PipelineStageFlagBits::eVertexInput,
                            vk::AccessFlagBits::eVertexAttributeRead);
     indexBufferList.flush(vk::PipelineStageFlagBits::eVertexInput,
                           vk::AccessFlagBits::eIndexRead);
+    imageLoader.flush();
 
-    auto [bufferImage, image, imageView, sampler] =
-        create_buffer_image(device, "../resources/images/texture.jpg");
-
-    auto transitionToTransferBarrier =
-        phx::LayoutTransitionUndefinedToTransferSrcBarrier{
-            image.getHandle(), image.getSubresourceRange()};
-    auto transitionToSampledBarrier =
-        phx::LayoutTransitionTransferToSampledBarrier{
-            image.getHandle(), vk::PipelineStageFlagBits::eFragmentShader,
-            image.getSubresourceRange()};
-    phx::MemoryTransfer memoryTransfer(device);
-
-    memoryTransfer.to(image) << transitionToTransferBarrier << bufferImage
-                             << transitionToSampledBarrier;
-
-    auto sampledImage = phx::SampledImage2dRgbaSrgbRef{imageView, sampler};
     auto descriptorPool = createDescriptorPool(device);
     auto descriptorSet = descriptorPool.allocate({sampledImage});
 
