@@ -58,7 +58,7 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     auto vertexInfo = vertexBufferList.send(vertices);
 
     auto sampledImage =
-        imageLoader.load("../resources/images/texture.jpg",
+        imageLoader.load("../resources/images/texture.jpg", true,
                          vk::PipelineStageFlagBits::eFragmentShader);
 
     vertexBufferList.flush(vk::PipelineStageFlagBits::eVertexInput,

@@ -32,12 +32,12 @@ class ImageLoader<SampledImageRef<Type, Format, _Usage>> {
 public:
   ImageLoader(Device &device) noexcept : m_device{device} {}
 
-  SampledImage load(const std::string &path,
+  SampledImage load(const std::string &path, bool withMipmap,
                     vk::PipelineStageFlags pipelineStage) {
     auto [width, height, data] = loadImage(path);
     auto &buffer = getCandidateBuffer(data.size());
     auto [offset, size] = fillBuffer(buffer, data);
-    auto &[image, imageView] = createNewImage(width, height);
+    auto &[image, imageView] = createNewImage(width, height, withMipmap);
     auto subResourceRange =
         vk::ImageSubresourceRange(image.aspectMask, 0, 1, 0, 1);
 
@@ -68,20 +68,21 @@ private:
     m_memoryTransfer.copyBufferToImage(buffer, image, copier);
   }
 
-  ltl::tuple_t<Image, ImageView> &createNewImage(Width width, Height height) {
+  ltl::tuple_t<Image, ImageView> &createNewImage(Width width, Height height,
+                                                 bool withMipmap) {
     auto w = width.get();
     auto h = height.get();
-    auto image = m_device.createImage<Image>(w, h, 1u);
+    auto image = m_device.createImage<Image>(w, h, 1u, withMipmap);
     auto imageView = image.template createImageView<Type>();
     return m_images.emplace_back(std::move(image), std::move(imageView));
   }
 
   ltl::tuple_t<std::size_t, std::size_t>
   fillBuffer(Buffer &buffer, const std::vector<std::byte> &datas) {
-    auto offset = buffer.size();
+    auto offset = buffer.sizeInBytes();
     for (auto x : datas)
       buffer << x;
-    return {offset, buffer.size()};
+    return {offset, buffer.sizeInBytes()};
   }
 
   auto &getCandidateBuffer(std::size_t size) {

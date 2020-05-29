@@ -27,12 +27,19 @@ public:
         m_mipLevels{mipLevels}, m_arrayLayers{arrayLayers} {}
 
   Image(Allocator &allocator, uint32_t width, uint32_t height, uint32_t depth,
-        VmaMemoryUsage memoryUsage)
+        bool withMipmap, VmaMemoryUsage memoryUsage)
       : m_allocator{&allocator}, m_device{allocator.device()}, m_extent{width,
                                                                         height,
                                                                         depth} {
+    if (withMipmap) {
+      auto sizeMax = std::max({width, height, depth});
+      m_mipLevels = uint32_t(std::log2(sizeMax)) + 1;
+    } else {
+      m_mipLevels = 1;
+    }
+
     vk::ImageCreateInfo info;
-    info.mipLevels = 1;
+    info.mipLevels = m_mipLevels;
     info.usage = imageUsage;
     info.format = format;
     info.imageType = type;
@@ -47,9 +54,10 @@ public:
         allocator.allocateImage(info, memoryUsage);
   }
 
-  Image(Allocator &allocator, uint32_t width, uint32_t height,
-        uint32_t depth) noexcept
-      : Image(allocator, width, height, depth, VMA_MEMORY_USAGE_GPU_ONLY) {}
+  Image(Allocator &allocator, uint32_t width, uint32_t height, uint32_t depth,
+        bool withMipmap) noexcept
+      : Image(allocator, width, height, depth, withMipmap,
+              VMA_MEMORY_USAGE_GPU_ONLY) {}
 
   Image(Image &&image) noexcept
       : m_allocator{image.m_allocator}, m_device{image.m_device},
