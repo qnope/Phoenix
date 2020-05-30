@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Phoenix)
 
 if(MSVC)
-    add_compile_options(/experimental:preprocessor /permissive-)
+    add_compile_options(/Zc:preprocessor /permissive-)
 endif(MSVC)
 
 set(CMAKE_CXX_STANDARD 17)
