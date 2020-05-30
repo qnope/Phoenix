@@ -9,7 +9,7 @@ namespace phx {
 namespace dynamic_state {
 struct DynamicState {
 protected:
-  DynamicState() = default;
+  constexpr DynamicState() = default;
 };
 struct DynamicViewport : DynamicState {
   static constexpr auto state = vk::DynamicState::eViewport;
