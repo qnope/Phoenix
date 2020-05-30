@@ -98,6 +98,25 @@ public:
     copyBufferRange(src, dst, copy);
   }
 
+  template <typename B1, typename B2>
+  void copyBufferRange(const B1 &src, const B2 &dst, vk::BufferCopy range) {
+    typed_static_assert_msg(
+        doesBufferSupport<vk::BufferUsageFlagBits::eTransferSrc>(src),
+        "Src Buffer must be a transferable source");
+
+    typed_static_assert_msg(
+        doesBufferSupport<vk::BufferUsageFlagBits::eTransferDst>(dst),
+        "Dst Buffer must be a transferable destination");
+
+    typed_static_assert_msg(dst.type == src.type,
+                            "Src and dst Buffer must be of the same type");
+
+    assert(src.sizeInBytes() >= range.srcOffset + range.size);
+    assert(dst.sizeInBytes() >= range.dstOffset + range.size);
+    getCurrentCommandBuffer().copyBuffer(src.getHandle(), dst.getHandle(),
+                                         range);
+  }
+
   template <typename B, typename I>
   void copyBufferToImage(const B &buffer, const I &image) {
     vk::BufferImageCopy region{};
@@ -127,23 +146,30 @@ public:
         vk::ImageLayout::eTransferDstOptimal, range);
   }
 
-  template <typename B1, typename B2>
-  void copyBufferRange(const B1 &src, const B2 &dst, vk::BufferCopy range) {
+  template <typename I> void generateMipmap(const I &image) {
     typed_static_assert_msg(
-        doesBufferSupport<vk::BufferUsageFlagBits::eTransferSrc>(src),
-        "Src Buffer must be a transferable source");
-
+        doesImageSupport<vk::ImageUsageFlagBits::eTransferSrc>(image),
+        "Image must be a transferable source");
     typed_static_assert_msg(
-        doesBufferSupport<vk::BufferUsageFlagBits::eTransferDst>(dst),
-        "Dst Buffer must be a transferable destination");
+        doesImageSupport<vk::ImageUsageFlagBits::eTransferDst>(image),
+        "Image must be a transferable destination");
 
-    typed_static_assert_msg(dst.type == src.type,
-                            "Src and dst Buffer must be of the same type");
-
-    assert(src.sizeInBytes() >= range.srcOffset + range.size);
-    assert(dst.sizeInBytes() >= range.dstOffset + range.size);
-    getCurrentCommandBuffer().copyBuffer(src.getHandle(), dst.getHandle(),
-                                         range);
+    auto cmd = getCurrentCommandBuffer();
+    auto handle = image.getHandle();
+    for (uint32_t i = 1; i < image.getMipLevels(); ++i) {
+      vk::ImageSubresourceLayers srcLayer(image.aspectMask, i - 1, 0, 1);
+      vk::ImageSubresourceLayers dstLayer(image.aspectMask, i, 0, 1);
+      auto srcOffset = image.extentAsOffset(i - 1);
+      auto dstOffset = image.extentAsOffset(i);
+      vk::ImageBlit blitter(srcLayer, {vk::Offset3D{}, srcOffset}, dstLayer,
+                            {vk::Offset3D{}, dstOffset});
+      cmd.blitImage(handle, vk::ImageLayout::eTransferSrcOptimal, handle,
+                    vk::ImageLayout::eTransferDstOptimal, blitter,
+                    vk::Filter::eLinear);
+      LayoutTransitionTransferDstToSrcBarrier dstToSrcBarrier{
+          handle, vk::ImageSubresourceRange(image.aspectMask, i, 1, 0, 1)};
+      applyBarrier(dstToSrcBarrier);
+    }
   }
 
   void applyBarrier(Barrier barrier) {

@@ -31,7 +31,19 @@ void applyBarrier(vk::CommandBuffer cmd, LayoutTransitionBarrier barrier) {
 }
 
 void applyBarrier(vk::CommandBuffer cmd,
-                  LayoutTransitionTransferToSampledBarrier barrier) {
+                  LayoutTransitionTransferDstToSrcBarrier barrier) {
+  vk::ImageMemoryBarrier memoryBarrier(
+      vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eTransferRead,
+      vk::ImageLayout::eTransferDstOptimal,
+      vk::ImageLayout::eTransferSrcOptimal, VK_QUEUE_FAMILY_IGNORED,
+      VK_QUEUE_FAMILY_IGNORED, barrier.image, barrier.range);
+  cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                      vk::PipelineStageFlagBits::eTransfer,
+                      vk::DependencyFlags(), {}, {}, memoryBarrier);
+}
+
+void applyBarrier(vk::CommandBuffer cmd,
+                  LayoutTransitionTransferDstToSampledBarrier barrier) {
   vk::ImageMemoryBarrier memoryBarrier(
       vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead,
       vk::ImageLayout::eTransferDstOptimal,
@@ -42,7 +54,18 @@ void applyBarrier(vk::CommandBuffer cmd,
 }
 
 void applyBarrier(vk::CommandBuffer cmd,
-                  LayoutTransitionUndefinedToTransferSrcBarrier barrier) {
+                  LayoutTransitionTransferSrcToSampledBarrier barrier) {
+  vk::ImageMemoryBarrier memoryBarrier(
+      vk::AccessFlags(), vk::AccessFlagBits::eShaderRead,
+      vk::ImageLayout::eTransferSrcOptimal,
+      vk::ImageLayout::eShaderReadOnlyOptimal, VK_QUEUE_FAMILY_IGNORED,
+      VK_QUEUE_FAMILY_IGNORED, barrier.image, barrier.range);
+  cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, barrier.dstStage,
+                      vk::DependencyFlags(), {}, {}, memoryBarrier);
+}
+
+void applyBarrier(vk::CommandBuffer cmd,
+                  LayoutTransitionUndefinedToTransferDstBarrier barrier) {
   vk::ImageMemoryBarrier memoryBarrier(
       vk::AccessFlags(), vk::AccessFlagBits::eTransferWrite,
       vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal,

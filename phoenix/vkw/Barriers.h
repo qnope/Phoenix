@@ -7,13 +7,24 @@
 
 namespace phx {
 
-struct LayoutTransitionTransferToSampledBarrier {
+struct LayoutTransitionTransferSrcToSampledBarrier {
   vk::Image image;
   vk::PipelineStageFlags dstStage;
   vk::ImageSubresourceRange range;
 };
 
-struct LayoutTransitionUndefinedToTransferSrcBarrier {
+struct LayoutTransitionTransferDstToSampledBarrier {
+  vk::Image image;
+  vk::PipelineStageFlags dstStage;
+  vk::ImageSubresourceRange range;
+};
+
+struct LayoutTransitionUndefinedToTransferDstBarrier {
+  vk::Image image;
+  vk::ImageSubresourceRange range;
+};
+
+struct LayoutTransitionTransferDstToSrcBarrier {
   vk::Image image;
   vk::ImageSubresourceRange range;
 };
@@ -42,8 +53,10 @@ struct MemoryBarrier {
 using Barrier = std::variant<FullBarrier,                                  //
                              MemoryBarrier,                                //
                              LayoutTransitionBarrier,                      //
-                             LayoutTransitionTransferToSampledBarrier,     //
-                             LayoutTransitionUndefinedToTransferSrcBarrier //
+                             LayoutTransitionTransferDstToSrcBarrier,      //
+                             LayoutTransitionTransferDstToSampledBarrier,  //
+                             LayoutTransitionTransferSrcToSampledBarrier,  //
+                             LayoutTransitionUndefinedToTransferDstBarrier //
                              >;
 
 namespace details {
@@ -51,9 +64,13 @@ void applyBarrier(vk::CommandBuffer cmd, FullBarrier barrier);
 void applyBarrier(vk::CommandBuffer cmd, MemoryBarrier barrier);
 void applyBarrier(vk::CommandBuffer cmd, LayoutTransitionBarrier barrier);
 void applyBarrier(vk::CommandBuffer cmd,
-                  LayoutTransitionTransferToSampledBarrier barrier);
+                  LayoutTransitionTransferDstToSrcBarrier barrier);
 void applyBarrier(vk::CommandBuffer cmd,
-                  LayoutTransitionUndefinedToTransferSrcBarrier barrier);
+                  LayoutTransitionTransferSrcToSampledBarrier barrier);
+void applyBarrier(vk::CommandBuffer cmd,
+                  LayoutTransitionTransferDstToSampledBarrier barrier);
+void applyBarrier(vk::CommandBuffer cmd,
+                  LayoutTransitionUndefinedToTransferDstBarrier barrier);
 } // namespace details
 
 template <typename T> void applyBarrier(T &&obj, Barrier barrier) {

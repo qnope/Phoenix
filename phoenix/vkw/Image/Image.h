@@ -16,7 +16,7 @@ public:
   static constexpr auto imageUsage = vk::ImageUsageFlags(Usage);
   static constexpr auto format = Format;
 
-  static constexpr auto aspectMask =
+  static constexpr vk::ImageAspectFlags aspectMask =
       (format == ltl::AnyOf{vk::Format::eD16Unorm, vk::Format::eD32Sfloat})
           ? vk::ImageAspectFlagBits::eDepth
           : vk::ImageAspectFlagBits::eColor;
@@ -85,6 +85,8 @@ public:
     return *this;
   }
 
+  bool hasMipmap() const noexcept { return m_mipLevels > 1; }
+
   vk::Extent3D getExtent() const noexcept { return m_extent; }
   uint32_t getMipLevels() const noexcept { return m_mipLevels; }
   uint32_t getArrayLayers() const noexcept { return m_arrayLayers; }
@@ -108,6 +110,12 @@ public:
         "ImageViewType must be compatible with ImageType");
     return ImageView<ImageViewType, Format, Usage>{m_device, getHandle(),
                                                    getSubresourceRange()};
+  }
+
+  vk::Offset3D extentAsOffset(uint32_t mipLevel) const {
+    return {std::max(1, int32_t(m_extent.width >> mipLevel)),
+            std::max(1, int32_t(m_extent.height >> mipLevel)),
+            std::max(1, int32_t(m_extent.depth >> mipLevel))};
   }
 
   void deallocate() {

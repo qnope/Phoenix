@@ -17,11 +17,12 @@ template <vk::ImageViewType type> constexpr auto imageTypeFromImageViewType() {
 
 template <typename SampledImage> class ImageLoader;
 
-constexpr auto MAX_STAGING_BUFFER_SIZE = 1 << 25;
+constexpr std::size_t MAX_STAGING_BUFFER_SIZE = 1 << 25;
 
 template <vk::ImageViewType Type, vk::Format Format, VkImageUsageFlags _Usage>
 class ImageLoader<SampledImageRef<Type, Format, _Usage>> {
-  static constexpr auto Usage = _Usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+  static constexpr auto Usage = _Usage | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                                VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
   using Image = Image<imageTypeFromImageViewType<Type>(), Format, Usage>;
   using ImageView = ImageView<Type, Format, Usage>;
@@ -38,18 +39,25 @@ public:
     auto &buffer = getCandidateBuffer(data.size());
     auto [offset, size] = fillBuffer(buffer, data);
     auto &[image, imageView] = createNewImage(width, height, withMipmap);
-    auto subResourceRange =
-        vk::ImageSubresourceRange(image.aspectMask, 0, 1, 0, 1);
+    auto subResourceRange = vk::ImageSubresourceRange(
+        image.aspectMask, 0, VK_REMAINING_MIP_LEVELS, 0, 1);
 
-    LayoutTransitionUndefinedToTransferSrcBarrier toTransferBarrier{
+    LayoutTransitionUndefinedToTransferDstBarrier toTransferBarrier{
         image.getHandle(), subResourceRange};
-
-    LayoutTransitionTransferToSampledBarrier toSampledBarrier{
-        image.getHandle(), pipelineStage, subResourceRange};
 
     m_memoryTransfer.applyBarrier(toTransferBarrier);
     copyBufferToImage(buffer, image, offset);
-    m_memoryTransfer.applyBarrier(toSampledBarrier);
+
+    if (withMipmap) {
+      generateMipmap(image);
+      LayoutTransitionTransferSrcToSampledBarrier toSampledBarrier{
+          image.getHandle(), pipelineStage, subResourceRange};
+      m_memoryTransfer.applyBarrier(toSampledBarrier);
+    } else {
+      LayoutTransitionTransferDstToSampledBarrier toSampledBarrier{
+          image.getHandle(), pipelineStage, subResourceRange};
+      m_memoryTransfer.applyBarrier(toSampledBarrier);
+    }
 
     return {imageView, m_sampler};
   }
@@ -57,6 +65,14 @@ public:
   void flush() { m_memoryTransfer.flush(); }
 
 private:
+  void generateMipmap(const Image &image) {
+    vk::ImageSubresourceRange firstLevelRange(image.aspectMask, 0, 1, 0, 1);
+    LayoutTransitionTransferDstToSrcBarrier firstLevelBarrier{image.getHandle(),
+                                                              firstLevelRange};
+    m_memoryTransfer.applyBarrier(firstLevelBarrier);
+    m_memoryTransfer.generateMipmap(image);
+  }
+
   void copyBufferToImage(Buffer &buffer, Image &image, std::size_t offset) {
     vk::BufferImageCopy copier{};
     copier.imageExtent = image.getExtent();
@@ -95,7 +111,7 @@ private:
     }
 
     return m_buffers.emplace_back(
-        m_device.createBuffer<Buffer>(ltl::max(size, MAX_STAGING_BUFFER_SIZE)));
+        m_device.createBuffer<Buffer>(std::max(size, MAX_STAGING_BUFFER_SIZE)));
   }
 
 private:
