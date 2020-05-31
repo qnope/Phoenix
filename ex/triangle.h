@@ -69,10 +69,8 @@ auto make_triangle_pass(phx::Device &device, phx::Width width,
       std::move(pipelineLayout), renderPass, 0_n,
       phx::WithBindingDescriptions{vertexBinding},
       phx::WithShaders{std::move(vertexShader), std::move(fragmentShader)},
-      vk::PrimitiveTopology::eTriangleList,
       phx::WithViewports{phx::viewport::StaticViewport{width, height}},
       phx::WithScissors{phx::scissor::StaticScissor{width, height}},
-      vk::CullModeFlagBits::eNone, vk::PolygonMode::eFill,
       phx::WithOutputs{phx::output::normal_attachment});
 
   return TriangleSubpass{std::move(graphicPipeline), vertexBuffer, indexBuffer,
