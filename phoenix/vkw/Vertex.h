@@ -49,6 +49,10 @@ using Position2D = details::Position<glm::vec2>;
 using Position3D = details::Position<glm::vec3>;
 using Position4D = details::Position<glm::vec4>;
 
+using Normal = details::Normal<glm::vec3>;
+using Tangeant = details::Tangeant<glm::vec3>;
+using BiTangeant = details::BiTangeant<glm::vec3>;
+
 using RgbColor = details::Color<glm::vec3>;
 using RgbaColor = details::Color<glm::vec4>;
 
@@ -94,5 +98,8 @@ template <typename... Types> struct Vertex : Types... {
 };
 
 using Textured2dVertex = Vertex<Position2D, TexCoord>;
+
+using Complete3dVertex =
+    Vertex<Position3D, Normal, Tangeant, BiTangeant, TexCoord>;
 
 } // namespace phx

@@ -8,6 +8,8 @@ endif(MSVC)
 
 set(CMAKE_CXX_STANDARD 17)
 
+include_directories(phoenix/)
+
 include_directories(${LTL_PATH})
 include_directories(${SDL_PATH}/include)
 include_directories(${GLM_PATH})
@@ -46,6 +48,11 @@ set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/Visitors/OneResultVisitor.h
     phoenix/SceneGraph/Visitors/ListResultVisitor.h
     phoenix/SceneGraph/Visitors/WithResultVisitor.h
+
+    phoenix/SceneGraph/DrawInformations/DrawInformations.h
+    phoenix/SceneGraph/DrawInformations/DrawInformationsAllocator.h
+
+    phoenix/SceneGraph/DrawInformations/DrawInformationsAllocator.cpp
     )
 
 set(PHOENIX_VKW_ALLOCATOR

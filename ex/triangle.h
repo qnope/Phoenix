@@ -15,7 +15,8 @@ class TriangleSubpass : public phx::AbstractSubpass {
       "The template paremeter Pipeline must be GraphicPipeline");
 
 public:
-  TriangleSubpass(Pipeline pipeline, phx::VertexBufferInfo vertexBuffer,
+  TriangleSubpass(Pipeline pipeline,
+                  phx::Textured2dVertexBufferInfo vertexBuffer,
                   phx::IndexBufferInfo indexBuffer, DescriptorSet set)
       : m_pipeline{std::move(pipeline)}, //
         m_vertexBuffer{vertexBuffer},    //
@@ -43,7 +44,7 @@ public:
 
 private:
   Pipeline m_pipeline;
-  phx::VertexBufferInfo m_vertexBuffer;
+  phx::Textured2dVertexBufferInfo m_vertexBuffer;
   phx::IndexBufferInfo m_indexBuffer;
   DescriptorSet m_set;
 };
@@ -52,7 +53,7 @@ template <typename... RP, typename DescriptorPool, typename DescriptorSet>
 auto make_triangle_pass(phx::Device &device, phx::Width width,
                         phx::Height height,
                         const phx::RenderPass<RP...> &renderPass,
-                        phx::VertexBufferInfo vertexBuffer,
+                        phx::Textured2dVertexBufferInfo vertexBuffer,
                         phx::IndexBufferInfo indexBuffer,
                         const DescriptorPool &pool, DescriptorSet set) {
   auto vertexShader = device.createShaderModule<phx::VertexShaderType>(

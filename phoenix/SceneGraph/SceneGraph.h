@@ -1,13 +1,16 @@
 #pragma once
 
+#include "DrawInformations/DrawInformationsAllocator.h"
 #include "Nodes/Node.h"
 
 namespace phx {
 
+class Device;
+
 class SceneGraph {
 public:
-  SceneGraph() noexcept;
-  SceneGraph(Node rootNode) noexcept;
+  SceneGraph(Device &device) noexcept;
+  SceneGraph(Device &device, Node rootNode) noexcept;
 
   void setRootNode(Node rootNode) noexcept;
 
@@ -21,6 +24,7 @@ public:
 
 private:
   Node m_rootNode;
+  DrawInformationsAllocator m_drawInfoAllocator;
 };
 
 } // namespace phx

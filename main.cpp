@@ -58,7 +58,7 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
     phx::Device &device = window.getDevice();
     vk::Device deviceHandle = device.getHandle();
     phx::BufferList<phx::IndexBufferInfo> indexBufferList(device);
-    phx::BufferList<phx::VertexBufferInfo> vertexBufferList(device);
+    phx::BufferList<phx::Textured2dVertexBufferInfo> vertexBufferList(device);
     phx::ImageLoader<phx::SampledImage2dRgbaSrgbRef> imageLoader(device);
 
     auto indexInfo = indexBufferList.send(indices);

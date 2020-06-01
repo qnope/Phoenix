@@ -10,7 +10,11 @@ template <typename T, VkBufferUsageFlags usages> struct BufferInfo {
 };
 
 using IndexBufferInfo = BufferInfo<uint32_t, VK_BUFFER_USAGE_INDEX_BUFFER_BIT>;
-using VertexBufferInfo =
+
+using Textured2dVertexBufferInfo =
     BufferInfo<Textured2dVertex, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT>;
+
+using Complete3dVertexBufferInfo =
+    BufferInfo<Complete3dVertex, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT>;
 
 } // namespace phx

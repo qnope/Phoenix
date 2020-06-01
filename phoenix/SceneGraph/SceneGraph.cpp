@@ -4,10 +4,13 @@
 
 namespace phx {
 
-SceneGraph::SceneGraph() noexcept : m_rootNode{GroupNode{}} {}
+SceneGraph::SceneGraph(Device &device) noexcept
+    : m_rootNode{GroupNode{}}, //
+      m_drawInfoAllocator{device} {}
 
-SceneGraph::SceneGraph(Node rootNode) noexcept
-    : m_rootNode{std::move(rootNode)} {}
+SceneGraph::SceneGraph(Device &device, Node rootNode) noexcept
+    : m_rootNode{std::move(rootNode)}, //
+      m_drawInfoAllocator{device} {}
 
 void SceneGraph::setRootNode(Node rootNode) noexcept {
   m_rootNode = std::move(rootNode);
