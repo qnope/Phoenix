@@ -24,6 +24,22 @@ set(PHOENIX_VKW_DESCRIPTOR
     phoenix/vkw/Descriptor/DescriptorSetLayout.h
     )
 
+set(PHOENIX_SCENEGRAPH
+    phoenix/SceneGraph/Nodes/Node.h
+    phoenix/SceneGraph/Nodes/GroupNode.h
+    phoenix/SceneGraph/Nodes/AbstractNode.h
+    phoenix/SceneGraph/Nodes/GeometryNode.h
+    phoenix/SceneGraph/Nodes/ActivableNode.h
+    phoenix/SceneGraph/Nodes/TransformationNode.h
+
+    phoenix/SceneGraph/Nodes/GroupNode.cpp
+    phoenix/SceneGraph/Nodes/GeometryNode.cpp
+    phoenix/SceneGraph/Nodes/ActivableNode.cpp
+    phoenix/SceneGraph/Nodes/TransformationNode.cpp
+
+    phoenix/SceneGraph/Visitors/NodeVisitor.h
+    )
+
 set(PHOENIX_VKW_ALLOCATOR
     phoenix/vkw/Allocator/Allocator.h
     phoenix/vkw/Allocator/AllocatorBlock.h
@@ -98,6 +114,8 @@ set(PHOENIX_VKW
     ${PHOENIX_VKW_PIPELINE}
     ${PHOENIX_VKW_ALLOCATOR}
     ${PHOENIX_VKW_DESCRIPTOR}
+
+    ${PHOENIX_SCENEGRAPH}
     )
 
 set(PHOENIX_EXAMPLE
