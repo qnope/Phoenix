@@ -38,6 +38,10 @@ set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/Nodes/TransformationNode.cpp
 
     phoenix/SceneGraph/Visitors/NodeVisitor.h
+    phoenix/SceneGraph/Visitors/TypedVisitor.h
+    phoenix/SceneGraph/Visitors/OneResultVisitor.h
+    phoenix/SceneGraph/Visitors/ListResultVisitor.h
+    phoenix/SceneGraph/Visitors/WithResultVisitor.h
     )
 
 set(PHOENIX_VKW_ALLOCATOR

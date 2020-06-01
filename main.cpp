@@ -24,6 +24,8 @@
 #include "phoenix/SceneGraph/Nodes/ActivableNode.h"
 #include "phoenix/SceneGraph/Nodes/GeometryNode.h"
 #include "phoenix/SceneGraph/Nodes/Node.h"
+#include "phoenix/SceneGraph/Visitors/ListResultVisitor.h"
+#include "phoenix/SceneGraph/Visitors/OneResultVisitor.h"
 #include "phoenix/SceneGraph/Visitors/TypedVisitor.h"
 #if 1
 
@@ -31,6 +33,7 @@ auto createNode() {
   auto geometry = phx::GeometryNode{};
   phx::ActivableNode node{true};
   node.addChild(std::move(geometry));
+  node.addChild(phx::GeometryNode{});
 
   return node;
 }
