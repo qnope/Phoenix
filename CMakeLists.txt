@@ -25,6 +25,10 @@ set(PHOENIX_VKW_DESCRIPTOR
     )
 
 set(PHOENIX_SCENEGRAPH
+    phoenix/SceneGraph/SceneGraph.h
+
+    phoenix/SceneGraph/SceneGraph.cpp
+
     phoenix/SceneGraph/Nodes/Node.h
     phoenix/SceneGraph/Nodes/GroupNode.h
     phoenix/SceneGraph/Nodes/AbstractNode.h

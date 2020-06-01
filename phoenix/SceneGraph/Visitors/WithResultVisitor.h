@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NodeVisitor.h"
+#include <ltl/traits.h>
 #include <utility>
 
 namespace phx {
@@ -14,4 +15,8 @@ public:
 protected:
   Result m_result;
 };
+
+LTL_MAKE_IS_KIND(WithResultVisitor, is_with_result_visitor, IsWithResultVisitor,
+                 typename);
+
 } // namespace phx

@@ -27,31 +27,7 @@
 #include "phoenix/SceneGraph/Visitors/ListResultVisitor.h"
 #include "phoenix/SceneGraph/Visitors/OneResultVisitor.h"
 #include "phoenix/SceneGraph/Visitors/TypedVisitor.h"
-#if 1
 
-auto createNode() {
-  auto geometry = phx::GeometryNode{};
-  phx::ActivableNode node{true};
-  node.addChild(std::move(geometry));
-  node.addChild(phx::GeometryNode{});
-
-  return node;
-}
-
-int main(int ac, char **av) {
-  phx::Node node = createNode();
-
-  auto visitor = phx::TypedVisitor{
-      ltl::type_list_v<phx::GeometryNode, phx::ActivableNode>, //
-      ltl::overloader{
-          [](phx::GeometryNode &) { std::cout << "printer" << std::endl; },
-          [](phx::ActivableNode &) { return true; }}};
-
-  node.accept(visitor);
-
-  return 0;
-}
-#else
 auto make_render_pass(const phx::PhoenixWindow &window) {
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
   auto attachment = ltl::tuple_t{window.getAttachmentDescription()};
@@ -199,4 +175,3 @@ int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {
 
   return 0;
 }
-#endif

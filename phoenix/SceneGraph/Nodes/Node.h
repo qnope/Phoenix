@@ -5,6 +5,7 @@
 #include <typeindex>
 
 #include "../Visitors/NodeVisitor.h"
+#include "../Visitors/WithResultVisitor.h"
 
 namespace phx {
 
@@ -53,9 +54,13 @@ public:
     return static_cast<ConcreteNode *>(m_node->underlying());
   }
 
-  template <typename Visitor> void accept(Visitor &&visitor) {
+  template <typename Visitor> auto accept(Visitor &&visitor) {
     assert(m_node);
     m_node->accept(visitor);
+
+    if_constexpr(is_with_result_visitor(visitor)) {
+      return visitor.takeResult();
+    }
   }
 
 private:
