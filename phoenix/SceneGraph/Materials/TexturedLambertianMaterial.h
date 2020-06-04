@@ -14,7 +14,7 @@ using TexturedLambertianMaterialSetLayout =
 class TexturedLambertianMaterial : public AbstractMaterial {
 public:
   TexturedLambertianMaterial(
-      const std::string &view,
+      const std::string &path,
       ImageLoader<SampledImage2dRgbaSrgbRef> &imageLoader,
       DescriptorPoolManager &pool) noexcept;
 };

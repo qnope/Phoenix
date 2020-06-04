@@ -6,6 +6,7 @@
 #include <typeindex>
 #include <utility>
 
+#include "AbstractMaterial.h"
 #include <vkw/vulkan.h>
 
 namespace phx {
@@ -31,12 +32,14 @@ class Material {
   };
 
   template <typename T> class Model : public Concept {
-    static_assert(std::is_base_v<AbstractMaterial, T>,
+    static_assert(std::is_base_of_v<AbstractMaterial, T>,
                   "T must be derived from AbstractMaterial");
 
   public:
     Model(T material)
-        : Concept{typeid(T), material.layoutType(), material.descriptorSet()} {}
+        : Concept{typeid(T), material.layoutType(),
+                  material.descriptorSet()}, //
+          m_material{std::move(material)} {}
 
     void *ptr() noexcept override { return std::addressof(m_material); }
 

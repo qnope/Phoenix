@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vkw/Descriptor/DescriptorPoolManager.h>
-
 #include "DrawInformations/DrawInformationsAllocator.h"
 #include "Nodes/Node.h"
 
@@ -23,12 +21,8 @@ public:
   }
 
 private:
-  void prepareDescriptorPools(Device &device);
-
-private:
   Node m_rootNode;
   DrawInformationsAllocator m_drawInfoAllocator;
-  DescriptorPoolManager m_descriptorPoolManager;
 };
 
 } // namespace phx
