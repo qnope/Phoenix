@@ -3,8 +3,9 @@
 #include <vector>
 
 #include <ltl/algos.h>
+#include <ltl/traits.h>
 
-#include "DescriptorPool.h"
+#include "TemplatedDescriptorPool.h"
 
 namespace phx {
 template <typename Layout> class DescriptorPoolList;
@@ -12,7 +13,7 @@ template <typename Layout> class DescriptorPoolList;
 template <typename... Bindings>
 class DescriptorPoolList<DescriptorSetLayout<Bindings...>> {
   using Layout = DescriptorSetLayout<Bindings...>;
-  using Pool = DescriptorPool<Layout>;
+  using Pool = TemplatedDescriptorPool<Layout>;
 
 public:
   DescriptorPoolList(vk::Device device, Layout layout)
@@ -39,4 +40,8 @@ private:
   Layout m_layout;
   std::vector<Pool> m_pools;
 };
+
+LTL_MAKE_IS_KIND(DescriptorPoolList, is_descriptor_pool_list,
+                 IsDescriptorPoolList, typename);
+
 } // namespace phx

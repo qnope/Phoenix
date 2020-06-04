@@ -1,60 +1,57 @@
 #pragma once
 
-#include "../VulkanResource.h"
-#include "../vulkan.h"
-
-#include "DescriptorSet.h"
-#include "DescriptorSetLayout.h"
-
-#include <ltl/ltl.h>
+#include "DescriptorPoolList.h"
+#include <cassert>
+#include <memory>
+#include <typeindex>
 
 namespace phx {
+class DescriptorPool {
+  class Concept {
+  public:
+    Concept(std::type_index type) noexcept : m_type{type} {}
 
-constexpr uint32_t MAX_SET_BY_POOL = 10;
+    std::type_index type() const noexcept { return m_type; }
+    virtual void *ptr() noexcept = 0;
 
-template <typename DescriptorLayout> class DescriptorPool;
+  private:
+    std::type_index m_type;
+  };
 
-template <typename... Bindings>
-class DescriptorPool<DescriptorSetLayout<Bindings...>>
-    : public VulkanResource<vk::UniqueDescriptorPool> {
+  template <typename T> class Model : public Concept {
+    static_assert(is_descriptor_pool_list(ltl::type_v<T>),
+                  "T must be a descriptor pool list");
 
-  using SetLayout = DescriptorSetLayout<Bindings...>;
+  public:
+    Model(T descriptorPoolList) noexcept
+        : Concept{typeid(T)}, //
+          m_descriptorPoolList{std::move(descriptorPoolList)} {}
+
+    void *ptr() noexcept override {
+      return std::addressof(m_descriptorPoolList);
+    }
+
+  private:
+    T m_descriptorPoolList;
+  };
 
 public:
-  DescriptorPool(vk::Device device,
-                 const DescriptorSetLayout<Bindings...> &layout)
-      : m_device{device}, m_layout{layout.getHandle()} {
-    vk::DescriptorPoolCreateInfo info;
+  template <typename T>
+  DescriptorPool(T poolList) noexcept
+      : m_ptr{std::make_shared<Model<T>>(std::move(poolList))} {}
 
-    info.maxSets = MAX_SET_BY_POOL * sizeof...(Bindings);
-    std::array poolSizes = {vk::DescriptorPoolSize(
-        Bindings::descriptorType, MAX_SET_BY_POOL * Bindings::count.value)...};
+  std::type_index type() const noexcept { return m_ptr->type(); }
 
-    info.poolSizeCount = uint32_t(poolSizes.size());
-    info.pPoolSizes = poolSizes.data();
-    m_handle = device.createDescriptorPoolUnique(info);
-  }
-
-  DescriptorSet<SetLayout>
-  allocate(DescriptorBindingTypes<Bindings>... values) noexcept {
-    assert(m_numberOfAllocation < MAX_SET_BY_POOL);
-    ++m_numberOfAllocation;
-
-    vk::DescriptorSetAllocateInfo info;
-    info.pSetLayouts = &m_layout;
-    info.descriptorPool = getHandle();
-    info.descriptorSetCount = 1;
-
-    return {m_device, m_device.allocateDescriptorSets(info)[0], {values...}};
-  }
-
-  bool isFull() const noexcept {
-    return m_numberOfAllocation == MAX_SET_BY_POOL;
+  template <typename Layout>
+  auto allocate(decltype_t(Layout::type_list) values) {
+    using List = DescriptorPoolList<Layout>;
+    assert(m_ptr->type() == typeid(List));
+    auto *ptr = static_cast<List *>(m_ptr->ptr());
+    return values(
+        [ptr](auto... xs) { return ptr->allocate(std::move(xs)...); });
   }
 
 private:
-  vk::Device m_device;
-  vk::DescriptorSetLayout m_layout;
-  std::size_t m_numberOfAllocation = 0;
+  std::shared_ptr<Concept> m_ptr;
 };
 } // namespace phx

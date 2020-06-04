@@ -18,14 +18,6 @@ include_directories(${VULKAN_MEMORY_ALLOCATOR_PATH}/src)
 
 set(MAIN_SRC main.cpp)
 
-set(PHOENIX_VKW_DESCRIPTOR
-    phoenix/vkw/Descriptor/DescriptorSet.h
-    phoenix/vkw/Descriptor/DescriptorPool.h
-    phoenix/vkw/Descriptor/DescriptorBinding.h
-    phoenix/vkw/Descriptor/DescriptorPoolList.h
-    phoenix/vkw/Descriptor/DescriptorSetLayout.h
-    )
-
 set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/SceneGraph.h
 
@@ -60,6 +52,18 @@ set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/DrawInformations/DrawInformationsAllocator.h
 
     phoenix/SceneGraph/DrawInformations/DrawInformationsAllocator.cpp
+    )
+
+set(PHOENIX_VKW_DESCRIPTOR
+    phoenix/vkw/Descriptor/DescriptorSet.h
+    phoenix/vkw/Descriptor/DescriptorPool.h
+    phoenix/vkw/Descriptor/DescriptorBinding.h
+    phoenix/vkw/Descriptor/DescriptorPoolList.h
+    phoenix/vkw/Descriptor/DescriptorSetLayout.h
+    phoenix/vkw/Descriptor/DescriptorPoolManager.h
+    phoenix/vkw/Descriptor/TemplatedDescriptorPool.h
+
+    phoenix/vkw/Descriptor/DescriptorPoolManager.cpp
     )
 
 set(PHOENIX_VKW_ALLOCATOR

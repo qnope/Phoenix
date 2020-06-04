@@ -2,7 +2,7 @@
 
 #include "AbstractMaterial.h"
 #include <vkw/Descriptor/DescriptorBinding.h>
-#include <vkw/Descriptor/DescriptorPoolList.h>
+#include <vkw/Descriptor/DescriptorPoolManager.h>
 #include <vkw/Descriptor/DescriptorSetLayout.h>
 #include <vkw/Image/ImageLoader.h>
 
@@ -16,7 +16,7 @@ public:
   TexturedLambertianMaterial(
       const std::string &view,
       ImageLoader<SampledImage2dRgbaSrgbRef> &imageLoader,
-      DescriptorPoolList<TexturedLambertianMaterialSetLayout> &pool) noexcept;
+      DescriptorPoolManager &pool) noexcept;
 };
 
 } // namespace phx

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "phoenix/vkw/Descriptor/DescriptorPool.h"
+#include "phoenix/vkw/Descriptor/TemplatedDescriptorPool.h"
 #include "phoenix/vkw/MemoryTransfer.h"
 
 #include "ex/triangle.h"
@@ -27,8 +27,6 @@
 #include "phoenix/SceneGraph/Visitors/ListResultVisitor.h"
 #include "phoenix/SceneGraph/Visitors/OneResultVisitor.h"
 #include "phoenix/SceneGraph/Visitors/TypedVisitor.h"
-
-#include "phoenix/SceneGraph/Materials/Material.h"
 
 auto make_render_pass(const phx::PhoenixWindow &window) {
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};

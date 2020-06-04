@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <memory>
+#include <type_traits>
 #include <typeindex>
 #include <utility>
 
@@ -30,6 +31,9 @@ class Material {
   };
 
   template <typename T> class Model : public Concept {
+    static_assert(std::is_base_v<AbstractMaterial, T>,
+                  "T must be derived from AbstractMaterial");
+
   public:
     Model(T material)
         : Concept{typeid(T), material.layoutType(), material.descriptorSet()} {}
