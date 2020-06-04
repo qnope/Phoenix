@@ -7,7 +7,10 @@
 #include "DescriptorPool.h"
 
 namespace phx {
-template <typename... Bindings> class DescriptorPoolList {
+template <typename Layout> class DescriptorPoolList;
+
+template <typename... Bindings>
+class DescriptorPoolList<DescriptorSetLayout<Bindings...>> {
   using Layout = DescriptorSetLayout<Bindings...>;
   using Pool = DescriptorPool<Layout>;
 

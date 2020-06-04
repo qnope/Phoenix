@@ -15,7 +15,7 @@ public:
   void setRootNode(Node rootNode) noexcept;
 
   template <typename ConcreteNode> ConcreteNode *rootNode() {
-    return m_rootNode.getConcretePtr<ConcreteNode>();
+    return m_rootNode.get<ConcreteNode>();
   }
 
   template <typename Visitor> auto dispatch(Visitor &&visitor) {

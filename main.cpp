@@ -28,6 +28,8 @@
 #include "phoenix/SceneGraph/Visitors/OneResultVisitor.h"
 #include "phoenix/SceneGraph/Visitors/TypedVisitor.h"
 
+#include "phoenix/SceneGraph/Materials/Material.h"
+
 auto make_render_pass(const phx::PhoenixWindow &window) {
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
   auto attachment = ltl::tuple_t{window.getAttachmentDescription()};
@@ -38,7 +40,8 @@ auto make_render_pass(const phx::PhoenixWindow &window) {
 }
 
 auto createDescriptorPool(phx::Device &device) {
-  return device.createDescriptorPool<phx::SampledImage2dRgbaSrgbBinding>();
+  return device.createDescriptorPool<
+      phx::DescriptorSetLayout<phx::SampledImage2dRgbaSrgbBinding>>();
 }
 
 int main([[maybe_unused]] int ac, [[maybe_unused]] char **av) {

@@ -70,14 +70,9 @@ public:
     return {*m_allocator, size};
   }
 
-  template <typename... Bindings>
-  DescriptorSetLayout<Bindings...> createDescriptorSetLayout() const {
-    return {getHandle()};
-  }
-
-  template <typename... Bindings>
-  DescriptorPoolList<Bindings...> createDescriptorPool() const {
-    return {getHandle(), DescriptorSetLayout<Bindings...>{getHandle()}};
+  template <typename Layout>
+  DescriptorPoolList<Layout> createDescriptorPool() const {
+    return {getHandle(), Layout{getHandle()}};
   }
 
   template <typename Image, typename... Ts> Image createImage(Ts... ts) const {

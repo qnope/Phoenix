@@ -16,7 +16,7 @@ class Node {
         : m_typeIndex{type_index} {}
 
     virtual void accept(NodeVisitor &visitor) = 0;
-    virtual void *underlying() = 0;
+    virtual void *ptr() = 0;
 
     virtual ~NodeConcept() = default;
 
@@ -35,7 +35,7 @@ class Node {
         : NodeConcept{typeid(ConcreteNode)}, //
           m_node{std::move(node)} {}
 
-    void *underlying() override { return std::addressof(m_node); }
+    void *ptr() override { return std::addressof(m_node); }
 
     void accept(NodeVisitor &visitor) override { m_node.accept(visitor); }
 
@@ -48,10 +48,10 @@ public:
   Node(ConcreteNode node) noexcept
       : m_node{std::make_shared<NodeModel<ConcreteNode>>(std::move(node))} {}
 
-  template <typename ConcreteNode> ConcreteNode *getConcretePtr() {
+  template <typename ConcreteNode> ConcreteNode *get() {
     assert(m_node);
     assert(m_node->typeIndex() == typeid(ConcreteNode));
-    return static_cast<ConcreteNode *>(m_node->underlying());
+    return static_cast<ConcreteNode *>(m_node->ptr());
   }
 
   template <typename Visitor> auto accept(Visitor &&visitor) {

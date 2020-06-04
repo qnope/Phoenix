@@ -43,6 +43,13 @@ set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/Nodes/ActivableNode.cpp
     phoenix/SceneGraph/Nodes/TransformationNode.cpp
 
+    phoenix/SceneGraph/Materials/Material.h
+    phoenix/SceneGraph/Materials/AbstractMaterial.h
+    phoenix/SceneGraph/Materials/TexturedLambertianMaterial.h
+
+    phoenix/SceneGraph/Materials/AbstractMaterial.cpp
+    phoenix/SceneGraph/Materials/TexturedLambertianMaterial.cpp
+
     phoenix/SceneGraph/Visitors/NodeVisitor.h
     phoenix/SceneGraph/Visitors/TypedVisitor.h
     phoenix/SceneGraph/Visitors/OneResultVisitor.h
