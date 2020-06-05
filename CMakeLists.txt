@@ -64,8 +64,6 @@ set(PHOENIX_VKW_DESCRIPTOR
     phoenix/vkw/Descriptor/DescriptorSetLayout.h
     phoenix/vkw/Descriptor/DescriptorPoolManager.h
     phoenix/vkw/Descriptor/TemplatedDescriptorPool.h
-
-    phoenix/vkw/Descriptor/DescriptorPoolManager.cpp
     )
 
 set(PHOENIX_VKW_ALLOCATOR

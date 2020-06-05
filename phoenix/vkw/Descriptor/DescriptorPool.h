@@ -1,57 +1,25 @@
 #pragma once
 
 #include "DescriptorPoolList.h"
-#include <cassert>
-#include <memory>
-#include <typeindex>
+#include <ltl/movable_any.h>
 
 namespace phx {
 class DescriptorPool {
-  class Concept {
-  public:
-    Concept(std::type_index type) noexcept : m_type{type} {}
-
-    std::type_index type() const noexcept { return m_type; }
-    virtual void *ptr() noexcept = 0;
-
-  private:
-    std::type_index m_type;
-  };
-
-  template <typename T> class Model : public Concept {
-    static_assert(is_descriptor_pool_list(ltl::type_v<T>),
-                  "T must be a descriptor pool list");
-
-  public:
-    Model(T descriptorPoolList) noexcept
-        : Concept{typeid(T)}, //
-          m_descriptorPoolList{std::move(descriptorPoolList)} {}
-
-    void *ptr() noexcept override {
-      return std::addressof(m_descriptorPoolList);
-    }
-
-  private:
-    T m_descriptorPoolList;
-  };
-
 public:
   template <typename T>
-  DescriptorPool(T poolList) noexcept
-      : m_ptr{std::make_shared<Model<T>>(std::move(poolList))} {}
+  DescriptorPool(T poolList) noexcept : m_pool{std::move(poolList)} {}
 
-  std::type_index type() const noexcept { return m_ptr->type(); }
+  std::type_index type() const noexcept { return m_pool.type(); }
 
   template <typename Layout>
   auto allocate(decltype_t(Layout::type_list) values) {
     using List = DescriptorPoolList<Layout>;
-    assert(m_ptr->type() == typeid(List));
-    auto *ptr = static_cast<List *>(m_ptr->ptr());
+    auto &ptr = m_pool.get<List>();
     return values(
-        [ptr](auto... xs) { return ptr->allocate(std::move(xs)...); });
+        [&ptr](auto... xs) { return ptr.allocate(std::move(xs)...); });
   }
 
 private:
-  std::shared_ptr<Concept> m_ptr;
+  ltl::movable_any m_pool;
 };
 } // namespace phx

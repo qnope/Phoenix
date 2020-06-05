@@ -1,69 +1,29 @@
 #pragma once
 
-#include <cassert>
-#include <memory>
-#include <type_traits>
 #include <typeindex>
 #include <utility>
-
-#include "AbstractMaterial.h"
 #include <vkw/vulkan.h>
+
+#include <ltl/movable_any.h>
 
 namespace phx {
 class Material {
-  class Concept {
-  public:
-    Concept(std::type_index type, std::type_index layoutType,
-            vk::DescriptorSet descriptorSet) noexcept
-        : m_type{type},             //
-          m_layoutType{layoutType}, //
-          m_descriptorSet{descriptorSet} {}
-
-    std::type_index type() const noexcept { return m_type; }
-    std::type_index layoutType() const noexcept { return m_layoutType; }
-    vk::DescriptorSet descriptorSet() const noexcept { return m_descriptorSet; }
-
-    virtual void *ptr() noexcept = 0;
-
-  private:
-    std::type_index m_type;
-    std::type_index m_layoutType;
-    vk::DescriptorSet m_descriptorSet;
-  };
-
-  template <typename T> class Model : public Concept {
-    static_assert(std::is_base_of_v<AbstractMaterial, T>,
-                  "T must be derived from AbstractMaterial");
-
-  public:
-    Model(T material)
-        : Concept{typeid(T), material.layoutType(),
-                  material.descriptorSet()}, //
-          m_material{std::move(material)} {}
-
-    void *ptr() noexcept override { return std::addressof(m_material); }
-
-  private:
-    T m_material;
-  };
-
 public:
   template <typename T>
   Material(T material) noexcept
-      : m_ptr{std::make_shared<Model<T>>(std::move(material))} {}
+      : m_layoutType{material.layoutType()},       //
+        m_descriptorSet{material.descriptorSet()}, //
+        m_material{std::move(material)} {}
 
-  std::type_index type() const noexcept { return m_ptr->type(); }
-  std::type_index layoutType() const noexcept { return m_ptr->layoutType(); }
-  vk::DescriptorSet descriptorSet() const noexcept {
-    return m_ptr->descriptorSet();
-  }
+  std::type_index type() const noexcept { return m_material.type(); }
+  std::type_index layoutType() const noexcept { return m_layoutType; }
+  vk::DescriptorSet descriptorSet() const noexcept { return m_descriptorSet; }
 
-  template <typename T> T *get() {
-    assert(type() != typeid(T));
-    return static_cast<T *>(m_ptr->ptr());
-  }
+  template <typename T> T &get() { return m_material.get<T>(); }
 
 private:
-  std::shared_ptr<Concept> m_ptr;
+  std::type_index m_layoutType;
+  vk::DescriptorSet m_descriptorSet;
+  ltl::movable_any m_material;
 };
 } // namespace phx
