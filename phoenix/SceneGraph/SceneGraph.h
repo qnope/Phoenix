@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DrawInformations/DrawInformationsAllocator.h"
+#include "Materials/MaterialFactory.h"
 #include "Nodes/Node.h"
 
 namespace phx {
@@ -20,9 +21,14 @@ public:
     return m_rootNode.accept(visitor);
   }
 
+  MaterialFactory &materialFactory() noexcept;
+  DrawInformations allocate(const std::vector<Complete3dVertex> &vertex,
+                            const std::vector<uint32_t> &indices);
+
 private:
   Node m_rootNode;
   DrawInformationsAllocator m_drawInfoAllocator;
+  MaterialFactory m_materialFactory;
 };
 
 } // namespace phx
