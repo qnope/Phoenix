@@ -22,8 +22,12 @@ public:
   }
 
   MaterialFactory &materialFactory() noexcept;
-  DrawInformations allocate(const std::vector<Complete3dVertex> &vertex,
-                            const std::vector<uint32_t> &indices);
+  DrawInformations
+  allocateDrawInformations(const std::vector<Complete3dVertex> &vertex,
+                           const std::vector<uint32_t> &indices);
+
+  void flush(vk::PipelineStageFlags nextPipeline,
+             vk::AccessFlags nextAccess) noexcept;
 
 private:
   Node m_rootNode;

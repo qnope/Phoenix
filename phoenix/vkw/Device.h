@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "Allocator/Allocator.h"
-#include "GraphicPipeline.h"
+#include "Framebuffer.h"
 #include "Image/Sampler.h"
 #include "Instance.h"
 #include "PipelineLayout.h"
@@ -11,6 +11,7 @@
 #include "RenderPass.h"
 #include "ShaderModule.h"
 #include "Surface.h"
+#include "TemplatedGraphicPipeline.h"
 #include "VulkanResource.h"
 
 #include "Descriptor/DescriptorPoolList.h"
@@ -40,16 +41,13 @@ public:
   }
 
   template <typename... SetLayout>
-  PipelineLayout<SetLayout...>
-  createPipelineLayout(const SetLayout &... setLayouts) const {
+  PipelineLayout createPipelineLayout(const SetLayout &... setLayouts) const {
     return {getHandle(), setLayouts...};
   }
 
-  template <typename... Uniforms, typename... RPs, typename SubpassIndex,
-            typename... Args>
-  GraphicPipeline<PipelineLayout<Uniforms...>, RenderPass<RPs...>, SubpassIndex,
-                  Args...>
-  createGraphicPipeline(PipelineLayout<Uniforms...> pipelineLayout,
+  template <typename... RPs, typename SubpassIndex, typename... Args>
+  TemplatedGraphicPipeline<RenderPass<RPs...>, SubpassIndex, Args...>
+  createGraphicPipeline(PipelineLayout pipelineLayout,
                         const RenderPass<RPs...> &renderPass,
                         SubpassIndex subpassIndex, Args... args) const {
     return {getHandle(), std::move(pipelineLayout), renderPass, subpassIndex,
@@ -82,6 +80,13 @@ public:
   Sampler createSampler(vk::Filter filterMinMag,
                         vk::SamplerMipmapMode mipmapMode) const noexcept {
     return {getHandle(), filterMinMag, mipmapMode};
+  }
+
+  template <typename... Ts>
+  Framebuffer<Ts...> createFramebuffer(vk::RenderPass renderPass,
+                                       uint32_t width, uint32_t height,
+                                       Ts... attachments) const noexcept {
+    return {getHandle(), renderPass, width, height, {attachments...}};
   }
 
   Fence createFence(bool signaledState) const;

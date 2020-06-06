@@ -17,15 +17,15 @@ public:
   bool visit(AbstractNode &node) override {
     bool res = true;
     auto caller = [this, &node, &res](auto type) {
-      if (auto ptr = dynamic_cast<decltype_t(type)>(std::addressof(node))) {
+      if (auto ptr = dynamic_cast<decltype_t(type) *>(std::addressof(node))) {
         constexpr auto returnType = type_from(ltl::invoke(m_f, *ptr));
-        if_constexpr(returnType == type) { //
-          res = false;
+        if_constexpr(returnType == this->type) { //
+          res = true;
           this->m_result.push_back(ltl::invoke(m_f, *ptr));
         }
         else_if_constexpr(returnType == optional_type) { //
           if (auto result = ltl::invoke(m_f, *ptr)) {
-            res = false;
+            res = true;
             this->m_result.push_back(std::move(*result));
           }
         }

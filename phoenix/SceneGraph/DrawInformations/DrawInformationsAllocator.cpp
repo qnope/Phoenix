@@ -23,6 +23,12 @@ public:
                             vertexBufferInfo.offset);
   }
 
+  void flush(vk::PipelineStageFlags nextPipeline,
+             vk::AccessFlags nextAccess) noexcept {
+    m_vertexBufferList.flush(nextPipeline, nextAccess);
+    m_indexBufferList.flush(nextPipeline, nextAccess);
+  }
+
 private:
   BufferList<Complete3dVertexBufferInfo> m_vertexBufferList;
   BufferList<IndexBufferInfo> m_indexBufferList;
@@ -40,6 +46,11 @@ DrawInformations DrawInformationsAllocator::allocate(
     const std::vector<Complete3dVertex> &vertices,
     const std::vector<uint32_t> &indices) {
   return m_vertexAndIndexBufferListPimpl->allocate(vertices, indices);
+}
+
+void DrawInformationsAllocator::flush(vk::PipelineStageFlags nextPipeline,
+                                      vk::AccessFlags nextAccess) noexcept {
+  m_vertexAndIndexBufferListPimpl->flush(nextPipeline, nextAccess);
 }
 
 } // namespace phx

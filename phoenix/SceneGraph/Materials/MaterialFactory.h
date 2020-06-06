@@ -14,6 +14,10 @@ public:
 
   Material createTexturedLambertianMaterial(const std::string &path) noexcept;
 
+  void flush() noexcept;
+
+  DescriptorPoolManager &descriptorPoolManager() noexcept;
+
 private:
   ImageLoader<SampledImage2dRgbaSrgbRef> m_imageLoader;
   DescriptorPoolManager m_descriptorPoolManager;

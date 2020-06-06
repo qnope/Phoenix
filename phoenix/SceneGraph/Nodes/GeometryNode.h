@@ -11,7 +11,7 @@ public:
   GeometryNode(DrawInformations informations, Material material) noexcept;
 
   DrawInformations drawInformations() const noexcept;
-  const Material &material() const noexcept;
+  Material material() const noexcept;
 
 private:
   DrawInformations m_informations;

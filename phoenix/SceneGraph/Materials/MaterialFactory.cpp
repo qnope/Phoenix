@@ -16,4 +16,10 @@ Material MaterialFactory::createTexturedLambertianMaterial(
                                     m_descriptorPoolManager);
 }
 
+void MaterialFactory::flush() noexcept { return m_imageLoader.flush(); }
+
+DescriptorPoolManager &MaterialFactory::descriptorPoolManager() noexcept {
+  return m_descriptorPoolManager;
+}
+
 } // namespace phx

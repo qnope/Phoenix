@@ -49,7 +49,7 @@ public:
         case vk::Format::eD24UnormS8Uint:
         case vk::Format::eD32Sfloat:
         case vk::Format::eD32SfloatS8Uint:
-          return vk::ClearDepthStencilValue{0.0f, 0};
+          return vk::ClearDepthStencilValue{1.0f, 0};
         default:
           return vk::ClearColorValue{std::array{0.0f, 0.0f, 0.0f, 1.0f}};
         }

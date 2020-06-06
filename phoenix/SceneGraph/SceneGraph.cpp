@@ -23,10 +23,16 @@ MaterialFactory &SceneGraph::materialFactory() noexcept {
   return m_materialFactory;
 }
 
-DrawInformations
-SceneGraph::allocate(const std::vector<Complete3dVertex> &vertex,
-                     const std::vector<uint32_t> &indices) {
+DrawInformations SceneGraph::allocateDrawInformations(
+    const std::vector<Complete3dVertex> &vertex,
+    const std::vector<uint32_t> &indices) {
   return m_drawInfoAllocator.allocate(vertex, indices);
+}
+
+void SceneGraph::flush(vk::PipelineStageFlags nextPipeline,
+                       vk::AccessFlags nextAccess) noexcept {
+  m_drawInfoAllocator.flush(nextPipeline, nextAccess);
+  m_materialFactory.flush();
 }
 
 } // namespace phx

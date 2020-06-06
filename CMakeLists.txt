@@ -18,6 +18,14 @@ include_directories(${VULKAN_MEMORY_ALLOCATOR_PATH}/src)
 
 set(MAIN_SRC main.cpp)
 
+set(PHOENIX_PASS
+    phoenix/Pass/GBuffer/GBufferRenderPass.h
+    phoenix/Pass/GBuffer/GBufferOutputSubpass.h
+
+    phoenix/Pass/GBuffer/GBufferRenderPass.cpp
+    phoenix/Pass/GBuffer/GBufferOutputSubpass.cpp
+    )
+
 set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/SceneGraph.h
 
@@ -49,6 +57,9 @@ set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/Visitors/OneResultVisitor.h
     phoenix/SceneGraph/Visitors/ListResultVisitor.h
     phoenix/SceneGraph/Visitors/WithResultVisitor.h
+    phoenix/SceneGraph/Visitors/GetDrawBatchesVisitor.h
+
+    phoenix/SceneGraph/Visitors/GetDrawBatchesVisitor.cpp
 
     phoenix/SceneGraph/DrawInformations/DrawInformations.h
     phoenix/SceneGraph/DrawInformations/DrawInformationsAllocator.h
@@ -123,6 +134,7 @@ set(PHOENIX_VKW
     phoenix/vkw/GraphicPipeline.h
     phoenix/vkw/RenderPassWrapper.h
     phoenix/vkw/CommandBufferWrapper.h
+    phoenix/vkw/TemplatedGraphicPipeline.h
 
     phoenix/vkw/Fence.cpp
     phoenix/vkw/Queue.cpp
@@ -140,12 +152,7 @@ set(PHOENIX_VKW
     ${PHOENIX_VKW_PIPELINE}
     ${PHOENIX_VKW_ALLOCATOR}
     ${PHOENIX_VKW_DESCRIPTOR}
-
-    ${PHOENIX_SCENEGRAPH}
     )
-
-set(PHOENIX_EXAMPLE
-    ex/triangle.h)
 
 set(PHOENIX
     phoenix/constant.h
@@ -155,9 +162,13 @@ set(PHOENIX
     phoenix/PhoenixWindow.cpp
     phoenix/SDL_Initializer.cpp
     ${PHOENIX_VKW}
-    ${PHOENIX_EXAMPLE})
+
+    ${PHOENIX_PASS}
+    ${PHOENIX_SCENEGRAPH})
 
 set(SHADER_SRC
+    phoenix/shaders/GBufferPass/GBufferOutput.vert
+    phoenix/shaders/GBufferPass/GBufferOutput.frag
     phoenix/shaders/TriangleTest/triangle.vert
     phoenix/shaders/TriangleTest/triangle.frag)
 

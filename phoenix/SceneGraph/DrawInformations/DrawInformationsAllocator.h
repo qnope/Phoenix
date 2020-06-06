@@ -21,6 +21,9 @@ public:
   DrawInformations allocate(const std::vector<Complete3dVertex> &vertices,
                             const std::vector<uint32_t> &indices);
 
+  void flush(vk::PipelineStageFlags nextPipeline,
+             vk::AccessFlags nextAccess) noexcept;
+
 private:
   std::unique_ptr<details::DrawInformationsAllocatorImpl>
       m_vertexAndIndexBufferListPimpl;

@@ -15,17 +15,26 @@ public:
 
   template <typename Layout>
   auto allocate(decltype_t(Layout::type_list) values) {
+    auto *pool = getPool<Layout>();
+    return pool->template allocate<Layout>(std::move(values));
+  }
+
+  template <typename Layout> const Layout &layout() {
+    auto *pool = getPool<Layout>();
+    return pool->template layout<Layout>();
+  }
+
+private:
+  template <typename Layout> DescriptorPool *getPool() {
     using Pool = DescriptorPoolList<Layout>;
     std::type_index type = typeid(Pool);
 
-    DescriptorPool *pool = ltl::find_map_ptr(m_pools, type);
+    if (auto pool = ltl::find_map_ptr(m_pools, type))
+      return pool;
 
-    if (!pool) {
-      auto it =
-          m_pools.insert({type, m_device.createDescriptorPool<Layout>()}).first;
-      pool = std::addressof(it->second);
-    }
-    return pool->template allocate<Layout>(std::move(values));
+    auto it =
+        m_pools.insert({type, m_device.createDescriptorPool<Layout>()}).first;
+    return std::addressof(it->second);
   }
 
 private:

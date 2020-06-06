@@ -17,9 +17,9 @@ public:
   bool visit(AbstractNode &node) override {
     bool res = true;
     auto caller = [this, &node, &res](auto type) {
-      if (auto ptr = dynamic_cast<decltype_t(type)>(std::addressof(node))) {
+      if (auto ptr = dynamic_cast<decltype_t(type) *>(std::addressof(node))) {
         constexpr auto returnType = type_from(ltl::invoke(m_f, *ptr));
-        if_constexpr(returnType == type) { //
+        if_constexpr(returnType == this->type) { //
           res = false;
           this->m_result = ltl::invoke(m_f, *ptr);
         }

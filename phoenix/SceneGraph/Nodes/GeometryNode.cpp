@@ -11,6 +11,6 @@ DrawInformations GeometryNode::drawInformations() const noexcept {
   return m_informations;
 }
 
-const Material &GeometryNode::material() const noexcept { return m_material; }
+Material GeometryNode::material() const noexcept { return m_material; }
 
 } // namespace phx

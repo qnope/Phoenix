@@ -3,13 +3,19 @@
 #include "VulkanResource.h"
 #include "vulkan.h"
 
-#include <ltl/Tuple.h>
+#include <ltl/algos.h>
+#include <ltl/tuple_algos.h>
+#include <typeindex>
 
 namespace phx {
-template <typename... SetLayouts>
 class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
 public:
-  PipelineLayout(vk::Device device, const SetLayouts &... setLayouts) noexcept {
+  template <typename... SetLayouts>
+  PipelineLayout(vk::Device device, const SetLayouts &... setLayouts) noexcept
+      : m_setNumber{sizeof...(SetLayouts)}, //
+        m_layoutTypes{typeid(SetLayouts)...} {
+    static constexpr auto layouts = ltl::type_list_v<SetLayouts...>;
+
     std::array<vk::DescriptorSetLayout, layouts.length.value>
         descriptorSetLayouts = {setLayouts.getHandle()...};
 
@@ -20,8 +26,32 @@ public:
     m_handle = device.createPipelineLayoutUnique(info);
   }
 
+  template <typename... Sets>
+  void bind(vk::CommandBuffer cmdBuffer, vk::PipelineBindPoint bindPoint,
+            Sets... sets) const noexcept {
+    typed_static_assert_msg(
+        ltl::all_of_type(ltl::type_list_v<Sets...>,
+                         ltl::is_type(ltl::type_v<vk::DescriptorSet>)),
+        "All types must be descriptor sets");
+
+    assert(sizeof...(Sets) == m_setNumber);
+    cmdBuffer.bindDescriptorSets(bindPoint, getHandle(), 0, std::array{sets...},
+                                 {});
+  }
+
+  bool isCompatible(std::type_index layoutType) const noexcept {
+    return ltl::contains(m_layoutTypes, layoutType);
+  }
+
+  uint32_t descriptorSetIndex(std::type_index layoutType) const noexcept {
+    assert(isCompatible(layoutType));
+    return uint32_t(std::distance(m_layoutTypes.begin(),
+                                  *ltl::find(m_layoutTypes, layoutType)));
+  }
+
 public:
-  static constexpr auto layouts = ltl::type_list_v<SetLayouts...>;
+  std::size_t m_setNumber;
+  std::vector<std::type_index> m_layoutTypes;
 };
 
 MAKE_IS_VULKAN_RESOURCE(vk::PipelineLayout, is_pipeline_layout,
