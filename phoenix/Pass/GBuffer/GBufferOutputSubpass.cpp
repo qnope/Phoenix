@@ -21,7 +21,6 @@ GBufferOutputSubpass::getCompatiblePipeline(const Material &material) const
 vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
                              const GBufferOutputSubpass &pass) noexcept {
   assert(pass.m_drawBatches != nullptr);
-  CommandBufferWrapper wrapper(cmdBuffer);
 
   for (auto [matrix, drawInformations, material] : *pass.m_drawBatches) {
     auto pipeline = pass.getCompatiblePipeline(material);
