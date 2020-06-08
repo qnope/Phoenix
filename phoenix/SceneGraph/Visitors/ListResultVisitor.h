@@ -12,7 +12,7 @@ class ListResultVisitor : public WithResultVisitor<std::vector<Result>> {
   static constexpr auto optional_type = ltl::type_v<std::optional<Result>>;
 
 public:
-  ListResultVisitor(F f) noexcept : m_f{std::move(f)} {}
+  ListResultVisitor(F f) noexcept : m_f{FWD(f)} {}
 
   bool visit(AbstractNode &node) override {
     bool res = true;

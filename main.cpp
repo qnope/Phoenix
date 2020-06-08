@@ -1,32 +1,15 @@
 #include <iostream>
 
-#include "phoenix/vkw/Descriptor/TemplatedDescriptorPool.h"
-#include "phoenix/vkw/MemoryTransfer.h"
-
 #include "phoenix/PhoenixWindow.h"
 #include "phoenix/vkw/CommandPool.h"
-#include "phoenix/vkw/SubpassBuilder.h"
-#include "phoenix/vkw/utility.h"
 
-#include "phoenix/vkw/RenderPassWrapper.h"
-#include <ltl/Range/Zip.h>
+#include <ltl/Range/enumerate.h>
 
-#include "phoenix/vkw/Vertex.h"
-
-#include "phoenix/vkw/Buffer/BufferList.h"
-#include "phoenix/vkw/Descriptor/DescriptorPoolList.h"
-#include "phoenix/vkw/Image/ImageLoader.h"
-#include "phoenix/vkw/Image/SampledImage.h"
-
-#include "phoenix/SceneGraph/Nodes/ActivableNode.h"
 #include "phoenix/SceneGraph/Nodes/GeometryNode.h"
-#include "phoenix/SceneGraph/Nodes/Node.h"
 #include "phoenix/SceneGraph/SceneGraph.h"
-#include "phoenix/SceneGraph/Visitors/ListResultVisitor.h"
-#include "phoenix/SceneGraph/Visitors/OneResultVisitor.h"
-#include "phoenix/SceneGraph/Visitors/TypedVisitor.h"
 
 #include "phoenix/Pass/GBuffer/GBufferRenderPass.h"
+#include "phoenix/Pass/Presentation/PresentationRenderPass.h"
 
 phx::GeometryNode createGeometryNode(phx::SceneGraph &sceneGraph) {
   auto &materialFactory = sceneGraph.materialFactory();
@@ -66,19 +49,11 @@ int main(int, char **) {
                      vk::AccessFlagBits::eIndexRead |
                          vk::AccessFlagBits::eVertexAttributeRead);
 
-    phx::GBufferRenderPass renderPass{
-        device, sceneGraph,
-        sceneGraph.materialFactory().descriptorPoolManager(), width, height};
-
     auto queue = device.getQueue();
-
-    // window.generateFramebuffer(renderPass.getHandle());
 
     phx::CommandPool pool(deviceHandle, queue.getIndexFamily(), false, false);
     auto commandBuffers = pool.allocateCommandBuffer(
         vk::CommandBufferLevel::ePrimary, window.getImageCount());
-
-    auto &framebuffers = window.getFramebuffers();
 
     vk::UniqueSemaphore renderFinished = device.createSemaphore();
 
@@ -91,13 +66,16 @@ int main(int, char **) {
     for (auto i = 0u; i < window.getImageCount(); ++i)
       fences.emplace_back(device.createFence(true));
 
-    // for (auto [commandBuffer, framebuffer] :
-    //     ltl::zip(commandBuffers, framebuffers)) {
-    for (auto commandBuffer : commandBuffers) {
+    phx::GBufferRenderPass renderPass{device, sceneGraph, width, height};
+    phx::PresentationRenderPass presentationPass{window};
+
+    for (auto [index, commandBuffer] : ltl::enumerate(commandBuffers)) {
       vk::CommandBufferBeginInfo info;
       commandBuffer.begin(info);
 
-      commandBuffer << renderPass;
+      presentationPass.setSampledImage(index, renderPass.getAlbedoMap());
+
+      commandBuffer << renderPass << presentationPass;
 
       commandBuffer.end();
     }

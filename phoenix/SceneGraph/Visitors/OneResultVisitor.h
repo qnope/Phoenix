@@ -12,7 +12,7 @@ class OneResultVisitor : public WithResultVisitor<Result> {
   static constexpr auto optional_type = ltl::type_v<std::optional<Result>>;
 
 public:
-  OneResultVisitor(F f) noexcept : m_f{std::move(f)} {}
+  OneResultVisitor(F f) noexcept : m_f{FWD(f)} {}
 
   bool visit(AbstractNode &node) override {
     bool res = true;

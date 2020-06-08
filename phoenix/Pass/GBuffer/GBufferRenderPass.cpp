@@ -21,10 +21,9 @@ static auto make_render_pass(Device &device) {
   attachment.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
   auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
-  auto dependency = phx::buildPresentationDependency();
 
   return device.createRenderPass(ltl::tuple_t{attachment}, subpass,
-                                 ltl::tuple_t{dependency});
+                                 ltl::tuple_t{});
 }
 
 using ColorBuffer =
@@ -84,11 +83,17 @@ private:
 };
 
 GBufferRenderPass::GBufferRenderPass(Device &device, SceneGraph &sceneGraph,
-                                     DescriptorPoolManager &manager,
                                      Width width, Height height)
     : m_sceneGraph{sceneGraph}, //
-      m_impl{std::make_unique<Impl>(device, manager, width, height)},
+      m_impl{std::make_unique<Impl>(
+          device,                                               //
+          sceneGraph.materialFactory().descriptorPoolManager(), //
+          width, height)},
       m_albedoMap{m_impl->getSampledAlbedoMap()} {}
+
+SampledImage2dRgbaSrgbRef GBufferRenderPass::getAlbedoMap() const noexcept {
+  return m_impl->getSampledAlbedoMap();
+}
 
 GBufferRenderPass::~GBufferRenderPass() = default;
 
@@ -97,7 +102,7 @@ operator<<(vk::CommandBuffer cmdBuffer,
            const GBufferRenderPass &gBufferRenderPass) noexcept {
   auto &impl = *gBufferRenderPass.m_impl;
   auto &sceneGraph = gBufferRenderPass.m_sceneGraph;
-  auto drawBatches = sceneGraph.dispatch(makeGetDrawBatchesVisitor());
+  auto drawBatches = sceneGraph.dispatch(GetDrawBatchesVisitor{});
 
   auto &renderPass = impl.renderPass();
   auto &framebuffer = impl.framebuffer();

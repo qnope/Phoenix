@@ -7,14 +7,13 @@
 namespace phx {
 class Device;
 class SceneGraph;
-class DescriptorPoolManager;
 
 class GBufferRenderPass {
   class Impl;
 
 public:
-  GBufferRenderPass(Device &device, SceneGraph &sceneGraph,
-                    DescriptorPoolManager &manager, Width width, Height height);
+  GBufferRenderPass(Device &device, SceneGraph &sceneGraph, Width width,
+                    Height height);
 
   SampledImage2dRgbaSrgbRef getAlbedoMap() const noexcept;
 

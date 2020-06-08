@@ -10,16 +10,13 @@ namespace phx {
 
 using DrawBatche = ltl::tuple_t<glm::mat4, DrawInformations, Material>;
 
-namespace details {
-struct GetDrawBatchesVisitorImpl {
+struct GetDrawBatchesVisitor
+    : ListResultVisitor<DrawBatche, GetDrawBatchesVisitor &, GeometryNode> {
+  GetDrawBatchesVisitor() noexcept;
   DrawBatche operator()(const GeometryNode &node) const noexcept;
+
+private:
+  glm::mat4 m_matrix{1.0f};
 };
-} // namespace details
-
-using GetDrawBatchesVisitor =
-    ListResultVisitor<DrawBatche, details::GetDrawBatchesVisitorImpl,
-                      GeometryNode>;
-
-GetDrawBatchesVisitor makeGetDrawBatchesVisitor();
 
 } // namespace phx

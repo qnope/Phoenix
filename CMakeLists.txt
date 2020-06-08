@@ -24,6 +24,12 @@ set(PHOENIX_PASS
 
     phoenix/Pass/GBuffer/GBufferRenderPass.cpp
     phoenix/Pass/GBuffer/GBufferOutputSubpass.cpp
+
+    phoenix/Pass/Presentation/PresentationSubpass.h
+    phoenix/Pass/Presentation/PresentationRenderPass.h
+
+    phoenix/Pass/Presentation/PresentationSubpass.cpp
+    phoenix/Pass/Presentation/PresentationRenderPass.cpp
     )
 
 set(PHOENIX_SCENEGRAPH
@@ -168,9 +174,10 @@ set(PHOENIX
 
 set(SHADER_SRC
     phoenix/shaders/GBufferPass/GBufferOutput.vert
-    phoenix/shaders/GBufferPass/GBufferOutput.frag
-    phoenix/shaders/TriangleTest/triangle.vert
-    phoenix/shaders/TriangleTest/triangle.frag)
+    phoenix/shaders/GBufferPass/GBufferLambertianTexture.frag
+
+    phoenix/shaders/PresentationPass/PresentationPass.vert
+    phoenix/shaders/PresentationPass/PresentationPass.frag)
 
 add_executable(Phoenix
     ${MAIN_SRC}

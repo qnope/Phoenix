@@ -2,15 +2,13 @@
 
 namespace phx {
 
-namespace details {
-DrawBatche GetDrawBatchesVisitorImpl::operator()(const GeometryNode &node) const
-    noexcept {
-  return {glm::mat4{1.0f}, node.drawInformations(), node.material()};
-}
-} // namespace details
+GetDrawBatchesVisitor::GetDrawBatchesVisitor() noexcept
+    : ListResultVisitor<DrawBatche, GetDrawBatchesVisitor &, GeometryNode>{
+          *this} {}
 
-GetDrawBatchesVisitor makeGetDrawBatchesVisitor() {
-  return GetDrawBatchesVisitor{details::GetDrawBatchesVisitorImpl{}};
+DrawBatche GetDrawBatchesVisitor::operator()(const GeometryNode &node) const
+    noexcept {
+  return {m_matrix, node.drawInformations(), node.material()};
 }
 
 } // namespace phx
