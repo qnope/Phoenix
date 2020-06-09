@@ -47,13 +47,18 @@ auto make_gbuffer_output_pipeline(Device &device, Width width, Height height,
 
   auto vertexBinding = phx::Complete3dVertex::getBindingDescription(0_n);
 
+  vk::PipelineDepthStencilStateCreateInfo depthInfo{};
+  depthInfo.depthTestEnable = true;
+  depthInfo.depthWriteEnable = true;
+  depthInfo.depthCompareOp = vk::CompareOp::eLess;
+
   return device.createGraphicPipeline(
       std::move(pipelineLayout), renderPass.get(), 0_n,
       WithBindingDescriptions{vertexBinding},
       WithShaders{std::move(vertexShader), std::move(fragmentShader)},
       WithViewports{viewport::StaticViewport{width, height}},
       WithScissors{scissor::StaticScissor{width, height}},
-      WithOutputs{output::normal_attachment});
+      WithOutputs{output::normal_attachment}, depthInfo);
 }
 
 template <typename RenderPass>

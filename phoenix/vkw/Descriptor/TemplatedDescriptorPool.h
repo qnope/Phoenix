@@ -35,8 +35,7 @@ public:
     m_handle = device.createDescriptorPoolUnique(info);
   }
 
-  DescriptorSet<SetLayout>
-  allocate(DescriptorBindingTypes<Bindings>... values) noexcept {
+  DescriptorSet allocate(DescriptorBindingTypes<Bindings>... values) noexcept {
     assert(m_numberOfAllocation < MAX_SET_BY_POOL);
     ++m_numberOfAllocation;
 
@@ -45,7 +44,10 @@ public:
     info.descriptorPool = getHandle();
     info.descriptorSetCount = 1;
 
-    return {m_device, m_device.allocateDescriptorSets(info)[0], {values...}};
+    return {m_device,
+            ltl::type_v<SetLayout>,
+            m_device.allocateDescriptorSets(info)[0],
+            {values...}};
   }
 
   bool isFull() const noexcept {

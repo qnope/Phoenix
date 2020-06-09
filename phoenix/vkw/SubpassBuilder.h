@@ -6,12 +6,13 @@
 
 namespace phx {
 template <typename... Ns>
-constexpr auto buildNoDepthStencilNoInputColors(Ns... ns) {
+constexpr auto buildNoDepthStencilNoInputColorsSubpassDescription(Ns... ns) {
   typed_static_assert((ltl::is_number_t(ns) && ... && true_v));
   constexpr ltl::tuple_t outputs{
       AttachmentReference{ns, vk::ImageLayout::eColorAttachmentOptimal}...};
 
-  return SubpassDescription{outputs, ltl::tuple_t{}, ltl::tuple_t{}, ltl::tuple_t{}};
+  return SubpassDescription{outputs, ltl::tuple_t{}, ltl::tuple_t{},
+                            ltl::tuple_t{}};
 }
 
 inline auto buildPresentationDependency() {

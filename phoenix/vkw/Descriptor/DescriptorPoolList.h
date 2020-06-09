@@ -21,8 +21,7 @@ public:
 
   const auto &layout() const noexcept { return m_layout; }
 
-  DescriptorSet<Layout>
-  allocate(DescriptorBindingTypes<Bindings>... values) noexcept {
+  DescriptorSet allocate(DescriptorBindingTypes<Bindings>... values) noexcept {
     return getCandidatePool().allocate(values...);
   }
 

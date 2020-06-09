@@ -48,6 +48,17 @@ class TemplatedGraphicPipeline<RenderPass<RPs...>, SubpassIndex, Args...>
     else return vk::CullModeFlagBits::eNone;
   }
 
+  vk::PipelineDepthStencilStateCreateInfo *getDepthStencilInfo() {
+    auto depthIndex = ltl::find_type(
+        types, ltl::type_v<vk::PipelineDepthStencilStateCreateInfo>);
+    if_constexpr(depthIndex.has_value) { //
+      return &m_args[*depthIndex];
+    }
+    else {
+      return nullptr;
+    }
+  }
+
   auto getInputAssembly() {
     vk::PipelineInputAssemblyStateCreateInfo info;
     info.topology = getTopology();
@@ -147,7 +158,7 @@ public:
     info.pViewportState = &viewportInfo;
     info.pRasterizationState = &rasterizationState;
     info.pMultisampleState = &multisampleState;
-    info.pDepthStencilState = nullptr;
+    info.pDepthStencilState = getDepthStencilInfo();
     info.pColorBlendState = &colorBlendState;
     info.layout = m_pipelineLayout.getHandle();
     info.renderPass = renderPass.getHandle();

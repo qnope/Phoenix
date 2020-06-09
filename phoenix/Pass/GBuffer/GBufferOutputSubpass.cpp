@@ -32,7 +32,7 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
     cmdBuffer.bindIndexBuffer(drawInformations.indexBuffer.getHandle(), 0,
                               vk::IndexType::eUint32);
 
-    pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics,
+    pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0,
                            material.descriptorSet());
 
     cmdBuffer.drawIndexed(drawInformations.indexCount, 1,

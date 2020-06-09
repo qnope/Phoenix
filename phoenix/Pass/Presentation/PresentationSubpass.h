@@ -7,14 +7,14 @@ namespace phx {
 
 class PresentationSubpass : AbstractSubpass {
 public:
-  PresentationSubpass(GraphicPipeline pipeline, vk::DescriptorSet set) noexcept;
+  PresentationSubpass(GraphicPipeline pipeline, DescriptorSet set) noexcept;
 
   friend vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
                                       const PresentationSubpass &pass) noexcept;
 
 private:
   GraphicPipeline m_pipeline;
-  vk::DescriptorSet m_descriptorSet;
+  DescriptorSet m_descriptorSet;
 };
 
 template <typename RenderPass, typename Layout>

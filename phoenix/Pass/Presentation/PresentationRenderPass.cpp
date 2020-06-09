@@ -9,7 +9,8 @@
 namespace phx {
 
 static auto make_render_pass(PhoenixWindow &phoenixWindow) {
-  auto subpass = ltl::tuple_t{buildNoDepthStencilNoInputColors(0_n)};
+  auto subpass =
+      ltl::tuple_t{buildNoDepthStencilNoInputColorsSubpassDescription(0_n)};
   auto attachment = ltl::tuple_t{phoenixWindow.getAttachmentDescription()};
   auto dependency = ltl::tuple_t{buildPresentationDependency()};
 
@@ -53,8 +54,8 @@ public:
         device, m_renderPass, m_poolManager.layout<Layout>(), width, height);
     auto set = m_poolManager.allocate<Layout>({ref});
 
-    m_subpasses[index] = std::make_unique<PresentationSubpass>(
-        std::move(pipeline), set.getHandle());
+    m_subpasses[index] =
+        std::make_unique<PresentationSubpass>(std::move(pipeline), set);
   }
 
 private:
@@ -63,7 +64,7 @@ private:
   DescriptorPoolManager m_poolManager;
   const std::vector<Framebuffer<vk::ImageView>> *m_framebuffers;
   std::vector<std::unique_ptr<PresentationSubpass>> m_subpasses;
-  uint32_t m_currentIndex{0};
+  std::size_t m_currentIndex{0};
 };
 
 PresentationRenderPass::PresentationRenderPass(PhoenixWindow &window) noexcept

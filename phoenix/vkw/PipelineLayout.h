@@ -3,6 +3,8 @@
 #include "VulkanResource.h"
 #include "vulkan.h"
 
+#include "Descriptor/DescriptorSet.h"
+
 #include <ltl/algos.h>
 #include <ltl/tuple_algos.h>
 #include <typeindex>
@@ -12,8 +14,7 @@ class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
 public:
   template <typename... SetLayouts>
   PipelineLayout(vk::Device device, const SetLayouts &... setLayouts) noexcept
-      : m_setNumber{sizeof...(SetLayouts)}, //
-        m_layoutTypes{typeid(SetLayouts)...} {
+      : m_layoutTypes{typeid(SetLayouts)...} {
     static constexpr auto layouts = ltl::type_list_v<SetLayouts...>;
 
     std::array<vk::DescriptorSetLayout, layouts.length.value>
@@ -26,17 +27,13 @@ public:
     m_handle = device.createPipelineLayoutUnique(info);
   }
 
-  template <typename... Sets>
   void bind(vk::CommandBuffer cmdBuffer, vk::PipelineBindPoint bindPoint,
-            Sets... sets) const noexcept {
-    typed_static_assert_msg(
-        ltl::all_of_type(ltl::type_list_v<Sets...>,
-                         ltl::is_type(ltl::type_v<vk::DescriptorSet>)),
-        "All types must be descriptor sets");
+            uint32_t setIndex, DescriptorSet set) const noexcept {
+    assert(setIndex < m_layoutTypes.size());
+    assert(m_layoutTypes[setIndex] == set.layoutType());
 
-    assert(sizeof...(Sets) == m_setNumber);
-    cmdBuffer.bindDescriptorSets(bindPoint, getHandle(), 0, std::array{sets...},
-                                 {});
+    cmdBuffer.bindDescriptorSets(bindPoint, getHandle(), setIndex,
+                                 set.getHandle(), {});
   }
 
   bool isCompatible(std::type_index layoutType) const noexcept {
@@ -50,7 +47,6 @@ public:
   }
 
 public:
-  std::size_t m_setNumber;
   std::vector<std::type_index> m_layoutTypes;
 };
 

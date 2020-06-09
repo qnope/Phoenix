@@ -7,10 +7,7 @@ TexturedLambertianMaterial::TexturedLambertianMaterial(
     ImageLoader<SampledImage2dRgbaSrgbRef> &imageLoader,
     DescriptorPoolManager &pool) noexcept
     : AbstractMaterial{
-          typeid(TexturedLambertianMaterialSetLayout),
-          pool
-              .allocate<TexturedLambertianMaterialSetLayout>({{imageLoader.load(
-                  path, true, vk::PipelineStageFlagBits::eFragmentShader)}})
-              .getHandle()} {}
+          pool.allocate<TexturedLambertianMaterialSetLayout>({{imageLoader.load(
+              path, true, vk::PipelineStageFlagBits::eFragmentShader)}})} {}
 
 } // namespace phx

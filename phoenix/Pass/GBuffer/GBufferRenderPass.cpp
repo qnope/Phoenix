@@ -1,6 +1,5 @@
 #include "GBufferRenderPass.h"
 #include <vkw/Device.h>
-#include <vkw/SubpassBuilder.h>
 
 #include "GBufferOutputSubpass.h"
 #include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
@@ -9,22 +8,51 @@
 
 namespace phx {
 
-static auto make_render_pass(Device &device) {
-  vk::AttachmentDescription attachment{};
-  attachment.format = vk::Format::eR8G8B8A8Srgb;
-  attachment.samples = vk::SampleCountFlagBits::e1;
-  attachment.loadOp = vk::AttachmentLoadOp::eClear;
-  attachment.storeOp = vk::AttachmentStoreOp::eStore;
-  attachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-  attachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-  attachment.initialLayout = vk::ImageLayout::eUndefined;
-  attachment.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+static auto buildGBufferSubpassDescription() {
+  ltl::tuple_t depth{AttachmentReference{
+      0_n, vk::ImageLayout::eDepthStencilAttachmentOptimal}};
 
-  auto subpass = ltl::tuple_t{phx::buildNoDepthStencilNoInputColors(0_n)};
+  ltl::tuple_t outputs{
+      AttachmentReference{1_n, vk::ImageLayout::eColorAttachmentOptimal}};
 
-  return device.createRenderPass(ltl::tuple_t{attachment}, subpass,
-                                 ltl::tuple_t{});
+  return SubpassDescription{outputs, ltl::tuple_t{}, depth, ltl::tuple_t{}};
 }
+
+static auto make_render_pass(Device &device) {
+  vk::AttachmentDescription attachmentColor{};
+  attachmentColor.format = vk::Format::eR8G8B8A8Srgb;
+  attachmentColor.samples = vk::SampleCountFlagBits::e1;
+  attachmentColor.loadOp = vk::AttachmentLoadOp::eClear;
+  attachmentColor.storeOp = vk::AttachmentStoreOp::eStore;
+  attachmentColor.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+  attachmentColor.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+  attachmentColor.initialLayout = vk::ImageLayout::eUndefined;
+  attachmentColor.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+  vk::AttachmentDescription attachmentDepth{};
+  attachmentDepth.format = vk::Format::eD32Sfloat;
+  attachmentDepth.samples = vk::SampleCountFlagBits::e1;
+  attachmentDepth.loadOp = vk::AttachmentLoadOp::eClear;
+  attachmentDepth.storeOp = vk::AttachmentStoreOp::eStore;
+  attachmentDepth.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+  attachmentDepth.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+  attachmentDepth.initialLayout = vk::ImageLayout::eUndefined;
+  attachmentDepth.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+  auto attachments = ltl::tuple_t{attachmentDepth, attachmentColor};
+  auto subpasses = ltl::tuple_t{buildGBufferSubpassDescription()};
+
+  return device.createRenderPass(attachments, subpasses, ltl::tuple_t{});
+}
+
+using DepthBuffer = Image<vk::ImageType::e2D, vk::Format::eD32Sfloat,
+                          VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
+                              VK_IMAGE_USAGE_SAMPLED_BIT>;
+
+using DepthBufferView =
+    ImageView<vk::ImageViewType::e2D, vk::Format::eD32Sfloat,
+              VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT |
+                  VK_IMAGE_USAGE_SAMPLED_BIT>;
 
 using ColorBuffer =
     Image<vk::ImageType::e2D, vk::Format::eR8G8B8A8Srgb,
@@ -62,6 +90,12 @@ private:
   Width m_width;
   Height m_height;
 
+  DepthBuffer m_depthMap = m_device.createImage<DepthBuffer>(
+      m_width.get(), m_height.get(), 1u, false, VMA_MEMORY_USAGE_GPU_ONLY);
+
+  DepthBufferView m_depthView =
+      m_depthMap.createImageView<vk::ImageViewType::e2D>();
+
   ColorBuffer m_albedoMap = m_device.createImage<ColorBuffer>(
       m_width.get(), m_height.get(), 1u, false, VMA_MEMORY_USAGE_GPU_ONLY);
 
@@ -74,9 +108,10 @@ private:
   decltype(make_render_pass(m_device)) m_renderPass =
       make_render_pass(m_device);
 
-  Framebuffer<vk::ImageView> m_framebuffer =
+  Framebuffer<vk::ImageView, vk::ImageView> m_framebuffer =
       m_device.createFramebuffer(m_renderPass.getHandle(), m_width.get(),
-                                 m_height.get(), m_albedoView.getHandle());
+                                 m_height.get(), m_depthView.getHandle(),
+                                 m_albedoView.getHandle());
 
   GBufferOutputSubpass m_outputSubpass = make_gbuffer_output_subpass(
       m_device, m_width, m_height, m_descriptorPoolManager, m_renderPass);
