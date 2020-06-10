@@ -15,7 +15,8 @@ class RenderPassWrapper<RenderPass<RPs...>, Operations...> {
   friend class RenderPassWrapperWithFramebuffer;
 
   using Pass = RenderPass<RPs...>;
-  static constexpr auto all_operations = ltl::type_list_v<Operations...>;
+  static constexpr auto all_operations =
+      ltl::type_list_v<const Operations &...>;
   static constexpr auto subpass_types =
       ltl::filter_type(all_operations, is_subpass);
   static constexpr auto subpass_number = subpass_types.length;
@@ -24,8 +25,18 @@ public:
   static constexpr auto is_complete = Pass::number_subpasses == subpass_number;
 
   RenderPassWrapper(const RenderPass<RPs...> &renderPass,
-                    Operations... operations) noexcept
+                    const Operations &... operations) noexcept
       : renderPass{renderPass}, operations{operations...} {}
+
+  template <typename Operation>
+  auto operator<<(const Operation &operation) const noexcept {
+    auto buildNextWrapper = [this, &operation](const auto &... operations) {
+      return RenderPassWrapper<RenderPass<RPs...>, Operations..., Operation>{
+          renderPass, operations..., operation};
+    };
+
+    return operations(buildNextWrapper);
+  }
 
   void executeSubpasses(vk::CommandBuffer commandBuffer) const noexcept {
     typed_static_assert(is_complete);
@@ -34,14 +45,14 @@ public:
       auto index = *ltl::find_type(operations, operationType);
       const auto &operation = operations[index];
 
-      auto subpassIndex = ltl::find_type(subpass_types, operationType);
-      if_constexpr(subpassIndex.has_value) {
-        if_constexpr(*subpassIndex == subpass_number) {
+      commandBuffer << operation;
+
+      if_constexpr(is_subpass(operationType)) {
+        auto subpassIndex = *ltl::find_type(subpass_types, operationType);
+        if_constexpr(subpassIndex < subpass_number - 1_n) {
           commandBuffer.nextSubpass(vk::SubpassContents::eInline);
         }
       }
-
-      commandBuffer << operation;
     };
 
     ltl::for_each(all_operations, executeOneOperation);
@@ -49,7 +60,7 @@ public:
 
 public:
   const RenderPass<RPs...> &renderPass;
-  ltl::tuple_t<Operations...> operations;
+  ltl::tuple_t<const Operations &...> operations;
 };
 
 template <typename Framebuffer, typename RenderPassWrapper>
@@ -92,9 +103,9 @@ private:
 };
 
 template <typename... RPs, typename T>
-inline auto operator<<(const RenderPass<RPs...> &renderPass, T &&operation) {
-  return RenderPassWrapper<RenderPass<RPs...>, const std::decay_t<T> &>{
-      renderPass, operation};
+inline auto operator<<(const RenderPass<RPs...> &renderPass,
+                       const T &operation) {
+  return RenderPassWrapper<RenderPass<RPs...>, T>{renderPass, operation};
 }
 
 template <typename... FBs, typename... RPs>

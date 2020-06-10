@@ -1,12 +1,21 @@
 #include "GBufferRenderPass.h"
 #include <vkw/Device.h>
 
+#include "../DepthPass/DepthSubpass.h"
 #include "GBufferOutputSubpass.h"
 #include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
 
 #include <vkw/RenderPassWrapper.h>
 
 namespace phx {
+
+static auto buildDepthSubpassDescription() {
+  ltl::tuple_t depth{AttachmentReference{
+      0_n, vk::ImageLayout::eDepthStencilAttachmentOptimal}};
+
+  return SubpassDescription{ltl::tuple_t{}, ltl::tuple_t{}, depth,
+                            ltl::tuple_t{}};
+}
 
 static auto buildGBufferSubpassDescription() {
   ltl::tuple_t depth{AttachmentReference{
@@ -16,6 +25,30 @@ static auto buildGBufferSubpassDescription() {
       AttachmentReference{1_n, vk::ImageLayout::eColorAttachmentOptimal}};
 
   return SubpassDescription{outputs, ltl::tuple_t{}, depth, ltl::tuple_t{}};
+}
+
+static auto buildDependencies() {
+  vk::SubpassDependency dependencyDepthToGBuffer(
+      0, 1,
+      vk::PipelineStageFlagBits::eEarlyFragmentTests |
+          vk::PipelineStageFlagBits::eLateFragmentTests,
+      vk::PipelineStageFlagBits::eEarlyFragmentTests,
+      vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+      vk::AccessFlagBits::eDepthStencilAttachmentRead,
+      vk::DependencyFlagBits::eByRegion);
+
+  vk::SubpassDependency dependencyExternToDepth(
+      VK_SUBPASS_EXTERNAL, 0, vk::PipelineStageFlagBits::eTopOfPipe,
+      vk::PipelineStageFlagBits::eEarlyFragmentTests, vk::AccessFlags(),
+      vk::AccessFlagBits::eDepthStencilAttachmentWrite);
+
+  vk::SubpassDependency dependencyExternToColorBuffer(
+      VK_SUBPASS_EXTERNAL, 1, vk::PipelineStageFlagBits::eTopOfPipe,
+      vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::AccessFlags(),
+      vk::AccessFlagBits::eColorAttachmentWrite);
+
+  return ltl::tuple_t{dependencyDepthToGBuffer, dependencyExternToDepth,
+                      dependencyExternToColorBuffer};
 }
 
 static auto make_render_pass(Device &device) {
@@ -40,9 +73,11 @@ static auto make_render_pass(Device &device) {
   attachmentDepth.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
   auto attachments = ltl::tuple_t{attachmentDepth, attachmentColor};
-  auto subpasses = ltl::tuple_t{buildGBufferSubpassDescription()};
+  auto subpasses = ltl::tuple_t{buildDepthSubpassDescription(),
+                                buildGBufferSubpassDescription()};
 
-  return device.createRenderPass(attachments, subpasses, ltl::tuple_t{});
+  auto dependencies = buildDependencies();
+  return device.createRenderPass(attachments, subpasses, dependencies);
 }
 
 using DepthBuffer = Image<vk::ImageType::e2D, vk::Format::eD32Sfloat,
@@ -76,11 +111,13 @@ public:
   }
 
   void setDrawBatches(const std::vector<DrawBatche> &drawBatches) noexcept {
+    m_depthSubpass.setDrawBatches(&drawBatches);
     m_outputSubpass.setDrawBatches(&drawBatches);
   }
 
   const auto &renderPass() const noexcept { return m_renderPass; }
   const auto &framebuffer() const noexcept { return m_framebuffer; }
+  const auto &depthSubpass() const noexcept { return m_depthSubpass; }
   const auto &outputSubpass() const noexcept { return m_outputSubpass; }
 
 private:
@@ -115,6 +152,9 @@ private:
 
   GBufferOutputSubpass m_outputSubpass = make_gbuffer_output_subpass(
       m_device, m_width, m_height, m_descriptorPoolManager, m_renderPass);
+
+  DepthSubpass m_depthSubpass =
+      make_depth_subpass(m_device, m_width, m_height, m_renderPass);
 };
 
 GBufferRenderPass::GBufferRenderPass(Device &device, SceneGraph &sceneGraph,
@@ -141,11 +181,12 @@ operator<<(vk::CommandBuffer cmdBuffer,
 
   auto &renderPass = impl.renderPass();
   auto &framebuffer = impl.framebuffer();
+  auto &depthSubpass = impl.depthSubpass();
   auto &outputSubpass = impl.outputSubpass();
 
   impl.setDrawBatches(drawBatches);
 
-  cmdBuffer << (framebuffer << (renderPass << outputSubpass));
+  cmdBuffer << (framebuffer << (renderPass << depthSubpass << outputSubpass));
 
   return cmdBuffer;
 }

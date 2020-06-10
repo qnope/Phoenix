@@ -112,7 +112,7 @@ public:
 
     auto viewports = m_args[*indexViewports].getViewports();
     auto scissors = m_args[*indexScissors].getScissors();
-    vk::GraphicsPipelineCreateInfo info;
+    vk::GraphicsPipelineCreateInfo info{};
 
     auto stages = m_args[*indexShaders].getStages();
     auto inputAssembly = getInputAssembly();
@@ -129,12 +129,14 @@ public:
     auto rasterizationState = getRasterizationState();
     vk::PipelineMultisampleStateCreateInfo multisampleState;
 
-    auto attachmentStates = m_args[*indexOutputs].getAttachmentStates();
     vk::PipelineColorBlendStateCreateInfo colorBlendState;
-    colorBlendState.attachmentCount =
-        static_cast<uint32_t>(attachmentStates.size());
-    colorBlendState.pAttachments = attachmentStates.data();
 
+    if_constexpr(indexOutputs.has_value) {
+      auto attachmentStates = m_args[*indexOutputs].getAttachmentStates();
+      colorBlendState.attachmentCount =
+          static_cast<uint32_t>(attachmentStates.size());
+      colorBlendState.pAttachments = attachmentStates.data();
+    }
     vk::PipelineDynamicStateCreateInfo dynamicStateInfo;
     std::array<vk::DynamicState, 20> dynamicStatesArray;
     (void)dynamicStatesArray;

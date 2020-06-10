@@ -25,6 +25,9 @@ set(PHOENIX_PASS
     phoenix/Pass/GBuffer/GBufferRenderPass.cpp
     phoenix/Pass/GBuffer/GBufferOutputSubpass.cpp
 
+    phoenix/Pass/DepthPass/DepthSubpass.h
+    phoenix/Pass/DepthPass/DepthSubpass.cpp
+
     phoenix/Pass/Presentation/PresentationSubpass.h
     phoenix/Pass/Presentation/PresentationRenderPass.h
 
@@ -175,6 +178,9 @@ set(PHOENIX
 set(SHADER_SRC
     phoenix/shaders/GBufferPass/GBufferOutput.vert
     phoenix/shaders/GBufferPass/GBufferLambertianTexture.frag
+
+    phoenix/shaders/DepthPass/DepthPass.vert
+    phoenix/shaders/DepthPass/DepthPass.frag
 
     phoenix/shaders/PresentationPass/PresentationPass.vert
     phoenix/shaders/PresentationPass/PresentationPass.frag)

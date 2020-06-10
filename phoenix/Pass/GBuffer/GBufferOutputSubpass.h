@@ -49,11 +49,11 @@ auto make_gbuffer_output_pipeline(Device &device, Width width, Height height,
 
   vk::PipelineDepthStencilStateCreateInfo depthInfo{};
   depthInfo.depthTestEnable = true;
-  depthInfo.depthWriteEnable = true;
-  depthInfo.depthCompareOp = vk::CompareOp::eLess;
+  depthInfo.depthWriteEnable = false;
+  depthInfo.depthCompareOp = vk::CompareOp::eEqual;
 
   return device.createGraphicPipeline(
-      std::move(pipelineLayout), renderPass.get(), 0_n,
+      std::move(pipelineLayout), renderPass.get(), 1_n,
       WithBindingDescriptions{vertexBinding},
       WithShaders{std::move(vertexShader), std::move(fragmentShader)},
       WithViewports{viewport::StaticViewport{width, height}},

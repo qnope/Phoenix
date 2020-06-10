@@ -1,6 +1,8 @@
 #version 450 core
 #extension GL_ARB_separate_shader_objects : enable
 
+layout(early_fragment_tests) in;
+
 layout(location = 0) in VertexData {
     vec3 normal;
     vec3 tangeant;
