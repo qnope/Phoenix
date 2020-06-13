@@ -40,9 +40,9 @@ public:
     return {getHandle(), path, debug};
   }
 
-  template <typename... SetLayout>
-  PipelineLayout createPipelineLayout(const SetLayout &... setLayouts) const {
-    return {getHandle(), setLayouts...};
+  template <typename... Args>
+  PipelineLayout createPipelineLayout(const Args &... args) const {
+    return {getHandle(), args...};
   }
 
   template <typename... RPs, typename SubpassIndex, typename... Args>

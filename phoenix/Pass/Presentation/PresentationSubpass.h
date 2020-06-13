@@ -26,7 +26,7 @@ auto make_presentation_pipeline(Device &device, const RenderPass &renderPass,
   auto fragmentShader = device.createShaderModule<FragmentShaderType>(
       "../phoenix/shaders/PresentationPass/PresentationPass.frag", true);
 
-  auto pipelineLayout = device.createPipelineLayout(layout);
+  auto pipelineLayout = device.createPipelineLayout(with_layouts, layout);
 
   return device.createGraphicPipeline(
       std::move(pipelineLayout), renderPass, 0_n,

@@ -20,7 +20,7 @@ void TexturedLambertianMaterial::bindTo(
 
 bool TexturedLambertianMaterial::isCompatibleWith(
     const PipelineLayout &pipelineLayout) const noexcept {
-  return pipelineLayout.isCompatible(layoutType());
+  return pipelineLayout.hasLayout(layoutType());
 }
 
 } // namespace phx

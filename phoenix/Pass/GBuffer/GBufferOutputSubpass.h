@@ -43,7 +43,7 @@ auto make_gbuffer_output_pipeline(Device &device, Width width, Height height,
       device.createShaderModule<FragmentShaderType>(fragmentPath, true);
 
   const auto &layout = poolManager.layout<Layout>();
-  auto pipelineLayout = device.createPipelineLayout(layout);
+  auto pipelineLayout = device.createPipelineLayout(with_layouts, layout);
 
   auto vertexBinding = phx::Complete3dVertex::getBindingDescription(0_n);
 
