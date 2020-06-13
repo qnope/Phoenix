@@ -1,5 +1,7 @@
 #include "GBufferOutputSubpass.h"
 
+#include <ltl/functional.h>
+
 namespace phx {
 
 void GBufferOutputSubpass::addGraphicPipeline(GraphicPipeline pipeline) {
@@ -9,10 +11,9 @@ void GBufferOutputSubpass::addGraphicPipeline(GraphicPipeline pipeline) {
 GraphicPipeline
 GBufferOutputSubpass::getCompatiblePipeline(const Material &material) const
     noexcept {
-  auto hasCompatible =
-      [type = material.layoutType()](const GraphicPipeline &pipeline) {
-        return pipeline.layout().isCompatible(type);
-      };
+  auto hasCompatible = [&material](const GraphicPipeline &pipeline) {
+    return material.isCompatibleWith(pipeline.layout());
+  };
 
   assert(ltl::contains_if(m_pipelines, hasCompatible));
   return *ltl::find_if_ptr(m_pipelines, hasCompatible);
@@ -32,8 +33,7 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
     cmdBuffer.bindIndexBuffer(drawInformations.indexBuffer.getHandle(), 0,
                               vk::IndexType::eUint32);
 
-    pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0,
-                           material.descriptorSet());
+    material.bindTo(cmdBuffer, pipeline.layout());
 
     cmdBuffer.drawIndexed(drawInformations.indexCount, 1,
                           drawInformations.firstIndex,

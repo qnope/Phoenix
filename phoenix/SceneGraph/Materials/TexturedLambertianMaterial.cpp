@@ -10,4 +10,17 @@ TexturedLambertianMaterial::TexturedLambertianMaterial(
           pool.allocate<TexturedLambertianMaterialSetLayout>({{imageLoader.load(
               path, true, vk::PipelineStageFlagBits::eFragmentShader)}})} {}
 
+void TexturedLambertianMaterial::bindTo(
+    vk::CommandBuffer cmdBuffer, const PipelineLayout &pipelineLayout) const
+    noexcept {
+  auto index = pipelineLayout.descriptorSetIndex(layoutType());
+  pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, index,
+                      descriptorSet());
+}
+
+bool TexturedLambertianMaterial::isCompatibleWith(
+    const PipelineLayout &pipelineLayout) const noexcept {
+  return pipelineLayout.isCompatible(layoutType());
+}
+
 } // namespace phx

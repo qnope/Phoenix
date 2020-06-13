@@ -5,6 +5,7 @@
 #include <vkw/Descriptor/DescriptorPoolManager.h>
 #include <vkw/Descriptor/DescriptorSetLayout.h>
 #include <vkw/Image/ImageLoader.h>
+#include <vkw/PipelineLayout.h>
 
 namespace phx {
 
@@ -17,6 +18,11 @@ public:
       const std::string &path,
       ImageLoader<SampledImage2dRgbaSrgbRef> &imageLoader,
       DescriptorPoolManager &pool) noexcept;
+
+  bool isCompatibleWith(const PipelineLayout &pipelineLayout) const noexcept;
+
+  void bindTo(vk::CommandBuffer cmdBuffer,
+              const PipelineLayout &pipelineLayout) const noexcept;
 };
 
 } // namespace phx
