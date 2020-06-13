@@ -17,10 +17,10 @@ inline struct with_layouts_t {
 inline struct with_push_constants_t {
 } with_push_constants;
 
-template <uint32_t offset, uint32_t size, auto... stages>
+template <uint32_t offset, uint32_t size, VkShaderStageFlags stages>
 struct PushConstantRange {
   auto getRange() const {
-    return vk::PushConstantRange{(stages | ...), offset, size};
+    return vk::PushConstantRange{vk::ShaderStageFlags{stages}, offset, size};
   }
 };
 
