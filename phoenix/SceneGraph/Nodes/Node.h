@@ -12,18 +12,10 @@ namespace phx {
 class Node {
   class NodeConcept {
   public:
-    NodeConcept(std::type_index type_index) noexcept
-        : m_typeIndex{type_index} {}
-
     virtual void accept(NodeVisitor &visitor) = 0;
     virtual void *ptr() = 0;
 
     virtual ~NodeConcept() = default;
-
-    std::type_index typeIndex() const noexcept { return m_typeIndex; }
-
-  private:
-    std::type_index m_typeIndex;
   };
 
   template <typename ConcreteNode> class NodeModel : public NodeConcept {
@@ -31,9 +23,7 @@ class Node {
                   "ConcreteNode must be derived from AbstractNode");
 
   public:
-    NodeModel(ConcreteNode node) noexcept
-        : NodeConcept{typeid(ConcreteNode)}, //
-          m_node{std::move(node)} {}
+    NodeModel(ConcreteNode node) noexcept : m_node{std::move(node)} {}
 
     void *ptr() override { return std::addressof(m_node); }
 
@@ -46,11 +36,14 @@ class Node {
 public:
   template <typename ConcreteNode>
   Node(ConcreteNode node) noexcept
-      : m_node{std::make_shared<NodeModel<ConcreteNode>>(std::move(node))} {}
+      : m_typeIndex{typeid(ConcreteNode)},
+        m_node{std::make_shared<NodeModel<ConcreteNode>>(std::move(node))} {}
+
+  std::type_index typeIndex() const noexcept { return m_typeIndex; }
 
   template <typename ConcreteNode> ConcreteNode *get() {
     assert(m_node);
-    assert(m_node->typeIndex() == typeid(ConcreteNode));
+    assert(m_typeIndex == typeid(ConcreteNode));
     return static_cast<ConcreteNode *>(m_node->ptr());
   }
 
@@ -64,6 +57,7 @@ public:
   }
 
 private:
+  std::type_index m_typeIndex;
   std::shared_ptr<NodeConcept> m_node;
 };
 
