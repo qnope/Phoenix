@@ -3,7 +3,6 @@
 
 #include "../DepthPass/DepthSubpass.h"
 #include "GBufferOutputSubpass.h"
-#include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
 
 #include <vkw/RenderPassWrapper.h>
 
@@ -99,11 +98,10 @@ using ColorBufferView =
 
 class GBufferRenderPass::Impl {
 public:
-  Impl(Device &device, DescriptorPoolManager &poolManager, Width width,
-       Height height)
-      : m_device{device},                     //
-        m_descriptorPoolManager{poolManager}, //
-        m_width{width},                       //
+  Impl(Device &device, Width width, Height height)
+      : m_device{device},                //
+        m_descriptorPoolManager{device}, //
+        m_width{width},                  //
         m_height{height} {}
 
   auto getSampledAlbedoMap() const noexcept {
@@ -122,7 +120,7 @@ public:
 
 private:
   Device &m_device;
-  DescriptorPoolManager &m_descriptorPoolManager;
+  DescriptorPoolManager m_descriptorPoolManager;
 
   Width m_width;
   Height m_height;
@@ -157,14 +155,13 @@ private:
       make_depth_subpass(m_device, m_width, m_height, m_renderPass);
 };
 
-GBufferRenderPass::GBufferRenderPass(Device &device, SceneGraph &sceneGraph,
-                                     Width width, Height height)
-    : m_sceneGraph{sceneGraph}, //
-      m_impl{std::make_unique<Impl>(
-          device,                                               //
-          sceneGraph.materialFactory().descriptorPoolManager(), //
-          width, height)},
-      m_albedoMap{m_impl->getSampledAlbedoMap()} {}
+GBufferRenderPass::GBufferRenderPass(Device &device, Width width, Height height)
+    : m_impl{std::make_unique<Impl>(device, width, height)} {}
+
+void GBufferRenderPass::setDrawBatches(
+    const std::vector<DrawBatche> &drawBatches) noexcept {
+  m_impl->setDrawBatches(drawBatches);
+}
 
 SampledImage2dRgbaSrgbRef GBufferRenderPass::getAlbedoMap() const noexcept {
   return m_impl->getSampledAlbedoMap();
@@ -176,15 +173,11 @@ vk::CommandBuffer
 operator<<(vk::CommandBuffer cmdBuffer,
            const GBufferRenderPass &gBufferRenderPass) noexcept {
   auto &impl = *gBufferRenderPass.m_impl;
-  auto &sceneGraph = gBufferRenderPass.m_sceneGraph;
-  auto drawBatches = sceneGraph.dispatch(GetDrawBatchesVisitor{});
 
   auto &renderPass = impl.renderPass();
   auto &framebuffer = impl.framebuffer();
   auto &depthSubpass = impl.depthSubpass();
   auto &outputSubpass = impl.outputSubpass();
-
-  impl.setDrawBatches(drawBatches);
 
   cmdBuffer << (framebuffer << (renderPass << depthSubpass << outputSubpass));
 

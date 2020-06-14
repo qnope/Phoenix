@@ -4,16 +4,18 @@
 #include <memory>
 #include <vkw/Image/SampledImage.h>
 
+#include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
+
 namespace phx {
 class Device;
-class SceneGraph;
 
 class GBufferRenderPass {
   class Impl;
 
 public:
-  GBufferRenderPass(Device &device, SceneGraph &sceneGraph, Width width,
-                    Height height);
+  GBufferRenderPass(Device &device, Width width, Height height);
+
+  void setDrawBatches(const std::vector<DrawBatche> &drawBatches) noexcept;
 
   SampledImage2dRgbaSrgbRef getAlbedoMap() const noexcept;
 
@@ -25,9 +27,7 @@ private:
              const GBufferRenderPass &gBufferRenderPass) noexcept;
 
 private:
-  SceneGraph &m_sceneGraph;
   std::unique_ptr<Impl> m_impl;
-  SampledImage2dRgbaSrgbRef m_albedoMap;
 };
 
 } // namespace phx

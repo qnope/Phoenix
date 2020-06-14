@@ -2,7 +2,6 @@
 
 #include <vkw/Device.h>
 #include <vkw/GraphicPipeline.h>
-#include <vkw/Subpass.h>
 
 #include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
 

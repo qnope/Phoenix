@@ -66,8 +66,10 @@ int main(int, char **) {
     for (auto i = 0u; i < window.getImageCount(); ++i)
       fences.emplace_back(device.createFence(true));
 
-    phx::GBufferRenderPass renderPass{device, sceneGraph, width, height};
+    phx::GBufferRenderPass renderPass{device, width, height};
     phx::PresentationRenderPass presentationPass{window};
+
+    auto drawBatches = sceneGraph.dispatch(phx::GetDrawBatchesVisitor{});
 
     for (auto [index, commandBuffer] : ltl::enumerate(commandBuffers)) {
       vk::CommandBufferBeginInfo info;
@@ -75,6 +77,7 @@ int main(int, char **) {
 
       presentationPass.setSampledImage(index, renderPass.getAlbedoMap());
 
+      renderPass.setDrawBatches(drawBatches);
       commandBuffer << renderPass << presentationPass;
 
       commandBuffer.end();
