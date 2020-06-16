@@ -11,7 +11,6 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(Little-Type-Library)
 include_directories(phoenix/)
 
-#include_directories(${LTL_PATH})
 include_directories(${SDL_PATH}/include)
 include_directories(${GLM_PATH})
 include_directories(${VULKAN_SDK_PATH}/Include)
