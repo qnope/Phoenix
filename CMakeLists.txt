@@ -8,9 +8,10 @@ endif(MSVC)
 
 set(CMAKE_CXX_STANDARD 17)
 
+add_subdirectory(Little-Type-Library)
 include_directories(phoenix/)
 
-include_directories(${LTL_PATH})
+#include_directories(${LTL_PATH})
 include_directories(${SDL_PATH}/include)
 include_directories(${GLM_PATH})
 include_directories(${VULKAN_SDK_PATH}/Include)
@@ -192,10 +193,12 @@ add_executable(Phoenix
     )
 
 target_link_libraries(Phoenix
+    LTL
     ${SDL_PATH}/lib/x64/SDL2main.lib
     ${SDL_PATH}/lib/x64/SDL2.lib
     ${SDL_PATH}/lib/x64/SDL2_image.lib
-    ${VULKAN_SDK_PATH}/Lib/vulkan-1.lib)
+    ${VULKAN_SDK_PATH}/Lib/vulkan-1.lib
+    )
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     target_link_libraries(Phoenix ${VULKAN_SDK_PATH}/Lib/shaderc_shared.lib)
