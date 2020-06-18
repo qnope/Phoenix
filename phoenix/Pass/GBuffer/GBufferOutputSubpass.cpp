@@ -1,5 +1,6 @@
 #include "GBufferOutputSubpass.h"
 
+#include <ltl/Range/enumerate.h>
 #include <ltl/functional.h>
 
 namespace phx {
@@ -24,20 +25,25 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
   assert(pass.m_drawBatches != nullptr);
   assert(pass.m_descriptorSet);
 
-  for (auto [drawInformations, material] : *pass.m_drawBatches) {
+  for (auto [index, drawInformationsAndMaterial] :
+       ltl::enumerate(*pass.m_drawBatches)) {
+    const auto &[drawInformations, material] = drawInformationsAndMaterial;
+
     auto pipeline = pass.getCompatiblePipeline(material);
+    const auto &pipelineLayout = pipeline.layout();
     cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                            pipeline.getHandle());
-    pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0,
-                           *pass.m_descriptorSet);
+    pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0,
+                        *pass.m_descriptorSet);
 
     cmdBuffer.bindVertexBuffers(0, drawInformations.vertexBuffer.getHandle(),
                                 vk::DeviceSize(0));
     cmdBuffer.bindIndexBuffer(drawInformations.indexBuffer.getHandle(), 0,
                               vk::IndexType::eUint32);
 
-    material.bindTo(cmdBuffer, pipeline.layout());
+    material.bindTo(cmdBuffer, pipelineLayout);
 
+    pipelineLayout.push<MatrixPushConstant>(cmdBuffer, uint32_t(index));
     cmdBuffer.drawIndexed(drawInformations.indexCount, 1,
                           drawInformations.firstIndex,
                           drawInformations.vertexOffset, 0);

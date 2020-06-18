@@ -1,6 +1,7 @@
 #include "DepthSubpass.h"
 
 #include <ltl/Range/DefaultView.h>
+#include <ltl/Range/enumerate.h>
 
 namespace phx {
 
@@ -12,17 +13,22 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
   assert(pass.m_drawBatches != nullptr);
   assert(pass.m_descriptorSet);
 
+  const auto &layout = pass.m_pipeline.layout();
+
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                          pass.m_pipeline.getHandle());
-  pass.m_pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0,
-                                *pass.m_descriptorSet);
+  layout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0,
+              *pass.m_descriptorSet);
 
-  for (auto drawInformations : *pass.m_drawBatches | ltl::get(0_n)) {
+  for (auto [index, drawInformations] :
+       ltl::enumerate(*pass.m_drawBatches | ltl::get(0_n))) {
+
     cmdBuffer.bindVertexBuffers(0, drawInformations.vertexBuffer.getHandle(),
                                 vk::DeviceSize(0));
     cmdBuffer.bindIndexBuffer(drawInformations.indexBuffer.getHandle(), 0,
                               vk::IndexType::eUint32);
 
+    layout.push<MatrixPushConstant>(cmdBuffer, uint32_t(index));
     cmdBuffer.drawIndexed(drawInformations.indexCount, 1,
                           drawInformations.firstIndex,
                           drawInformations.vertexOffset, 0);

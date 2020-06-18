@@ -19,7 +19,7 @@ inline struct with_push_constants_t {
 
 template <uint32_t offset, uint32_t size, VkShaderStageFlags stages>
 struct PushConstantRange {
-  auto getRange() const {
+  static auto getRange() noexcept {
     return vk::PushConstantRange{vk::ShaderStageFlags{stages}, offset, size};
   }
 };
@@ -73,6 +73,17 @@ public:
 
     cmdBuffer.bindDescriptorSets(bindPoint, getHandle(), setIndex,
                                  set.getHandle(), {});
+  }
+
+  template <typename PushConstant, typename... Ts>
+  void push(vk::CommandBuffer cmdBuffer, Ts... _values) const noexcept {
+    std::array values = {_values...};
+    vk::PushConstantRange range = PushConstant::getRange();
+    assert(ltl::contains(m_pushConstantRangeTypes, typeid(PushConstant)));
+    assert(range.size == values.size() * sizeof(values[0]));
+
+    cmdBuffer.pushConstants(getHandle(), range.stageFlags, range.offset,
+                            range.size, values.data());
   }
 
   bool hasLayout(std::type_index layoutType) const noexcept {
