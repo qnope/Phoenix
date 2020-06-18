@@ -1,5 +1,7 @@
 #include "DepthSubpass.h"
 
+#include <ltl/Range/DefaultView.h>
+
 namespace phx {
 
 DepthSubpass::DepthSubpass(GraphicPipeline pipeline)
@@ -12,7 +14,7 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                          pass.m_pipeline.getHandle());
 
-  for (auto [matrix, drawInformations, material] : *pass.m_drawBatches) {
+  for (auto drawInformations : *pass.m_drawBatches | ltl::get(0_n)) {
     cmdBuffer.bindVertexBuffers(0, drawInformations.vertexBuffer.getHandle(),
                                 vk::DeviceSize(0));
     cmdBuffer.bindIndexBuffer(drawInformations.indexBuffer.getHandle(), 0,
@@ -21,15 +23,15 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
     cmdBuffer.drawIndexed(drawInformations.indexCount, 1,
                           drawInformations.firstIndex,
                           drawInformations.vertexOffset, 0);
-
-    (void)material;
   }
   return cmdBuffer;
 }
 
-void DepthSubpass::setDrawBatches(
+void DepthSubpass::setMatrixBufferAndDrawBatches(
+    DescriptorSet matrixBufferDescriptorSet,
     const std::vector<DrawBatche> *drawBatches) noexcept {
   m_drawBatches = drawBatches;
+  m_descriptorSet = matrixBufferDescriptorSet;
 }
 
 } // namespace phx

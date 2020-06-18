@@ -8,12 +8,14 @@
 
 namespace phx {
 
-using DrawBatche = ltl::tuple_t<glm::mat4, DrawInformations, Material>;
+using DrawBatche = ltl::tuple_t<DrawInformations, Material>;
+using MatrixAndDrawBatche = ltl::tuple_t<glm::mat4, DrawBatche>;
 
 struct GetDrawBatchesVisitor
-    : ListResultVisitor<DrawBatche, GetDrawBatchesVisitor &, GeometryNode> {
+    : ListResultVisitor<MatrixAndDrawBatche, GetDrawBatchesVisitor &,
+                        GeometryNode> {
   GetDrawBatchesVisitor() noexcept;
-  DrawBatche operator()(const GeometryNode &node) const noexcept;
+  MatrixAndDrawBatche operator()(const GeometryNode &node) const noexcept;
 
 private:
   glm::mat4 m_matrix{1.0f};

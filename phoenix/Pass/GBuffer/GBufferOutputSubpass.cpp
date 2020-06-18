@@ -23,7 +23,7 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
                              const GBufferOutputSubpass &pass) noexcept {
   assert(pass.m_drawBatches != nullptr);
 
-  for (auto [matrix, drawInformations, material] : *pass.m_drawBatches) {
+  for (auto [drawInformations, material] : *pass.m_drawBatches) {
     auto pipeline = pass.getCompatiblePipeline(material);
     cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                            pipeline.getHandle());
@@ -42,8 +42,10 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
   return cmdBuffer;
 }
 
-void GBufferOutputSubpass::setDrawBatches(
+void GBufferOutputSubpass::setMatrixBufferAndDrawBatches(
+    DescriptorSet matrixBufferDescriptorSet,
     const std::vector<DrawBatche> *drawBatches) noexcept {
+  m_descriptorSet = matrixBufferDescriptorSet;
   m_drawBatches = drawBatches;
 }
 

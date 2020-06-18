@@ -20,13 +20,16 @@ public:
   operator<<(vk::CommandBuffer cmdBuffer,
              const GBufferOutputSubpass &pass) noexcept;
 
-  void setDrawBatches(const std::vector<DrawBatche> *drawBatches) noexcept;
+  void setMatrixBufferAndDrawBatches(
+      DescriptorSet matrixBufferDescriptorSet,
+      const std::vector<DrawBatche> *drawBatches) noexcept;
 
   GraphicPipeline getCompatiblePipeline(const Material &material) const
       noexcept;
 
 private:
   std::vector<GraphicPipeline> m_pipelines;
+  std::optional<DescriptorSet> m_descriptorSet;
   const std::vector<DrawBatche> *m_drawBatches = nullptr;
 };
 

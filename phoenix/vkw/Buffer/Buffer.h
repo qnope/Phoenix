@@ -88,6 +88,9 @@ public:
   }
 
   vk::DeviceSize sizeInBytes() const noexcept { return size() * sizeof(T); }
+  vk::DeviceSize capacityInBytes() const noexcept {
+    return capacity() * sizeof(T);
+  }
 
   vk::DeviceSize capacity() const noexcept { return m_capacity; }
 
@@ -137,6 +140,9 @@ using IndexBuffer = GpuBuffer<T, VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
 template <typename T>
 using CpuUniformBuffer = CpuBuffer<T, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT>;
 
+template <typename T>
+using CpuStorageBuffer = CpuBuffer<T, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT>;
+
 MAKE_IS_VULKAN_RESOURCE(vk::Buffer, is_buffer, IsBuffer);
 
 template <vk::BufferUsageFlagBits usage, typename B>
@@ -146,7 +152,7 @@ constexpr auto doesBufferSupport(B &b) noexcept {
 }
 
 template <typename B, requires_f(IsBuffer<B>)> auto getDescriptorInfo(B &b) {
-  return vk::DescriptorBufferInfo(b.getHandle(), 0, b.sizeInBytes());
+  return vk::DescriptorBufferInfo(b.getHandle(), 0, b.capacityInBytes());
 }
 
 } // namespace phx

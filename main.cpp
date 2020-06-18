@@ -10,6 +10,7 @@
 
 #include "phoenix/Pass/GBuffer/GBufferRenderPass.h"
 #include "phoenix/Pass/Presentation/PresentationRenderPass.h"
+#include "phoenix/Pass/SceneGraphPass/SceneGraphPass.h"
 
 phx::GeometryNode createGeometryNode(phx::SceneGraph &sceneGraph) {
   auto &materialFactory = sceneGraph.materialFactory();
@@ -68,8 +69,9 @@ int main(int, char **) {
 
     phx::GBufferRenderPass renderPass{device, width, height};
     phx::PresentationRenderPass presentationPass{window};
+    phx::SceneGraphPass sceneGraphPass{device};
 
-    auto drawBatches = sceneGraph.dispatch(phx::GetDrawBatchesVisitor{});
+    auto [matrixBufferSet, drawBatches] = sceneGraphPass.generate(sceneGraph);
 
     for (auto [index, commandBuffer] : ltl::enumerate(commandBuffers)) {
       vk::CommandBufferBeginInfo info;
@@ -77,7 +79,7 @@ int main(int, char **) {
 
       presentationPass.setSampledImage(index, renderPass.getAlbedoMap());
 
-      renderPass.setDrawBatches(drawBatches);
+      renderPass.setBufferDrawBatches(matrixBufferSet, drawBatches);
       commandBuffer << renderPass << presentationPass;
 
       commandBuffer.end();

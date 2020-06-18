@@ -14,10 +14,13 @@ public:
   friend vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
                                       const DepthSubpass &pass);
 
-  void setDrawBatches(const std::vector<DrawBatche> *drawBatches) noexcept;
+  void setMatrixBufferAndDrawBatches(
+      DescriptorSet matrixBufferDescriptorSet,
+      const std::vector<DrawBatche> *drawBatches) noexcept;
 
 private:
   GraphicPipeline m_pipeline;
+  std::optional<DescriptorSet> m_descriptorSet;
   const std::vector<DrawBatche> *m_drawBatches = nullptr;
 };
 

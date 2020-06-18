@@ -35,6 +35,9 @@ public:
   auto capacity() const noexcept { return m_capacity; }
 
   vk::DeviceSize sizeInBytes() const noexcept { return size() * sizeof(T); }
+  vk::DeviceSize capacityInBytes() const noexcept {
+    return capacity() * sizeof(T);
+  }
 
 private:
   vk::Buffer m_buffer;

@@ -28,11 +28,15 @@ set(PHOENIX_PASS
     phoenix/Pass/DepthPass/DepthSubpass.h
     phoenix/Pass/DepthPass/DepthSubpass.cpp
 
+    phoenix/Pass/SceneGraphPass/SceneGraphPass.h
+    phoenix/Pass/SceneGraphPass/SceneGraphPass.cpp
+
     phoenix/Pass/Presentation/PresentationSubpass.h
     phoenix/Pass/Presentation/PresentationRenderPass.h
 
     phoenix/Pass/Presentation/PresentationSubpass.cpp
     phoenix/Pass/Presentation/PresentationRenderPass.cpp
+
     )
 
 set(PHOENIX_SCENEGRAPH
