@@ -98,10 +98,12 @@ using ColorBufferView =
 
 class GBufferRenderPass::Impl {
 public:
-  Impl(Device &device, Width width, Height height)
-      : m_device{device},                //
-        m_descriptorPoolManager{device}, //
-        m_width{width},                  //
+  Impl(Device &device, const MatrixBufferLayout &matrixBufferLayout, //
+       Width width, Height height)
+      : m_device{device},                         //
+        m_matrixBufferLayout{matrixBufferLayout}, //
+        m_descriptorPoolManager{device},          //
+        m_width{width},                           //
         m_height{height} {}
 
   auto getSampledAlbedoMap() const noexcept {
@@ -124,6 +126,7 @@ public:
 
 private:
   Device &m_device;
+  const MatrixBufferLayout &m_matrixBufferLayout;
   DescriptorPoolManager m_descriptorPoolManager;
 
   Width m_width;
@@ -153,14 +156,18 @@ private:
                                  m_albedoView.getHandle());
 
   GBufferOutputSubpass m_outputSubpass = make_gbuffer_output_subpass(
-      m_device, m_width, m_height, m_descriptorPoolManager, m_renderPass);
+      m_device, m_width, m_height, m_descriptorPoolManager, m_renderPass,
+      m_matrixBufferLayout);
 
-  DepthSubpass m_depthSubpass =
-      make_depth_subpass(m_device, m_width, m_height, m_renderPass);
+  DepthSubpass m_depthSubpass = make_depth_subpass(
+      m_device, m_width, m_height, m_renderPass, m_matrixBufferLayout);
 };
 
-GBufferRenderPass::GBufferRenderPass(Device &device, Width width, Height height)
-    : m_impl{std::make_unique<Impl>(device, width, height)} {}
+GBufferRenderPass::GBufferRenderPass(
+    Device &device, const MatrixBufferLayout &matrixBufferLayout, Width width,
+    Height height)
+    : m_impl{
+          std::make_unique<Impl>(device, matrixBufferLayout, width, height)} {}
 
 void GBufferRenderPass::setBufferDrawBatches(
     DescriptorSet matrixBufferDescriptorSet,

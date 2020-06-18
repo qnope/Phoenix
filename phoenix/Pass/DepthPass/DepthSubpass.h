@@ -5,6 +5,8 @@
 
 #include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
 
+#include "../SceneGraphPass/SceneGraphPass.h"
+
 namespace phx {
 
 class DepthSubpass : public phx::AbstractSubpass {
@@ -26,12 +28,15 @@ private:
 
 template <typename RenderPass>
 auto make_depth_subpass(Device &device, Width width, Height height,
-                        const RenderPass &renderPass) {
+                        const RenderPass &renderPass,
+                        const MatrixBufferLayout &layout) {
   auto vertexShader = device.createShaderModule<VertexShaderType>(
       "../phoenix/shaders/DepthPass/DepthPass.vert", true);
   auto fragmentShader = device.createShaderModule<FragmentShaderType>(
       "../phoenix/shaders/DepthPass/DepthPass.frag", true);
-  auto pipelineLayout = device.createPipelineLayout();
+  auto pipelineLayout =
+      device.createPipelineLayout(ltl::tuple_t{MatrixPushConstant{}}, //
+                                  ltl::tuple_t{std::cref(layout)});
 
   auto vertexBinding = BindingDescription{
       0_n, ltl::type_v<Complete3dVertex>, Complete3dVertex::stride,

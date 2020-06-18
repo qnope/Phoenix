@@ -6,20 +6,19 @@
 
 namespace phx {
 
-using MatrixBufferBinding =
-    DescriptorBinding<VK_SHADER_STAGE_VERTEX_BIT,
-                      vk::DescriptorType::eStorageBuffer, 1, glm::mat4>;
-
-using Layout = DescriptorSetLayout<MatrixBufferBinding>;
-
 class SceneGraphPass::Impl {
 public:
   Impl(Device &device) noexcept
       : m_poolManager{device}, //
         m_buffer{
             device.createBuffer<CpuStorageBuffer<glm::mat4>>(10'000'000)}, //
-        m_descriptorSet{m_poolManager.allocate<Layout>({{m_buffer}})}      //
+        m_descriptorSet{
+            m_poolManager.allocate<MatrixBufferLayout>({{m_buffer}})} //
   {}
+
+  const auto &layout() noexcept {
+    return m_poolManager.layout<MatrixBufferLayout>();
+  }
 
   DescriptorSet getDescriptorSet() const noexcept { return m_descriptorSet; }
 
@@ -47,6 +46,10 @@ SceneGraphPass::generate(SceneGraph &sceneGraph) noexcept {
   }
 
   return {m_impl->getDescriptorSet(), drawBatches | ltl::get(1_n)};
+}
+
+const MatrixBufferLayout &SceneGraphPass::matrixBufferLayout() const noexcept {
+  return m_impl->layout();
 }
 
 SceneGraphPass::~SceneGraphPass() = default;

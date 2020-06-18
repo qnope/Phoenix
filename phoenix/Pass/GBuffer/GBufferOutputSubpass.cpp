@@ -22,11 +22,14 @@ GBufferOutputSubpass::getCompatiblePipeline(const Material &material) const
 vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
                              const GBufferOutputSubpass &pass) noexcept {
   assert(pass.m_drawBatches != nullptr);
+  assert(pass.m_descriptorSet);
 
   for (auto [drawInformations, material] : *pass.m_drawBatches) {
     auto pipeline = pass.getCompatiblePipeline(material);
     cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                            pipeline.getHandle());
+    pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0,
+                           *pass.m_descriptorSet);
 
     cmdBuffer.bindVertexBuffers(0, drawInformations.vertexBuffer.getHandle(),
                                 vk::DeviceSize(0));

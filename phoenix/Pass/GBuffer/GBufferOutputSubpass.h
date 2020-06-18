@@ -10,6 +10,8 @@
 #include <SceneGraph/SceneGraph.h>
 #include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
 
+#include "../SceneGraphPass/SceneGraphPass.h"
+
 namespace phx {
 
 class GBufferOutputSubpass : public phx::AbstractSubpass {
@@ -33,11 +35,12 @@ private:
   const std::vector<DrawBatche> *m_drawBatches = nullptr;
 };
 
-template <typename RenderPass, typename Layout>
+template <typename RenderPass, typename MaterialLayout>
 auto make_gbuffer_output_pipeline(Device &device, Width width, Height height,
                                   DescriptorPoolManager &poolManager,
                                   const RenderPass &renderPass,
-                                  ltl::type_t<Layout>,
+                                  const MatrixBufferLayout &matrixBufferLayout,
+                                  ltl::type_t<MaterialLayout>,
                                   const std::string &fragmentPath) {
   auto vertexShader = device.createShaderModule<VertexShaderType>(
       "../phoenix/shaders/GBufferPass/GBufferOutput.vert", true);
@@ -45,8 +48,11 @@ auto make_gbuffer_output_pipeline(Device &device, Width width, Height height,
   auto fragmentShader =
       device.createShaderModule<FragmentShaderType>(fragmentPath, true);
 
-  const auto &layout = poolManager.layout<Layout>();
-  auto pipelineLayout = device.createPipelineLayout(with_layouts, layout);
+  const auto &materialLayout = poolManager.layout<MaterialLayout>();
+  auto pipelineLayout = device.createPipelineLayout(
+      ltl::tuple_t{
+          PushConstantRange<0, sizeof(uint32_t), VK_SHADER_STAGE_VERTEX_BIT>{}},
+      ltl::tuple_t{std::cref(matrixBufferLayout), std::cref(materialLayout)});
 
   auto vertexBinding = phx::Complete3dVertex::getBindingDescription(0_n);
 
@@ -67,11 +73,13 @@ auto make_gbuffer_output_pipeline(Device &device, Width width, Height height,
 template <typename RenderPass>
 auto make_gbuffer_output_subpass(Device &device, Width width, Height height,
                                  DescriptorPoolManager &poolManager,
-                                 const RenderPass &renderPass) {
+                                 const RenderPass &renderPass,
+                                 const MatrixBufferLayout &matrixBufferLayout) {
 
   auto curried =
       ltl::curry(lift(make_gbuffer_output_pipeline), std::ref(device), width,
-                 height, std::ref(poolManager), std::cref(renderPass));
+                 height, std::ref(poolManager), std::cref(renderPass),
+                 std::cref(matrixBufferLayout));
 
   GBufferOutputSubpass outputSubpass;
   outputSubpass.addGraphicPipeline(GraphicPipeline{

@@ -10,9 +10,12 @@ DepthSubpass::DepthSubpass(GraphicPipeline pipeline)
 vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
                              const DepthSubpass &pass) {
   assert(pass.m_drawBatches != nullptr);
+  assert(pass.m_descriptorSet);
 
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics,
                          pass.m_pipeline.getHandle());
+  pass.m_pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0,
+                                *pass.m_descriptorSet);
 
   for (auto drawInformations : *pass.m_drawBatches | ltl::get(0_n)) {
     cmdBuffer.bindVertexBuffers(0, drawInformations.vertexBuffer.getHandle(),

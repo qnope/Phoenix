@@ -6,6 +6,8 @@
 
 #include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
 
+#include "../SceneGraphPass/SceneGraphPass.h"
+
 namespace phx {
 class Device;
 
@@ -13,7 +15,9 @@ class GBufferRenderPass {
   class Impl;
 
 public:
-  GBufferRenderPass(Device &device, Width width, Height height);
+  GBufferRenderPass(Device &device,
+                    const phx::MatrixBufferLayout &matrixBufferLayout,
+                    Width width, Height height);
 
   void
   setBufferDrawBatches(DescriptorSet matrixBufferDescriptorSet,

@@ -67,9 +67,10 @@ int main(int, char **) {
     for (auto i = 0u; i < window.getImageCount(); ++i)
       fences.emplace_back(device.createFence(true));
 
-    phx::GBufferRenderPass renderPass{device, width, height};
-    phx::PresentationRenderPass presentationPass{window};
     phx::SceneGraphPass sceneGraphPass{device};
+    phx::GBufferRenderPass renderPass{
+        device, sceneGraphPass.matrixBufferLayout(), width, height};
+    phx::PresentationRenderPass presentationPass{window};
 
     auto [matrixBufferSet, drawBatches] = sceneGraphPass.generate(sceneGraph);
 

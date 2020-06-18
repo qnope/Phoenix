@@ -14,8 +14,16 @@ layout(location = 0) out VertexData {
     vec2 texCoord;
 } outData;
 
+layout(push_constant) uniform MatrixIndex {
+    uint matrixIndex;
+};
+
+layout(set = 0, binding = 0, std430) buffer MatrixBuffer {
+    mat4 matrices[];
+};
+
 void main() {
-    gl_Position = vec4(inPosition, 1.0);
+    gl_Position = matrices[matrixIndex] * vec4(inPosition, 1.0);
 
     outData.normal = inNormal;
     outData.tangeant = inTangeant;

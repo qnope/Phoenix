@@ -12,7 +12,7 @@ layout(location = 0) in VertexData {
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 0, binding = 0) uniform sampler2D texSampler;
+layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
 void main() {
     outColor = textureLod(texSampler, inData.texCoord, 0);
