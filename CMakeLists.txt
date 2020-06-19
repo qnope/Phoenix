@@ -182,6 +182,7 @@ set(PHOENIX
 set(SHADER_SRC
     phoenix/shaders/GBufferPass/GBufferOutput.vert
     phoenix/shaders/GBufferPass/GBufferLambertianTexture.frag
+    phoenix/shaders/GBufferPass/GBufferLambertianColored.frag
 
     phoenix/shaders/DepthPass/DepthPass.vert
     phoenix/shaders/DepthPass/DepthPass.frag

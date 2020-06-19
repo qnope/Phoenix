@@ -12,11 +12,14 @@
 #include "phoenix/Pass/Presentation/PresentationRenderPass.h"
 #include "phoenix/Pass/SceneGraphPass/SceneGraphPass.h"
 
-phx::GeometryNode createGeometryNode(phx::SceneGraph &sceneGraph) {
-  auto &materialFactory = sceneGraph.materialFactory();
+#include "phoenix/SceneGraph/Materials/MaterialFactory.h"
+
+phx::GeometryNode createGeometryNode(phx::SceneGraph &sceneGraph,
+                                     phx::MaterialFactory &materialFactory) {
   auto material = materialFactory.createTexturedLambertianMaterial(
       "../resources/images/texture.jpg");
 
+  materialFactory.flush();
   std::vector<phx::Complete3dVertex> vertices = {
       {{-1.f, -1.f, 0.5f}, {0.0f}, {0.0f}, {0.0f}, {0.0f, 0.0f}},
       {{1.f, -1.f, 0.5f}, {0.0f}, {0.0f}, {0.0f}, {1.0f, 0.0f}},
@@ -40,10 +43,11 @@ int main(int, char **) {
                               phx::WindowTitle("Phoenix Engine")};
     phx::Device &device = window.getDevice();
     vk::Device deviceHandle = device.getHandle();
+    phx::MaterialFactory materialFactory{device};
 
     phx::SceneGraph sceneGraph(device);
 
-    auto node = createGeometryNode(sceneGraph);
+    auto node = createGeometryNode(sceneGraph, materialFactory);
     sceneGraph.setRootNode(std::move(node));
 
     sceneGraph.flush(vk::PipelineStageFlagBits::eVertexInput,

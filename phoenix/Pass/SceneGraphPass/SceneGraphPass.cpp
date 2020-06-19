@@ -1,7 +1,9 @@
 #include "SceneGraphPass.h"
 
 #include <SceneGraph/SceneGraph.h>
+#include <ltl/Range/DefaultView.h>
 #include <vkw/Buffer/Buffer.h>
+#include <vkw/Descriptor/DescriptorPoolManager.h>
 #include <vkw/Device.h>
 
 namespace phx {

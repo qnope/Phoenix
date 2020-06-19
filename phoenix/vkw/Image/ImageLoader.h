@@ -35,10 +35,13 @@ public:
 
   SampledImage load(const std::string &path, bool withMipmap,
                     vk::PipelineStageFlags pipelineStage) {
+    if (auto *image = ltl::find_map_ptr(m_images, path)) {
+      return {(*image)[1_n], m_sampler};
+    }
     auto [width, height, data] = loadImage(path);
     auto &buffer = getCandidateBuffer(data.size());
     auto [offset, size] = fillBuffer(buffer, data);
-    auto &[image, imageView] = createNewImage(width, height, withMipmap);
+    auto &[image, imageView] = createNewImage(width, height, withMipmap, path);
     auto subResourceRange = vk::ImageSubresourceRange(
         image.aspectMask, 0, VK_REMAINING_MIP_LEVELS, 0, 1);
 
@@ -85,12 +88,17 @@ private:
   }
 
   ltl::tuple_t<Image, ImageView> &createNewImage(Width width, Height height,
-                                                 bool withMipmap) {
+                                                 bool withMipmap,
+                                                 const std::string &path) {
     auto w = width.get();
     auto h = height.get();
     auto image = m_device.createImage<Image>(w, h, 1u, withMipmap);
     auto imageView = image.template createImageView<Type>();
-    return m_images.emplace_back(std::move(image), std::move(imageView));
+    auto [it, ok] = m_images.emplace(
+        path,
+        ltl::tuple_t<Image, ImageView>{std::move(image), std::move(imageView)});
+    assert(ok);
+    return it->second;
   }
 
   ltl::tuple_t<std::size_t, std::size_t>
@@ -121,6 +129,6 @@ private:
                                              vk::SamplerMipmapMode::eLinear);
 
   std::vector<Buffer> m_buffers;
-  std::vector<ltl::tuple_t<Image, ImageView>> m_images;
+  std::unordered_map<std::string, ltl::tuple_t<Image, ImageView>> m_images;
 };
 } // namespace phx
