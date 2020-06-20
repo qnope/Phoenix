@@ -7,14 +7,14 @@
 
 namespace phx {
 class AbstractMaterial {
-protected:
-  AbstractMaterial(DescriptorSet descriptorSet) noexcept;
+  protected:
+    AbstractMaterial(DescriptorSet descriptorSet) noexcept;
 
-public:
-  std::type_index layoutType() const noexcept;
-  DescriptorSet descriptorSet() const noexcept;
+  public:
+    std::type_index layoutType() const noexcept;
+    DescriptorSet descriptorSet() const noexcept;
 
-private:
-  DescriptorSet m_descriptorSet;
+  private:
+    DescriptorSet m_descriptorSet;
 };
 } // namespace phx

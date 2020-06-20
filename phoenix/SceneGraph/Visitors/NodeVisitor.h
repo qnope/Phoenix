@@ -4,10 +4,10 @@
 
 namespace phx {
 class NodeVisitor {
-public:
-  virtual bool visit(AbstractNode &node) = 0;
+  public:
+    virtual bool visit(AbstractNode &node) = 0;
 
-protected:
-  virtual ~NodeVisitor() = default;
+  protected:
+    virtual ~NodeVisitor() = default;
 };
 } // namespace phx

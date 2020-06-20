@@ -5,8 +5,8 @@
 namespace phx {
 
 class TransformationNode : public GroupNode {
-public:
-  TransformationNode();
+  public:
+    TransformationNode();
 };
 
 } // namespace phx

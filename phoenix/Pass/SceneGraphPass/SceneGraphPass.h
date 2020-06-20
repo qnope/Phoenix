@@ -12,28 +12,25 @@ class Device;
 class SceneGraph;
 
 using MatrixBufferBinding =
-    DescriptorBinding<VK_SHADER_STAGE_VERTEX_BIT,
-                      vk::DescriptorType::eStorageBuffer, 1, glm::mat4>;
+    DescriptorBinding<VK_SHADER_STAGE_VERTEX_BIT, vk::DescriptorType::eStorageBuffer, 1, glm::mat4>;
 using MatrixBufferLayout = DescriptorSetLayout<MatrixBufferBinding>;
 
-using MatrixPushConstant =
-    PushConstantRange<0, sizeof(uint32_t), VK_SHADER_STAGE_VERTEX_BIT>;
+using MatrixPushConstant = PushConstantRange<0, sizeof(uint32_t), VK_SHADER_STAGE_VERTEX_BIT>;
 
 class SceneGraphPass {
-  class Impl;
+    class Impl;
 
-public:
-  SceneGraphPass(Device &device) noexcept;
+  public:
+    SceneGraphPass(Device &device) noexcept;
 
-  ltl::tuple_t<DescriptorSet, std::vector<DrawBatche>>
-  generate(SceneGraph &sceneGraph) noexcept;
+    ltl::tuple_t<DescriptorSet, std::vector<DrawBatche>> generate(SceneGraph &sceneGraph) noexcept;
 
-  const MatrixBufferLayout &matrixBufferLayout() const noexcept;
+    const MatrixBufferLayout &matrixBufferLayout() const noexcept;
 
-  ~SceneGraphPass();
+    ~SceneGraphPass();
 
-private:
-  std::unique_ptr<Impl> m_impl;
+  private:
+    std::unique_ptr<Impl> m_impl;
 };
 
 } // namespace phx

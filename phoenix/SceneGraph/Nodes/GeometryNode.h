@@ -7,15 +7,15 @@
 namespace phx {
 
 class GeometryNode : public AbstractLeafNode {
-public:
-  GeometryNode(DrawInformations informations, Material material) noexcept;
+  public:
+    GeometryNode(DrawInformations informations, Material material) noexcept;
 
-  DrawInformations drawInformations() const noexcept;
-  Material material() const noexcept;
+    DrawInformations drawInformations() const noexcept;
+    Material material() const noexcept;
 
-private:
-  DrawInformations m_informations;
-  Material m_material;
+  private:
+    DrawInformations m_informations;
+    Material m_material;
 };
 
 } // namespace phx

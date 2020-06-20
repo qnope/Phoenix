@@ -5,13 +5,13 @@
 namespace phx {
 
 class ActivableNode : public BaseGroupNode {
-public:
-  ActivableNode(bool isEnabled) noexcept;
+  public:
+    ActivableNode(bool isEnabled) noexcept;
 
-  void accept(NodeVisitor &visitor);
+    void accept(NodeVisitor &visitor);
 
-private:
-  bool m_isEnabled = false;
+  private:
+    bool m_isEnabled = false;
 };
 
 } // namespace phx

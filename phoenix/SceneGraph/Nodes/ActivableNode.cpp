@@ -2,13 +2,12 @@
 
 namespace phx {
 
-ActivableNode::ActivableNode(bool isEnabled) noexcept
-    : m_isEnabled{isEnabled} {}
+ActivableNode::ActivableNode(bool isEnabled) noexcept : m_isEnabled{isEnabled} {}
 
 void ActivableNode::accept(NodeVisitor &visitor) {
-  if (visitor.visit(*this) && m_isEnabled) {
-    processChildren(visitor);
-  }
+    if (visitor.visit(*this) && m_isEnabled) {
+        processChildren(visitor);
+    }
 }
 
 } // namespace phx

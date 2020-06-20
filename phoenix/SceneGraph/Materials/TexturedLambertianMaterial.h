@@ -9,20 +9,16 @@
 
 namespace phx {
 
-using TexturedLambertianMaterialSetLayout =
-    DescriptorSetLayout<SampledImage2dRgbaSrgbBinding>;
+using TexturedLambertianMaterialSetLayout = DescriptorSetLayout<SampledImage2dRgbaSrgbBinding>;
 
 class TexturedLambertianMaterial : public AbstractMaterial {
-public:
-  TexturedLambertianMaterial(
-      const std::string &path,
-      ImageLoader<SampledImage2dRgbaSrgbRef> &imageLoader,
-      DescriptorPoolManager &pool) noexcept;
+  public:
+    TexturedLambertianMaterial(const std::string &path, ImageLoader<SampledImage2dRgbaSrgbRef> &imageLoader,
+                               DescriptorPoolManager &pool) noexcept;
 
-  bool isCompatibleWith(const PipelineLayout &pipelineLayout) const noexcept;
+    bool isCompatibleWith(const PipelineLayout &pipelineLayout) const noexcept;
 
-  void bindTo(vk::CommandBuffer cmdBuffer,
-              const PipelineLayout &pipelineLayout) const noexcept;
+    void bindTo(vk::CommandBuffer cmdBuffer, const PipelineLayout &pipelineLayout) const noexcept;
 };
 
 } // namespace phx

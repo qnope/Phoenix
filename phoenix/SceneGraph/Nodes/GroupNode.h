@@ -9,18 +9,18 @@
 namespace phx {
 
 class BaseGroupNode : public AbstractNode {
-public:
-  void addChild(Node node);
+  public:
+    void addChild(Node node);
 
-  void processChildren(NodeVisitor &visitor);
+    void processChildren(NodeVisitor &visitor);
 
-protected:
-  std::vector<Node> m_nodes;
+  protected:
+    std::vector<Node> m_nodes;
 };
 
 class GroupNode : public BaseGroupNode {
-public:
-  void accept(NodeVisitor &visitor);
+  public:
+    void accept(NodeVisitor &visitor);
 };
 
 } // namespace phx

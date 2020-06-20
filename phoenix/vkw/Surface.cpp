@@ -2,12 +2,12 @@
 
 namespace phx {
 Surface::Surface(SDL_Window *m_window, const Instance &instance) {
-  VkSurfaceKHR surface;
+    VkSurfaceKHR surface;
 
-  if (!SDL_Vulkan_CreateSurface(m_window, instance.getHandle(), &surface)) {
-    throw UnableToCreateSurfaceException{};
-  }
+    if (!SDL_Vulkan_CreateSurface(m_window, instance.getHandle(), &surface)) {
+        throw UnableToCreateSurfaceException{};
+    }
 
-  m_handle = vk::UniqueSurfaceKHR(surface, instance.getHandle());
+    m_handle = vk::UniqueSurfaceKHR(surface, instance.getHandle());
 }
 } // namespace phx
