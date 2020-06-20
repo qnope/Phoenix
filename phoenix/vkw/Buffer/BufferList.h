@@ -34,7 +34,12 @@ public:
     m_memoryTransfer.flush();
   }
 
-  void reset() { m_stagingBuffer.clear(); }
+  void resetOnlyStagingBuffer() { m_stagingBuffer.clear(); }
+
+  void reset() {
+    m_stagingBuffer.clear();
+    m_gpuBuffers.clear();
+  }
 
 private:
   static vk::BufferCopy prepareCopy(const std::vector<T> &values,

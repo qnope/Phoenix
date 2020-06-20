@@ -79,7 +79,7 @@ public:
   void push(vk::CommandBuffer cmdBuffer, Ts... _values) const noexcept {
     std::array values = {_values...};
     vk::PushConstantRange range = PushConstant::getRange();
-    assert(ltl::contains(m_pushConstantRangeTypes, typeid(PushConstant)));
+    assert(hasPushConstant(typeid(PushConstant)));
     assert(range.size == values.size() * sizeof(values[0]));
 
     cmdBuffer.pushConstants(getHandle(), range.stageFlags, range.offset,
@@ -88,6 +88,10 @@ public:
 
   bool hasLayout(std::type_index layoutType) const noexcept {
     return ltl::contains(m_layoutTypes, layoutType);
+  }
+
+  bool hasPushConstant(std::type_index pushConstantType) const noexcept {
+    return ltl::contains(m_pushConstantRangeTypes, pushConstantType);
   }
 
   uint32_t descriptorSetIndex(std::type_index layoutType) const noexcept {
