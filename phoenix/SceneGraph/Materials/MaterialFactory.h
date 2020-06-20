@@ -9,18 +9,18 @@ namespace phx {
 class Device;
 
 class MaterialFactory {
-public:
-  MaterialFactory(Device &device) noexcept;
+  public:
+    MaterialFactory(Device &device) noexcept;
 
-  Material createTexturedLambertianMaterial(const std::string &path) noexcept;
+    Material createTexturedLambertianMaterial(const std::string &path) noexcept;
 
-  void flush() noexcept;
+    void flush() noexcept;
 
-  DescriptorPoolManager &descriptorPoolManager() noexcept;
+    DescriptorPoolManager &descriptorPoolManager() noexcept;
 
-private:
-  ImageLoader<SampledImage2dRgbaSrgbRef> m_imageLoader;
-  DescriptorPoolManager m_descriptorPoolManager;
+  private:
+    ImageLoader<SampledImage2dRgbaSrgbRef> m_imageLoader;
+    DescriptorPoolManager m_descriptorPoolManager;
 };
 
 } // namespace phx

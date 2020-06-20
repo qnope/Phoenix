@@ -13,20 +13,17 @@ class DrawInformationsAllocatorImpl;
 class Device;
 
 class DrawInformationsAllocator {
-public:
-  DrawInformationsAllocator(Device &device);
+  public:
+    DrawInformationsAllocator(Device &device);
 
-  ~DrawInformationsAllocator();
+    ~DrawInformationsAllocator();
 
-  DrawInformations allocate(const std::vector<Complete3dVertex> &vertices,
-                            const std::vector<uint32_t> &indices);
+    DrawInformations allocate(const std::vector<Complete3dVertex> &vertices, const std::vector<uint32_t> &indices);
 
-  void flush(vk::PipelineStageFlags nextPipeline,
-             vk::AccessFlags nextAccess) noexcept;
+    void flush(vk::PipelineStageFlags nextPipeline, vk::AccessFlags nextAccess) noexcept;
 
-private:
-  std::unique_ptr<details::DrawInformationsAllocatorImpl>
-      m_vertexAndIndexBufferListPimpl;
+  private:
+    std::unique_ptr<details::DrawInformationsAllocatorImpl> m_vertexAndIndexBufferListPimpl;
 };
 
 } // namespace phx

@@ -6,21 +6,19 @@
 
 namespace phx {
 struct DrawInformations {
-  DrawInformations(IndexBufferRef<uint32_t> indexBuffer,
-                   VertexBufferRef<Complete3dVertex> vertexBuffer,
-                   uint32_t indexCount, uint32_t firstIndex,
-                   uint32_t vertexOffset)
-      : indexBuffer{indexBuffer},   //
+    DrawInformations(IndexBufferRef<uint32_t> indexBuffer, VertexBufferRef<Complete3dVertex> vertexBuffer,
+                     uint32_t indexCount, uint32_t firstIndex, uint32_t vertexOffset) :
+        indexBuffer{indexBuffer},   //
         vertexBuffer{vertexBuffer}, //
         indexCount{indexCount},     //
         firstIndex{firstIndex},     //
         vertexOffset{vertexOffset} {}
 
-  IndexBufferRef<uint32_t> indexBuffer;
-  VertexBufferRef<Complete3dVertex> vertexBuffer;
+    IndexBufferRef<uint32_t> indexBuffer;
+    VertexBufferRef<Complete3dVertex> vertexBuffer;
 
-  uint32_t indexCount;
-  uint32_t firstIndex;
-  uint32_t vertexOffset;
+    uint32_t indexCount;
+    uint32_t firstIndex;
+    uint32_t vertexOffset;
 };
 } // namespace phx

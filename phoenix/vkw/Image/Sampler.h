@@ -5,8 +5,7 @@
 
 namespace phx {
 class Sampler : public VulkanResource<vk::UniqueSampler> {
-public:
-  Sampler(vk::Device device, vk::Filter minMag,
-          vk::SamplerMipmapMode mipmapMode) noexcept;
+  public:
+    Sampler(vk::Device device, vk::Filter minMag, vk::SamplerMipmapMode mipmapMode) noexcept;
 };
 } // namespace phx

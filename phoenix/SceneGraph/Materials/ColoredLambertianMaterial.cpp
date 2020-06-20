@@ -2,6 +2,6 @@
 
 namespace phx {
 
-ColoredLambertianMaterial::ColoredLambertianMaterial() {}
+// ColoredLambertianMaterial::ColoredLambertianMaterial(glm::vec4 color) : AbstractMaterial{}{}
 
 } // namespace phx

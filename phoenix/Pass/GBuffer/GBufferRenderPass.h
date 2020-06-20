@@ -12,28 +12,24 @@ namespace phx {
 class Device;
 
 class GBufferRenderPass {
-  class Impl;
+    class Impl;
 
-public:
-  GBufferRenderPass(Device &device,
-                    const phx::MatrixBufferLayout &matrixBufferLayout,
-                    Width width, Height height);
+  public:
+    GBufferRenderPass(Device &device, const phx::MatrixBufferLayout &matrixBufferLayout, Width width, Height height);
 
-  void
-  setBufferDrawBatches(DescriptorSet matrixBufferDescriptorSet,
-                       const std::vector<DrawBatche> &drawBatches) noexcept;
+    void setBufferDrawBatches(DescriptorSet matrixBufferDescriptorSet,
+                              const std::vector<DrawBatche> &drawBatches) noexcept;
 
-  SampledImage2dRgbaSrgbRef getAlbedoMap() const noexcept;
+    SampledImage2dRgbaSrgbRef getAlbedoMap() const noexcept;
 
-  ~GBufferRenderPass();
+    ~GBufferRenderPass();
 
-private:
-  friend vk::CommandBuffer
-  operator<<(vk::CommandBuffer cmdBuffer,
-             const GBufferRenderPass &gBufferRenderPass) noexcept;
+  private:
+    friend vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
+                                        const GBufferRenderPass &gBufferRenderPass) noexcept;
 
-private:
-  std::unique_ptr<Impl> m_impl;
+  private:
+    std::unique_ptr<Impl> m_impl;
 };
 
 } // namespace phx

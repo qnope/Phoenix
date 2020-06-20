@@ -8,25 +8,25 @@
 namespace phx {
 
 class PhoenixWindow;
-template <typename...> class Framebuffer;
+template <typename...>
+class Framebuffer;
 
 class PresentationRenderPass {
-  class Impl;
+    class Impl;
 
-public:
-  PresentationRenderPass(PhoenixWindow &window) noexcept;
+  public:
+    PresentationRenderPass(PhoenixWindow &window) noexcept;
 
-  void setSampledImage(size_t index, SampledImage2dRgbaSrgbRef ref);
+    void setSampledImage(size_t index, SampledImage2dRgbaSrgbRef ref);
 
-  ~PresentationRenderPass();
+    ~PresentationRenderPass();
 
-private:
-  friend vk::CommandBuffer
-  operator<<(vk::CommandBuffer cmdBuffer,
-             const PresentationRenderPass &presentationPass) noexcept;
+  private:
+    friend vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer,
+                                        const PresentationRenderPass &presentationPass) noexcept;
 
-private:
-  std::unique_ptr<Impl> m_impl;
+  private:
+    std::unique_ptr<Impl> m_impl;
 };
 
 } // namespace phx

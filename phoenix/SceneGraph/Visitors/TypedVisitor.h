@@ -30,4 +30,4 @@ struct TypedVisitor : public NodeVisitor {
 
     F m_f;
 };
-}
+} // namespace phx

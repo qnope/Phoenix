@@ -8,9 +8,9 @@
 namespace phx {
 struct UnableToCreateSurfaceException {};
 class Surface final : public VulkanResource<vk::UniqueSurfaceKHR> {
-public:
-  Surface(SDL_Window *m_window, const Instance &instance);
+  public:
+    Surface(SDL_Window *m_window, const Instance &instance);
 
-private:
+  private:
 };
 } // namespace phx

@@ -8,25 +8,22 @@
 namespace phx {
 
 class Allocator {
-public:
-  Allocator(vk::Instance instance, vk::Device device,
-            vk::PhysicalDevice physicalDevice);
+  public:
+    Allocator(vk::Instance instance, vk::Device device, vk::PhysicalDevice physicalDevice);
 
-  vk::Device device() const noexcept;
+    vk::Device device() const noexcept;
 
-  ltl::tuple_t<vk::Image, VmaAllocation> allocateImage(vk::ImageCreateInfo info,
-                                                       VmaMemoryUsage usage);
+    ltl::tuple_t<vk::Image, VmaAllocation> allocateImage(vk::ImageCreateInfo info, VmaMemoryUsage usage);
 
-  ltl::tuple_t<vk::Buffer, AllocatorBlock>
-  allocateBuffer(vk::BufferCreateInfo infoBuffer, VmaMemoryUsage usage);
+    ltl::tuple_t<vk::Buffer, AllocatorBlock> allocateBuffer(vk::BufferCreateInfo infoBuffer, VmaMemoryUsage usage);
 
-  void deallocateImage(vk::Image image, VmaAllocation allocation);
-  void deallocateBuffer(vk::Buffer buffer, AllocatorBlock block);
+    void deallocateImage(vk::Image image, VmaAllocation allocation);
+    void deallocateBuffer(vk::Buffer buffer, AllocatorBlock block);
 
-  ~Allocator();
+    ~Allocator();
 
-private:
-  vk::Device m_device;
-  VmaAllocator m_allocator;
+  private:
+    vk::Device m_device;
+    VmaAllocator m_allocator;
 };
 } // namespace phx

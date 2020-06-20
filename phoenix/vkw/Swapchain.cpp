@@ -3,145 +3,130 @@
 
 namespace phx {
 
-static vk::SurfaceFormatKHR chooseSwapchainFormat(vk::PhysicalDevice device,
-                                                  vk::SurfaceKHR surface) {
-  auto formats = device.getSurfaceFormatsKHR(surface);
+static vk::SurfaceFormatKHR chooseSwapchainFormat(vk::PhysicalDevice device, vk::SurfaceKHR surface) {
+    auto formats = device.getSurfaceFormatsKHR(surface);
 
-  if (formats.size() == 1 && formats[0].format == vk::Format::eUndefined) {
-    return {vk::Format::eB8G8R8A8Srgb, vk::ColorSpaceKHR::eSrgbNonlinear};
-  }
-
-  for (auto format : formats) {
-    if (format.format == vk::Format::eB8G8R8A8Srgb &&
-        format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
-      return format;
+    if (formats.size() == 1 && formats[0].format == vk::Format::eUndefined) {
+        return {vk::Format::eB8G8R8A8Srgb, vk::ColorSpaceKHR::eSrgbNonlinear};
     }
-  }
 
-  throw NoFormatAvailableException{};
+    for (auto format : formats) {
+        if (format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
+            return format;
+        }
+    }
+
+    throw NoFormatAvailableException{};
 }
 
-static vk::PresentModeKHR
-chooseSwapchainPresentMode(vk::PhysicalDevice device,
-                           vk::SurfaceKHR surface) noexcept {
-  auto presentModes = device.getSurfacePresentModesKHR(surface);
-  vk::PresentModeKHR bestMode = vk::PresentModeKHR::eFifo;
+static vk::PresentModeKHR chooseSwapchainPresentMode(vk::PhysicalDevice device, vk::SurfaceKHR surface) noexcept {
+    auto presentModes = device.getSurfacePresentModesKHR(surface);
+    vk::PresentModeKHR bestMode = vk::PresentModeKHR::eFifo;
 
-  for (auto presentMode : presentModes) {
-    if (presentMode == vk::PresentModeKHR::eMailbox)
-      return presentMode;
-    else if (presentMode == vk::PresentModeKHR::eImmediate)
-      bestMode = presentMode;
-  }
+    for (auto presentMode : presentModes) {
+        if (presentMode == vk::PresentModeKHR::eMailbox)
+            return presentMode;
+        else if (presentMode == vk::PresentModeKHR::eImmediate)
+            bestMode = presentMode;
+    }
 
-  return bestMode;
+    return bestMode;
 }
 
-static vk::Extent2D chooseSwapchainExtent(vk::PhysicalDevice device,
-                                          vk::SurfaceKHR surface, Width width,
+static vk::Extent2D chooseSwapchainExtent(vk::PhysicalDevice device, vk::SurfaceKHR surface, Width width,
                                           Height height) noexcept {
-  auto capabilities = device.getSurfaceCapabilitiesKHR(surface);
+    auto capabilities = device.getSurfaceCapabilitiesKHR(surface);
 
-  if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-    return capabilities.currentExtent;
+    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+        return capabilities.currentExtent;
 
-  const vk::Extent2D minExtent = capabilities.minImageExtent;
-  const vk::Extent2D maxExtent = capabilities.maxImageExtent;
-  const uint32_t w = width.get();
-  const uint32_t h = height.get();
+    const vk::Extent2D minExtent = capabilities.minImageExtent;
+    const vk::Extent2D maxExtent = capabilities.maxImageExtent;
+    const uint32_t w = width.get();
+    const uint32_t h = height.get();
 
-  vk::Extent2D extent;
-  extent.width = std::clamp(w, minExtent.width, maxExtent.width);
-  extent.height = std::clamp(h, minExtent.height, maxExtent.height);
-  return extent;
+    vk::Extent2D extent;
+    extent.width = std::clamp(w, minExtent.width, maxExtent.width);
+    extent.height = std::clamp(h, minExtent.height, maxExtent.height);
+    return extent;
 }
 
-Swapchain::Swapchain(Device &device, Surface &surface, Width width,
-                     Height height)
-    : m_device{device.getHandle()} {
-  using namespace vk;
-  auto physicalDevice = device.getPhysicalDevice();
-  auto surfaceKHR = surface.getHandle();
-  m_surfaceFormat = chooseSwapchainFormat(physicalDevice, surfaceKHR);
-  auto presentMode = chooseSwapchainPresentMode(physicalDevice, surfaceKHR);
-  auto size = chooseSwapchainExtent(physicalDevice, surfaceKHR, width, height);
+Swapchain::Swapchain(Device &device, Surface &surface, Width width, Height height) : m_device{device.getHandle()} {
+    using namespace vk;
+    auto physicalDevice = device.getPhysicalDevice();
+    auto surfaceKHR = surface.getHandle();
+    m_surfaceFormat = chooseSwapchainFormat(physicalDevice, surfaceKHR);
+    auto presentMode = chooseSwapchainPresentMode(physicalDevice, surfaceKHR);
+    auto size = chooseSwapchainExtent(physicalDevice, surfaceKHR, width, height);
 
-  auto capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surfaceKHR);
-  m_imageCount =
-      std::clamp(3u, capabilities.minImageCount, capabilities.maxImageCount);
+    auto capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surfaceKHR);
+    m_imageCount = std::clamp(3u, capabilities.minImageCount, capabilities.maxImageCount);
 
-  SwapchainCreateInfoKHR info;
+    SwapchainCreateInfoKHR info;
 
-  info.surface = surfaceKHR;
-  info.minImageCount = m_imageCount;
-  info.imageFormat = m_surfaceFormat.format;
-  info.imageColorSpace = m_surfaceFormat.colorSpace;
-  info.imageExtent = size;
-  info.imageArrayLayers = 1;
-  info.imageUsage = ImageUsageFlagBits::eColorAttachment;
-  info.imageSharingMode = SharingMode::eExclusive;
-  info.preTransform = capabilities.currentTransform;
-  info.compositeAlpha = CompositeAlphaFlagBitsKHR::eOpaque;
-  info.presentMode = presentMode;
-  info.clipped = true;
+    info.surface = surfaceKHR;
+    info.minImageCount = m_imageCount;
+    info.imageFormat = m_surfaceFormat.format;
+    info.imageColorSpace = m_surfaceFormat.colorSpace;
+    info.imageExtent = size;
+    info.imageArrayLayers = 1;
+    info.imageUsage = ImageUsageFlagBits::eColorAttachment;
+    info.imageSharingMode = SharingMode::eExclusive;
+    info.preTransform = capabilities.currentTransform;
+    info.compositeAlpha = CompositeAlphaFlagBitsKHR::eOpaque;
+    info.presentMode = presentMode;
+    info.clipped = true;
 
-  m_handle = m_device.createSwapchainKHRUnique(info);
+    m_handle = m_device.createSwapchainKHRUnique(info);
 
-  auto images = m_device.getSwapchainImagesKHR(*m_handle);
+    auto images = m_device.getSwapchainImagesKHR(*m_handle);
 
-  m_extent = vk::Extent3D{size.width, size.height, 1};
+    m_extent = vk::Extent3D{size.width, size.height, 1};
 
-  for (auto vkimage : images) {
-    SwapchainImage image{m_device, vkimage, m_extent, 1u, 1u};
-    auto imageView = image.createImageView<ImageViewType::e2D>();
+    for (auto vkimage : images) {
+        SwapchainImage image{m_device, vkimage, m_extent, 1u, 1u};
+        auto imageView = image.createImageView<ImageViewType::e2D>();
 
-    m_swapchainImages.emplace_back(std::move(image), std::move(imageView));
-  }
+        m_swapchainImages.emplace_back(std::move(image), std::move(imageView));
+    }
 }
 
-vk::Format Swapchain::getImageFormat() const noexcept {
-  return m_surfaceFormat.format;
-}
+vk::Format Swapchain::getImageFormat() const noexcept { return m_surfaceFormat.format; }
 
 uint32_t Swapchain::getImageCount() const noexcept { return m_imageCount; }
 
 vk::AttachmentDescription Swapchain::getAttachmentDescription() const noexcept {
-  vk::AttachmentDescription description;
+    vk::AttachmentDescription description;
 
-  description.initialLayout = vk::ImageLayout::eUndefined;
-  description.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+    description.initialLayout = vk::ImageLayout::eUndefined;
+    description.finalLayout = vk::ImageLayout::ePresentSrcKHR;
 
-  description.format = getImageFormat();
+    description.format = getImageFormat();
 
-  description.loadOp = vk::AttachmentLoadOp::eClear;
-  description.storeOp = vk::AttachmentStoreOp::eStore;
+    description.loadOp = vk::AttachmentLoadOp::eClear;
+    description.storeOp = vk::AttachmentStoreOp::eStore;
 
-  description.samples = vk::SampleCountFlagBits::e1;
+    description.samples = vk::SampleCountFlagBits::e1;
 
-  description.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-  description.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+    description.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+    description.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
 
-  return description;
+    return description;
 }
 
 void Swapchain::generateFramebuffer(vk::RenderPass renderpass) noexcept {
-  using namespace ltl;
-  for (auto &img : m_swapchainImages) {
-    auto imgView = img[1_n].getHandle();
-    m_framebuffers.emplace_back(Framebuffer{m_device, renderpass,
-                                            m_extent.width, m_extent.height,
-                                            tuple_t{imgView}});
-  }
+    using namespace ltl;
+    for (auto &img : m_swapchainImages) {
+        auto imgView = img[1_n].getHandle();
+        m_framebuffers.emplace_back(
+            Framebuffer{m_device, renderpass, m_extent.width, m_extent.height, tuple_t{imgView}});
+    }
 }
 
-const Framebuffer<vk::ImageView> &
-Swapchain::getFramebuffer(uint32_t index) const noexcept {
-  return m_framebuffers[index];
+const Framebuffer<vk::ImageView> &Swapchain::getFramebuffer(uint32_t index) const noexcept {
+    return m_framebuffers[index];
 }
 
-const std::vector<Framebuffer<vk::ImageView>> &
-Swapchain::getFramebuffers() const noexcept {
-  return m_framebuffers;
-}
+const std::vector<Framebuffer<vk::ImageView>> &Swapchain::getFramebuffers() const noexcept { return m_framebuffers; }
 
 } // namespace phx

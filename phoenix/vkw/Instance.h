@@ -7,23 +7,22 @@
 
 namespace phx {
 struct ExtentionInvalidException {
-  std::vector<std::string> extensions;
+    std::vector<std::string> extensions;
 };
 
 struct LayerInvalidException {
-  std::vector<std::string> layers;
+    std::vector<std::string> layers;
 };
 
 class Instance final : public VulkanResource<vk::UniqueInstance> {
-public:
-  Instance(SDL_Window *window, bool debug);
+  public:
+    Instance(SDL_Window *window, bool debug);
 
-  const std::vector<const char *> &getValidationLayers() const noexcept;
+    const std::vector<const char *> &getValidationLayers() const noexcept;
 
-private:
-  std::vector<const char *> m_validationLayers;
-  vk::DispatchLoaderDynamic m_dispatchLoaderDynamic;
-  vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic>
-      m_debugMessenger;
+  private:
+    std::vector<const char *> m_validationLayers;
+    vk::DispatchLoaderDynamic m_dispatchLoaderDynamic;
+    vk::UniqueHandle<vk::DebugUtilsMessengerEXT, vk::DispatchLoaderDynamic> m_debugMessenger;
 };
 } // namespace phx
