@@ -49,8 +49,8 @@ template <typename Tag> auto getPropertiesNames(Tag &&tag) {
   const auto properties = getProperties(FWD(tag));
   std::vector<std::string> propertiesNames;
   ltl::overloader to_name{
-      [](vk::ExtensionProperties p) -> std::string { return p.extensionName; },
-      [](vk::LayerProperties p) -> std::string { return p.layerName; }};
+      [](vk::ExtensionProperties p) -> std::string { return p.extensionName.data(); },
+      [](vk::LayerProperties p) -> std::string { return p.layerName.data(); }};
 
   ltl::transform(properties, std::back_inserter(propertiesNames), to_name);
   ltl::sort(propertiesNames);
