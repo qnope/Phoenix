@@ -15,5 +15,6 @@ layout(location = 0) out vec4 outColor;
 layout(set = 1, binding = 0) uniform sampler2D texSampler;
 
 void main() {
-    outColor = textureLod(texSampler, inData.texCoord, 0);
+    float mipmapLevel = textureQueryLod(texSampler, inData.texCoord).x;
+    outColor = textureLod(texSampler, inData.texCoord, mipmapLevel);
 }

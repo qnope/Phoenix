@@ -38,7 +38,12 @@ ltl::tuple_t<DescriptorSet, std::vector<DrawBatche>> SceneGraphPass::generate(Sc
     m_impl->clearBuffer();
 
     for (glm::mat4 matrix : drawBatches | ltl::get(0_n)) {
-        m_impl->push_value(matrix);
+        auto proj = glm::perspective(glm::radians(45.f), 1024.0f / 768.0f, 1.0f, 10000.f);
+        proj[1][1] *= -1;
+        m_impl->push_value(proj *
+                           glm::lookAt(glm::vec3{700.0f, 700.0f, 000.0f}, glm::vec3{699.0f, 700.0f, 0.0f},
+                                       glm::vec3{0.0f, 1.0f, 0.0f}) *
+                           matrix);
     }
 
     return {m_impl->getDescriptorSet(), drawBatches | ltl::get(1_n)};

@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace phx {
-constexpr std::size_t NUMBER_OF_ELEMENTS_BY_BUFFER = 100'000;
+constexpr std::size_t NUMBER_OF_ELEMENTS_BY_BUFFER = 10'000'000;
 
 template <typename BufferInfo>
 class BufferList;
@@ -27,7 +27,7 @@ class BufferList<BufferInfo<T, usages>> {
         auto offset = dstBuffer.size();
         auto bufferCopy = prepareCopy(values, srcBuffer, dstBuffer);
         m_memoryTransfer.copyBufferRange(srcBuffer, dstBuffer, bufferCopy);
-        return {dstBuffer, offset, dstBuffer.size()};
+        return {dstBuffer, offset, dstBuffer.size() - offset};
     }
 
     void flush(vk::PipelineStageFlags dstStage, vk::AccessFlags dstAccess) {

@@ -11,7 +11,7 @@
 
 #include <ltl/operator.h>
 #include <ltl/functional.h>
-#include <ltl/range/Zip.h>
+#include <ltl/range/zip.h>
 
 namespace phx {
 

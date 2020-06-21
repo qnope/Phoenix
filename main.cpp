@@ -6,6 +6,7 @@
 #include <ltl/Range/enumerate.h>
 
 #include "phoenix/SceneGraph/Nodes/GeometryNode.h"
+#include "phoenix/SceneGraph/Nodes/GroupNode.h"
 #include "phoenix/SceneGraph/SceneGraph.h"
 
 #include "phoenix/Pass/GBuffer/GBufferRenderPass.h"
@@ -39,8 +40,8 @@ auto load(phx::SceneGraph &sceneGraph, phx::MaterialFactory &materialFactory) {
 }
 
 int main(int, char **) {
-    constexpr auto width = phx::Width{512u};
-    constexpr auto height = phx::Height{512u};
+    constexpr auto width = phx::Width{1024u};
+    constexpr auto height = phx::Height{768u};
 
     try {
         phx::PhoenixWindow window{width, height, phx::WindowTitle("Phoenix Engine")};
@@ -52,8 +53,10 @@ int main(int, char **) {
 
         auto nodes = load(sceneGraph, materialFactory);
 
-        auto node = createGeometryNode(sceneGraph, materialFactory);
-        sceneGraph.setRootNode(std::move(node));
+        materialFactory.flush();
+
+        for (auto node : nodes)
+            sceneGraph.rootNode<phx::GroupNode>()->addChild(std::move(node));
 
         sceneGraph.flush(vk::PipelineStageFlagBits::eVertexInput,
                          vk::AccessFlagBits::eIndexRead | vk::AccessFlagBits::eVertexAttributeRead);
