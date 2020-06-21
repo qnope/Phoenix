@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace phx {
-constexpr std::size_t NUMBER_OF_ELEMENTS_BY_BUFFER = 10'000'000;
+constexpr std::size_t NUMBER_OF_ELEMENTS_BY_BUFFER = 100'000;
 
 template <typename BufferInfo>
 class BufferList;
@@ -59,7 +59,7 @@ class BufferList<BufferInfo<T, usages>> {
         if (auto *buffer = ltl::find_if_ptr(buffers, hasEnoughSpace)) {
             return *buffer;
         }
-        return buffers.emplace_back(m_device.createBuffer<Buffer>(NUMBER_OF_ELEMENTS_BY_BUFFER));
+        return buffers.emplace_back(m_device.createBuffer<Buffer>(std::max(NUMBER_OF_ELEMENTS_BY_BUFFER, size)));
     }
 
   private:

@@ -8,9 +8,11 @@ layout(push_constant) uniform MatrixIndex {
 };
 
 layout(set = 0, binding = 0, std430) buffer MatrixBuffer {
+    mat4 projection;
+    mat4 view;
     mat4 matrices[];
 };
 
 void main() {
-    gl_Position = matrices[matrixIndex] * vec4(inPosition, 1.0);
+    gl_Position = projection * view * matrices[matrixIndex] * vec4(inPosition, 1.0);
 }

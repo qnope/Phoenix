@@ -23,6 +23,9 @@ class SceneGraphPass {
   public:
     SceneGraphPass(Device &device) noexcept;
 
+    void setLookAtMatrix(glm::mat4 matrix) noexcept;
+    void setProjectionMatrix(glm::mat4 matrix) noexcept;
+
     ltl::tuple_t<DescriptorSet, std::vector<DrawBatche>> generate(SceneGraph &sceneGraph) noexcept;
 
     const MatrixBufferLayout &matrixBufferLayout() const noexcept;

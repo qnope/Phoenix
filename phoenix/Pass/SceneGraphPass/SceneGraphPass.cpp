@@ -24,6 +24,10 @@ class SceneGraphPass::Impl {
 
     void push_value(glm::mat4 matrix) noexcept { m_buffer << matrix; }
 
+    void setLookAtMatrix(glm::mat4 matrix) noexcept { m_buffer.ptr()[1] = matrix; }
+
+    void setProjectionMatrix(glm::mat4 matrix) noexcept { m_buffer.ptr()[0] = matrix; }
+
   private:
     DescriptorPoolManager m_poolManager;
     CpuStorageBuffer<glm::mat4> m_buffer;
@@ -32,18 +36,19 @@ class SceneGraphPass::Impl {
 
 SceneGraphPass::SceneGraphPass(Device &device) noexcept : m_impl{std::make_unique<Impl>(device)} {}
 
+void SceneGraphPass::setLookAtMatrix(glm::mat4 matrix) noexcept { m_impl->setLookAtMatrix(matrix); }
+
+void SceneGraphPass::setProjectionMatrix(glm::mat4 matrix) noexcept { m_impl->setProjectionMatrix(matrix); }
+
 ltl::tuple_t<DescriptorSet, std::vector<DrawBatche>> SceneGraphPass::generate(SceneGraph &sceneGraph) noexcept {
     auto drawBatches = sceneGraph.dispatch(GetDrawBatchesVisitor{});
 
     m_impl->clearBuffer();
+    m_impl->push_value(glm::mat4{});
+    m_impl->push_value(glm::mat4{});
 
     for (glm::mat4 matrix : drawBatches | ltl::get(0_n)) {
-        auto proj = glm::perspective(glm::radians(45.f), 1024.0f / 768.0f, 1.0f, 10000.f);
-        proj[1][1] *= -1;
-        m_impl->push_value(proj *
-                           glm::lookAt(glm::vec3{700.0f, 700.0f, 000.0f}, glm::vec3{699.0f, 700.0f, 0.0f},
-                                       glm::vec3{0.0f, 1.0f, 0.0f}) *
-                           matrix);
+        m_impl->push_value(matrix);
     }
 
     return {m_impl->getDescriptorSet(), drawBatches | ltl::get(1_n)};

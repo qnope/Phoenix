@@ -82,6 +82,14 @@ int main(int, char **) {
 
         auto [matrixBufferSet, drawBatches] = sceneGraphPass.generate(sceneGraph);
 
+        auto proj = glm::perspective(glm::radians(45.f), 1024.0f / 768.0f, 1.0f, 10000.f);
+        proj[1][1] *= -1;
+        auto view = glm::lookAt(glm::vec3{700.0f, 700.0f, 000.0f}, glm::vec3{699.0f, 700.0f, 0.0f},
+                                glm::vec3{0.0f, 1.0f, 0.0f});
+
+        sceneGraphPass.setProjectionMatrix(proj);
+        sceneGraphPass.setLookAtMatrix(view);
+
         for (auto [index, commandBuffer] : ltl::enumerate(commandBuffers)) {
             vk::CommandBufferBeginInfo info;
             commandBuffer.begin(info);
