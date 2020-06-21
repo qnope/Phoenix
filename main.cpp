@@ -14,9 +14,11 @@
 
 #include "phoenix/SceneGraph/Materials/MaterialFactory.h"
 
+#include "phoenix/vkw/Buffer/BufferManager.h"
+
 phx::GeometryNode createGeometryNode(phx::SceneGraph &sceneGraph, phx::MaterialFactory &materialFactory) {
     auto material = materialFactory.createTexturedLambertianMaterial("../resources/images/texture.jpg");
-
+    // auto material = materialFactory.createColoredLambertianMaterial(glm::vec4(1.0, 0.4, 0.8, 1.0));
     materialFactory.flush();
     std::vector<phx::Complete3dVertex> vertices = {{{-1.f, -1.f, 0.5f}, {0.0f}, {0.0f}, {0.0f}, {0.0f, 0.0f}},
                                                    {{1.f, -1.f, 0.5f}, {0.0f}, {0.0f}, {0.0f}, {1.0f, 0.0f}},

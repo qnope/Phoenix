@@ -104,6 +104,7 @@ set(PHOENIX_VKW_BUFFER
     phoenix/vkw/Buffer/BufferRef.h
     phoenix/vkw/Buffer/BufferList.h
     phoenix/vkw/Buffer/BufferInfo.h
+    phoenix/vkw/Buffer/BufferManager.h
     )
 
 set(PHOENIX_VKW_IMAGE

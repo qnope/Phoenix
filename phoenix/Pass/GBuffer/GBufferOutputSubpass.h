@@ -7,6 +7,7 @@
 #include <vkw/GraphicPipeline.h>
 
 #include <SceneGraph/Materials/TexturedLambertianMaterial.h>
+#include <SceneGraph/Materials/ColoredLambertianMaterial.h>
 #include <SceneGraph/SceneGraph.h>
 #include <SceneGraph/Visitors/GetDrawBatchesVisitor.h>
 
@@ -31,19 +32,20 @@ class GBufferOutputSubpass : public phx::AbstractSubpass {
     const std::vector<DrawBatche> *m_drawBatches = nullptr;
 };
 
-template <typename RenderPass, typename MaterialLayout>
+template <typename RenderPass, typename MaterialLayout, typename... PushConstantRanges>
 auto make_gbuffer_output_pipeline(Device &device, Width width, Height height, DescriptorPoolManager &poolManager,
                                   const RenderPass &renderPass, const MatrixBufferLayout &matrixBufferLayout,
-                                  ltl::type_t<MaterialLayout>, const std::string &fragmentPath) {
+                                  ltl::type_t<MaterialLayout>, ltl::tuple_t<PushConstantRanges...> pushConstantRanges,
+                                  const std::string &fragmentPath) {
     auto vertexShader =
         device.createShaderModule<VertexShaderType>("../phoenix/shaders/GBufferPass/GBufferOutput.vert", true);
 
     auto fragmentShader = device.createShaderModule<FragmentShaderType>(fragmentPath, true);
 
     const auto &materialLayout = poolManager.layout<MaterialLayout>();
-    auto pipelineLayout =
-        device.createPipelineLayout(ltl::tuple_t{PushConstantRange<0, sizeof(uint32_t), VK_SHADER_STAGE_VERTEX_BIT>{}},
-                                    ltl::tuple_t{std::cref(matrixBufferLayout), std::cref(materialLayout)});
+    auto pipelineLayout = device.createPipelineLayout(
+        ltl::tuple_t{PushConstantRange<0, sizeof(uint32_t), VK_SHADER_STAGE_VERTEX_BIT>{}} + pushConstantRanges,
+        ltl::tuple_t{std::cref(matrixBufferLayout), std::cref(materialLayout)});
 
     auto vertexBinding = phx::Complete3dVertex::getBindingDescription(0_n);
 
@@ -68,8 +70,11 @@ auto make_gbuffer_output_subpass(Device &device, Width width, Height height, Des
 
     GBufferOutputSubpass outputSubpass;
     outputSubpass.addGraphicPipeline(
-        GraphicPipeline{curried(ltl::type_v<TexturedLambertianMaterialSetLayout>,
+        GraphicPipeline{curried(ltl::type_v<TexturedLambertianMaterialSetLayout>, ltl::tuple_t{},
                                 "../phoenix/shaders/GBufferPass/GBufferLambertianTexture.frag")});
+    outputSubpass.addGraphicPipeline(GraphicPipeline{
+        curried(ltl::type_v<ColoredLambertianMaterialSetLayout>, ltl::tuple_t<ColoredLambertianMaterialPushConstant>{},
+                "../phoenix/shaders/GBufferPass/GBufferLambertianColored.frag")});
 
     return outputSubpass;
 }

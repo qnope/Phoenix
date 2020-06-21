@@ -12,18 +12,14 @@ layout(location = 0) in VertexData {
 
 layout(location = 0) out vec4 outColor;
 
-struct LambertianMaterial {
-    vec4 color;
-};
-
-layout(set = 1, binding = 0) uniform buffer MaterialBuffer {
-    LambertianMaterial materials[];
+layout(set = 1, binding = 0) buffer MaterialBuffer {
+    vec4 albedos[];
 };
 
 layout(push_constant) uniform MaterialIndex {
-    uint materialIndex;
+    layout(offset = 4) uint materialIndex;
 };
 
 void main() {
-    outColor = materials[materialIndex];
+    outColor = albedos[materialIndex];
 }
