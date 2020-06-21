@@ -28,8 +28,9 @@ constexpr auto getFormat(ltl::type_t<glm::vec4>) { return vk::Format::eR32G32B32
         static constexpr auto format = getFormat(ltl::type_v<Vec>);                                                    \
         static constexpr auto cardinality = getCardinality(ltl::type_v<Vec>);                                          \
         static constexpr auto location_size = getLocationSize(ltl::type_v<Vec>);                                       \
+        Name() noexcept : name{} {}                                                                                    \
         template <typename... Xs>                                                                                      \
-        Name(Xs... xs) : name(xs...) {}                                                                                \
+        Name(Xs... xs) noexcept : name(xs...) {}                                                                       \
         Vec name;                                                                                                      \
     }
 
@@ -58,6 +59,7 @@ template <typename... Types>
 struct Vertex : Types... {
     static constexpr auto types = ltl::type_list_v<Types...>;
 
+    Vertex() {}
     Vertex(Types... ts) : Types(ts)... {}
 
     template <typename Index>

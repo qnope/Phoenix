@@ -9,8 +9,10 @@ endif(MSVC)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(Little-Type-Library)
-include_directories(phoenix/)
 
+include_directories(phoenix/)
+include_directories(${ASSIMP_PATH}/include)
+include_directories(${ASSIMP_PATH}/build/include)
 include_directories(${SDL_PATH}/include)
 include_directories(${GLM_PATH})
 include_directories(${VULKAN_SDK_PATH}/Include)
@@ -41,8 +43,10 @@ set(PHOENIX_PASS
 
 set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/SceneGraph.h
+    phoenix/SceneGraph/ModelImporter.h
 
     phoenix/SceneGraph/SceneGraph.cpp
+    phoenix/SceneGraph/ModelImporter.cpp
 
     phoenix/SceneGraph/Nodes/Node.h
     phoenix/SceneGraph/Nodes/GroupNode.h
@@ -205,6 +209,7 @@ target_link_libraries(Phoenix
     ${SDL_PATH}/lib/x64/SDL2.lib
     ${SDL_PATH}/lib/x64/SDL2_image.lib
     ${VULKAN_SDK_PATH}/Lib/vulkan-1.lib
+    ${ASSIMP_PATH}/build/lib/Release/assimp-vc142-mt.lib
     )
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)

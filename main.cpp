@@ -16,6 +16,8 @@
 
 #include "phoenix/vkw/Buffer/BufferManager.h"
 
+#include "phoenix/SceneGraph/ModelImporter.h"
+
 phx::GeometryNode createGeometryNode(phx::SceneGraph &sceneGraph, phx::MaterialFactory &materialFactory) {
     auto material = materialFactory.createTexturedLambertianMaterial("../resources/images/texture.jpg");
     // auto material = materialFactory.createColoredLambertianMaterial(glm::vec4(1.0, 0.4, 0.8, 1.0));
@@ -32,6 +34,10 @@ phx::GeometryNode createGeometryNode(phx::SceneGraph &sceneGraph, phx::MaterialF
     return {drawInformations, std::move(material)};
 }
 
+auto load(phx::SceneGraph &sceneGraph, phx::MaterialFactory &materialFactory) {
+    return phx::loadModel("../resources/Models/Sponza/sponza.obj", sceneGraph, materialFactory);
+}
+
 int main(int, char **) {
     constexpr auto width = phx::Width{512u};
     constexpr auto height = phx::Height{512u};
@@ -43,6 +49,8 @@ int main(int, char **) {
         phx::MaterialFactory materialFactory{device};
 
         phx::SceneGraph sceneGraph(device);
+
+        auto nodes = load(sceneGraph, materialFactory);
 
         auto node = createGeometryNode(sceneGraph, materialFactory);
         sceneGraph.setRootNode(std::move(node));
