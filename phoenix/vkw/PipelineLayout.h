@@ -25,8 +25,8 @@ struct PushConstantRange {
 class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
   public:
     template <typename... PushConstantRanges, typename... SetLayouts>
-    PipelineLayout(vk::Device device, //
-                   ltl::tuple_t<PushConstantRanges...> ranges,
+    PipelineLayout(vk::Device device,                          //
+                   ltl::tuple_t<PushConstantRanges...> ranges, //
                    ltl::tuple_t<const SetLayouts &...> setLayouts) noexcept :
         m_pushConstantRangeTypes{typeid(PushConstantRanges)...}, //
         m_layoutTypes{typeid(SetLayouts)...} {
@@ -57,8 +57,8 @@ class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
     PipelineLayout(vk::Device device, with_push_constants_t, PushConstantRanges... ranges) noexcept :
         PipelineLayout(device, ltl::tuple_t{ranges...}, ltl::tuple_t{}) {}
 
-    void bind(vk::CommandBuffer cmdBuffer, vk::PipelineBindPoint bindPoint, uint32_t setIndex, DescriptorSet set) const
-        noexcept {
+    void bind(vk::CommandBuffer cmdBuffer, vk::PipelineBindPoint bindPoint, uint32_t setIndex,
+              DescriptorSet set) const noexcept {
         assert(setIndex < m_layoutTypes.size());
         assert(m_layoutTypes[setIndex] == set.layoutType());
 
