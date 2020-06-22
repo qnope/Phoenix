@@ -26,7 +26,7 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferOutputSub
         auto pipeline = pass.getCompatiblePipeline(material);
         const auto &pipelineLayout = pipeline.layout();
         cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.getHandle());
-        pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0, *pass.m_descriptorSet);
+        pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, *pass.m_descriptorSet);
 
         cmdBuffer.bindVertexBuffers(0, drawInformations.vertexBuffer.getHandle(), vk::DeviceSize(0));
         cmdBuffer.bindIndexBuffer(drawInformations.indexBuffer.getHandle(), 0, vk::IndexType::eUint32);

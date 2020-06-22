@@ -8,10 +8,9 @@ TexturedLambertianMaterial::TexturedLambertianMaterial(const std::string &path,
     AbstractMaterial{pool.allocate<TexturedLambertianMaterialSetLayout>(
         {{imageLoader.load(path, true, vk::PipelineStageFlagBits::eFragmentShader)}})} {}
 
-void TexturedLambertianMaterial::bindTo(vk::CommandBuffer cmdBuffer,
-                                        const PipelineLayout &pipelineLayout) const noexcept {
-    auto index = pipelineLayout.descriptorSetIndex(layoutType());
-    pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, index, descriptorSet());
+void TexturedLambertianMaterial::bindTo(vk::CommandBuffer cmdBuffer, const PipelineLayout &pipelineLayout) const
+    noexcept {
+    pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, descriptorSet());
 }
 
 bool TexturedLambertianMaterial::isCompatibleWith(const PipelineLayout &pipelineLayout) const noexcept {

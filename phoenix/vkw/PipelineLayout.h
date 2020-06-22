@@ -57,10 +57,8 @@ class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
     PipelineLayout(vk::Device device, with_push_constants_t, PushConstantRanges... ranges) noexcept :
         PipelineLayout(device, ltl::tuple_t{ranges...}, ltl::tuple_t{}) {}
 
-    void bind(vk::CommandBuffer cmdBuffer, vk::PipelineBindPoint bindPoint, uint32_t setIndex,
-              DescriptorSet set) const noexcept {
-        assert(setIndex < m_layoutTypes.size());
-        assert(m_layoutTypes[setIndex] == set.layoutType());
+    void bind(vk::CommandBuffer cmdBuffer, vk::PipelineBindPoint bindPoint, DescriptorSet set) const noexcept {
+        auto setIndex = descriptorSetIndex(set.layoutType());
 
         cmdBuffer.bindDescriptorSets(bindPoint, getHandle(), setIndex, set.getHandle(), {});
     }

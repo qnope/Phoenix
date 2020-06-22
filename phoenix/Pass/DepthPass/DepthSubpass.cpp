@@ -14,7 +14,7 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const DepthSubpass &pa
     const auto &layout = pass.m_pipeline.layout();
 
     cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pass.m_pipeline.getHandle());
-    layout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0, *pass.m_descriptorSet);
+    layout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, *pass.m_descriptorSet);
 
     for (auto [index, drawInformations] : ltl::enumerate(*pass.m_drawBatches | ltl::get(0_n))) {
 

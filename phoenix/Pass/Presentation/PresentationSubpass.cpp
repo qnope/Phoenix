@@ -9,7 +9,7 @@ PresentationSubpass::PresentationSubpass(GraphicPipeline pipeline, DescriptorSet
 vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const PresentationSubpass &pass) noexcept {
 
     cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pass.m_pipeline.getHandle());
-    pass.m_pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, 0, pass.m_descriptorSet);
+    pass.m_pipeline.layout().bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, pass.m_descriptorSet);
     cmdBuffer.draw(4, 1, 0, 0);
     return cmdBuffer;
 }

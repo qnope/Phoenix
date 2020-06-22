@@ -13,8 +13,7 @@ bool ColoredLambertianMaterial::isCompatibleWith(const PipelineLayout &pipelineL
 
 void ColoredLambertianMaterial::bindTo(vk::CommandBuffer cmdBuffer, const PipelineLayout &pipelineLayout) const
     noexcept {
-    auto index = pipelineLayout.descriptorSetIndex(typeid(ColoredLambertianMaterialSetLayout));
-    pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, index, descriptorSet());
+    pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, descriptorSet());
     pipelineLayout.push<ColoredLambertianMaterialPushConstant>(cmdBuffer, m_index);
 }
 
