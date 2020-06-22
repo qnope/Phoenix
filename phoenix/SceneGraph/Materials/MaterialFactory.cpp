@@ -13,7 +13,7 @@ MaterialFactory::MaterialFactory(Device &device) noexcept :
     m_descriptorPoolManager{device} {}
 
 Material MaterialFactory::createTexturedLambertianMaterial(const std::string &path) noexcept {
-    return TexturedLambertianMaterial(path, m_imageLoader, m_descriptorPoolManager);
+    return m_texturedLambertianMaterialManager.allocate({path}, true, vk::PipelineStageFlagBits::eFragmentShader);
 }
 
 Material MaterialFactory::createColoredLambertianMaterial(glm::vec4 albedo) noexcept {
