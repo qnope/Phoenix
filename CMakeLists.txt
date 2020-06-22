@@ -63,13 +63,14 @@ set(PHOENIX_SCENEGRAPH
     phoenix/SceneGraph/Materials/Material.h
     phoenix/SceneGraph/Materials/MaterialFactory.h
     phoenix/SceneGraph/Materials/AbstractMaterial.h
+    phoenix/SceneGraph/Materials/TexturedMaterial.h
+    phoenix/SceneGraph/Materials/TexturedMaterialManager.h
     phoenix/SceneGraph/Materials/ColoredLambertianMaterial.h
     phoenix/SceneGraph/Materials/TexturedLambertianMaterial.h
 
     phoenix/SceneGraph/Materials/MaterialFactory.cpp
     phoenix/SceneGraph/Materials/AbstractMaterial.cpp
     phoenix/SceneGraph/Materials/ColoredLambertianMaterial.cpp
-    phoenix/SceneGraph/Materials/TexturedLambertianMaterial.cpp
 
     phoenix/SceneGraph/Visitors/NodeVisitor.h
     phoenix/SceneGraph/Visitors/TypedVisitor.h

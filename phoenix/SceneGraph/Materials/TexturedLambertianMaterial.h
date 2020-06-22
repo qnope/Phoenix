@@ -7,18 +7,12 @@
 #include <vkw/Image/ImageLoader.h>
 #include <vkw/PipelineLayout.h>
 
+#include "TexturedMaterialManager.h"
+
 namespace phx {
 
-using TexturedLambertianMaterialSetLayout = DescriptorSetLayout<SampledImage2dRgbaSrgbBinding>;
-
-class TexturedLambertianMaterial : public AbstractMaterial {
-  public:
-    TexturedLambertianMaterial(const std::string &path, ImageLoader<SampledImage2dRgbaSrgbRef> &imageLoader,
-                               DescriptorPoolManager &pool) noexcept;
-
-    bool isCompatibleWith(const PipelineLayout &pipelineLayout) const noexcept;
-
-    void bindTo(vk::CommandBuffer cmdBuffer, const PipelineLayout &pipelineLayout) const noexcept;
-};
+using TexturedLambertianMaterialManager = TexturedMaterialManager<SampledImage2dRgbaSrgbRef, 1>;
+using TexturedLambertianMaterial = TexturedMaterial<TexturedLambertianMaterialManager>;
+using TexturedLambertianMaterialSetLayout = typename TexturedLambertianMaterialManager::Layout;
 
 } // namespace phx

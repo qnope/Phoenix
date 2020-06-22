@@ -1,11 +1,12 @@
 #pragma once
 
-#include <vkw/Descriptor/DescriptorPoolManager.h>
+#include <unordered_map>
 #include <vkw/Image/ImageLoader.h>
 #include <vkw/Buffer/BufferManager.h>
+#include <vkw/Descriptor/DescriptorPoolManager.h>
 
 #include "Material.h"
-#include <unordered_map>
+#include "TexturedLambertianMaterial.h"
 
 namespace phx {
 class Device;
@@ -30,6 +31,8 @@ class MaterialFactory {
     BufferManager m_bufferManager;
     DescriptorPoolManager m_descriptorPoolManager;
     std::unordered_map<vk::Buffer, DescriptorSet> m_bufferMaterialDescriptorSets;
+
+    TexturedLambertianMaterialManager m_texturedLambertianMaterialManager{m_imageLoader, m_descriptorPoolManager};
 };
 
 } // namespace phx
