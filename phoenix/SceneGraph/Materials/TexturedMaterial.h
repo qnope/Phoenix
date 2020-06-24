@@ -10,6 +10,9 @@ namespace phx {
 template <typename ManagerType>
 class TexturedMaterial : public AbstractMaterial {
   public:
+    using Layout = typename ManagerType::Layout;
+    static constexpr auto pushConstantRanges = ltl::tuple_t<>{};
+
     TexturedMaterial(DescriptorSet descriptorSet) noexcept : AbstractMaterial{descriptorSet} {}
 
     bool isCompatibleWith(const PipelineLayout &pipelineLayout) const noexcept {

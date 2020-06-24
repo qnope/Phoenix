@@ -15,25 +15,7 @@
 
 #include "phoenix/SceneGraph/Materials/MaterialFactory.h"
 
-#include "phoenix/vkw/Buffer/BufferManager.h"
-
 #include "phoenix/SceneGraph/ModelImporter.h"
-
-phx::GeometryNode createGeometryNode(phx::SceneGraph &sceneGraph, phx::MaterialFactory &materialFactory) {
-    auto material = materialFactory.createTexturedLambertianMaterial("../resources/images/texture.jpg");
-    // auto material = materialFactory.createColoredLambertianMaterial(glm::vec4(1.0, 0.4, 0.8, 1.0));
-    materialFactory.flush();
-    std::vector<phx::Complete3dVertex> vertices = {{{-1.f, -1.f, 0.5f}, {0.0f}, {0.0f}, {0.0f}, {0.0f, 0.0f}},
-                                                   {{1.f, -1.f, 0.5f}, {0.0f}, {0.0f}, {0.0f}, {1.0f, 0.0f}},
-                                                   {{1.f, 1.f, 0.5f}, {0.0f}, {0.0f}, {0.0f}, {1.0f, 1.0f}},
-                                                   {{-1.f, 1.f, 0.5f}, {0.0f}, {0.0f}, {0.0f}, {0.0f, 1.0f}}};
-
-    std::vector<uint32_t> indices = {0, 1, 2, 2, 3, 0};
-
-    auto drawInformations = sceneGraph.allocateDrawInformations(vertices, indices);
-
-    return {drawInformations, std::move(material)};
-}
 
 auto load(phx::SceneGraph &sceneGraph, phx::MaterialFactory &materialFactory) {
     return phx::loadModel("../resources/Models/Sponza/sponza.obj", sceneGraph, materialFactory);
