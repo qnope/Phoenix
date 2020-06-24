@@ -13,6 +13,5 @@ namespace phx {
 
 using TexturedLambertianMaterialManager = TexturedMaterialManager<SampledImage2dRgbaSrgbRef, 1>;
 using TexturedLambertianMaterial = TexturedMaterial<TexturedLambertianMaterialManager>;
-using TexturedLambertianMaterialSetLayout = typename TexturedLambertianMaterialManager::Layout;
 
 } // namespace phx
