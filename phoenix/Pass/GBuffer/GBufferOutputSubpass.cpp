@@ -17,10 +17,9 @@ GraphicPipeline GBufferOutputSubpass::getCompatiblePipeline(const Material &mate
 }
 
 vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferOutputSubpass &pass) noexcept {
-    assert(pass.m_drawBatches != nullptr);
     assert(pass.m_descriptorSet);
 
-    for (auto [drawInformationsAndMaterial, index] : *pass.m_drawBatches) {
+    for (auto [drawInformationsAndMaterial, index] : pass.m_drawBatches) {
         const auto &[drawInformations, material] = drawInformationsAndMaterial;
 
         auto pipeline = pass.getCompatiblePipeline(material);
@@ -41,8 +40,7 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferOutputSub
 }
 
 void GBufferOutputSubpass::setMatrixBufferAndDrawBatches(
-    DescriptorSet matrixBufferDescriptorSet,
-    const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> *drawBatches) noexcept {
+    DescriptorSet matrixBufferDescriptorSet, std::vector<ltl::tuple_t<DrawBatche, uint32_t>> drawBatches) noexcept {
     m_descriptorSet = matrixBufferDescriptorSet;
     m_drawBatches = drawBatches;
 }

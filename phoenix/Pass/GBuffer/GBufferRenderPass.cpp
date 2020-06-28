@@ -93,8 +93,13 @@ class GBufferRenderPass::Impl {
 
     void setMatrixBufferSetAndDrawBatches(DescriptorSet matrixBufferDescriptorSet,
                                           const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> &drawBatches) noexcept {
-        m_depthSubpass.setMatrixBufferAndDrawBatches(matrixBufferDescriptorSet, &drawBatches);
-        m_outputSubpass.setMatrixBufferAndDrawBatches(matrixBufferDescriptorSet, &drawBatches);
+        auto toDrawInformationsAndIndex = ltl::unzip([](DrawBatche drawBatch, auto index) {
+            return ltl::tuple_t{drawBatch[0_n], index};
+        });
+
+        m_depthSubpass.setMatrixBufferAndDrawBatches(matrixBufferDescriptorSet,
+                                                     drawBatches | ltl::map(toDrawInformationsAndIndex));
+        m_outputSubpass.setMatrixBufferAndDrawBatches(matrixBufferDescriptorSet, drawBatches);
     }
 
     const auto &renderPass() const noexcept { return m_renderPass; }

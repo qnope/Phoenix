@@ -16,12 +16,12 @@ class DepthSubpass : public phx::AbstractSubpass {
     friend vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const DepthSubpass &pass);
 
     void setMatrixBufferAndDrawBatches(DescriptorSet matrixBufferDescriptorSet,
-                                       const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> *drawBatches) noexcept;
+                                       std::vector<ltl::tuple_t<DrawInformations, uint32_t>> drawBatches) noexcept;
 
   private:
     GraphicPipeline m_pipeline;
     std::optional<DescriptorSet> m_descriptorSet;
-    const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> *m_drawBatches = nullptr;
+    std::vector<ltl::tuple_t<DrawInformations, uint32_t>> m_drawBatches;
 };
 
 template <typename RenderPass>
