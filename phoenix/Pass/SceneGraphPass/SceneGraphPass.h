@@ -26,7 +26,8 @@ class SceneGraphPass {
     void setLookAtMatrix(glm::mat4 matrix) noexcept;
     void setProjectionMatrix(glm::mat4 matrix) noexcept;
 
-    ltl::tuple_t<DescriptorSet, std::vector<DrawBatche>> generate(SceneGraph &sceneGraph) noexcept;
+    ltl::tuple_t<DescriptorSet, std::vector<ltl::tuple_t<DrawBatche, uint32_t>>>
+    generate(SceneGraph &sceneGraph) noexcept;
 
     const MatrixBufferLayout &matrixBufferLayout() const noexcept;
 

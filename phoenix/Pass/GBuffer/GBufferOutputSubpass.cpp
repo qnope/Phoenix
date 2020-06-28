@@ -20,7 +20,7 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferOutputSub
     assert(pass.m_drawBatches != nullptr);
     assert(pass.m_descriptorSet);
 
-    for (auto [index, drawInformationsAndMaterial] : ltl::enumerate(*pass.m_drawBatches)) {
+    for (auto [drawInformationsAndMaterial, index] : *pass.m_drawBatches) {
         const auto &[drawInformations, material] = drawInformationsAndMaterial;
 
         auto pipeline = pass.getCompatiblePipeline(material);
@@ -40,8 +40,9 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferOutputSub
     return cmdBuffer;
 }
 
-void GBufferOutputSubpass::setMatrixBufferAndDrawBatches(DescriptorSet matrixBufferDescriptorSet,
-                                                         const std::vector<DrawBatche> *drawBatches) noexcept {
+void GBufferOutputSubpass::setMatrixBufferAndDrawBatches(
+    DescriptorSet matrixBufferDescriptorSet,
+    const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> *drawBatches) noexcept {
     m_descriptorSet = matrixBufferDescriptorSet;
     m_drawBatches = drawBatches;
 }

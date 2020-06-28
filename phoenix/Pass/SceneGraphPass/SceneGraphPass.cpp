@@ -6,6 +6,8 @@
 #include <vkw/Descriptor/DescriptorPoolManager.h>
 #include <vkw/Device.h>
 
+#include <ltl/Range/enumerate.h>
+
 namespace phx {
 
 class SceneGraphPass::Impl {
@@ -40,18 +42,25 @@ void SceneGraphPass::setLookAtMatrix(glm::mat4 matrix) noexcept { m_impl->setLoo
 
 void SceneGraphPass::setProjectionMatrix(glm::mat4 matrix) noexcept { m_impl->setProjectionMatrix(matrix); }
 
-ltl::tuple_t<DescriptorSet, std::vector<DrawBatche>> SceneGraphPass::generate(SceneGraph &sceneGraph) noexcept {
-    auto drawBatches = sceneGraph.dispatch(GetDrawBatchesVisitor{});
+ltl::tuple_t<DescriptorSet, std::vector<ltl::tuple_t<DrawBatche, uint32_t>>>
+SceneGraphPass::generate(SceneGraph &sceneGraph) noexcept {
+    auto matrixAndDrawBatches = sceneGraph.dispatch(GetDrawBatchesVisitor{});
 
     m_impl->clearBuffer();
     m_impl->push_value(glm::mat4{});
     m_impl->push_value(glm::mat4{});
 
-    for (glm::mat4 matrix : drawBatches | ltl::get(0_n)) {
+    for (glm::mat4 matrix : matrixAndDrawBatches | ltl::get(0_n)) {
         m_impl->push_value(matrix);
     }
 
-    return {m_impl->getDescriptorSet(), drawBatches | ltl::get(1_n)};
+    auto drawBatches = ltl::enumerate(matrixAndDrawBatches | ltl::get(1_n));
+
+    auto invert = ltl::unzip([](auto index, DrawBatche batch) { //
+        return ltl::tuple_t{batch, uint32_t(index)};
+    });
+
+    return {m_impl->getDescriptorSet(), drawBatches | ltl::map(invert)};
 }
 
 const MatrixBufferLayout &SceneGraphPass::matrixBufferLayout() const noexcept { return m_impl->layout(); }

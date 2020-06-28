@@ -92,7 +92,7 @@ class GBufferRenderPass::Impl {
     auto getSampledAlbedoMap() const noexcept { return SampledImage2dRgbaSrgbRef{m_albedoView, m_sampler}; }
 
     void setMatrixBufferSetAndDrawBatches(DescriptorSet matrixBufferDescriptorSet,
-                                          const std::vector<DrawBatche> &drawBatches) noexcept {
+                                          const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> &drawBatches) noexcept {
         m_depthSubpass.setMatrixBufferAndDrawBatches(matrixBufferDescriptorSet, &drawBatches);
         m_outputSubpass.setMatrixBufferAndDrawBatches(matrixBufferDescriptorSet, &drawBatches);
     }
@@ -137,8 +137,9 @@ GBufferRenderPass::GBufferRenderPass(Device &device, const MatrixBufferLayout &m
                                      Height height) :
     m_impl{std::make_unique<Impl>(device, matrixBufferLayout, width, height)} {}
 
-void GBufferRenderPass::setBufferDrawBatches(DescriptorSet matrixBufferDescriptorSet,
-                                             const std::vector<DrawBatche> &drawBatches) noexcept {
+void GBufferRenderPass::setBufferDrawBatches(
+    DescriptorSet matrixBufferDescriptorSet,
+    const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> &drawBatches) noexcept {
     m_impl->setMatrixBufferSetAndDrawBatches(matrixBufferDescriptorSet, drawBatches);
 }
 

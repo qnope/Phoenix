@@ -18,7 +18,7 @@ class GBufferRenderPass {
     GBufferRenderPass(Device &device, const phx::MatrixBufferLayout &matrixBufferLayout, Width width, Height height);
 
     void setBufferDrawBatches(DescriptorSet matrixBufferDescriptorSet,
-                              const std::vector<DrawBatche> &drawBatches) noexcept;
+                              const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> &drawBatches) noexcept;
 
     SampledImage2dRgbaSrgbRef getAlbedoMap() const noexcept;
 

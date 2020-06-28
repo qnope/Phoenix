@@ -16,8 +16,9 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const DepthSubpass &pa
     cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pass.m_pipeline.getHandle());
     layout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, *pass.m_descriptorSet);
 
-    for (auto [index, drawInformations] : ltl::enumerate(*pass.m_drawBatches | ltl::get(0_n))) {
+    auto toDrawInformationsAndIndex = [](const auto &tuple) { return ltl::tuple_t{tuple[0_n][0_n], tuple[1_n]}; };
 
+    for (auto [drawInformations, index] : *pass.m_drawBatches | ltl::map(toDrawInformationsAndIndex)) {
         cmdBuffer.bindVertexBuffers(0, drawInformations.vertexBuffer.getHandle(), vk::DeviceSize(0));
         cmdBuffer.bindIndexBuffer(drawInformations.indexBuffer.getHandle(), 0, vk::IndexType::eUint32);
 
@@ -28,8 +29,9 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const DepthSubpass &pa
     return cmdBuffer;
 }
 
-void DepthSubpass::setMatrixBufferAndDrawBatches(DescriptorSet matrixBufferDescriptorSet,
-                                                 const std::vector<DrawBatche> *drawBatches) noexcept {
+void DepthSubpass::setMatrixBufferAndDrawBatches(
+    DescriptorSet matrixBufferDescriptorSet,
+    const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> *drawBatches) noexcept {
     m_drawBatches = drawBatches;
     m_descriptorSet = matrixBufferDescriptorSet;
 }

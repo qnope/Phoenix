@@ -22,14 +22,14 @@ class GBufferOutputSubpass : public phx::AbstractSubpass {
     friend vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferOutputSubpass &pass) noexcept;
 
     void setMatrixBufferAndDrawBatches(DescriptorSet matrixBufferDescriptorSet,
-                                       const std::vector<DrawBatche> *drawBatches) noexcept;
+                                       const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> *drawBatches) noexcept;
 
     GraphicPipeline getCompatiblePipeline(const Material &material) const noexcept;
 
   private:
     std::vector<GraphicPipeline> m_pipelines;
     std::optional<DescriptorSet> m_descriptorSet;
-    const std::vector<DrawBatche> *m_drawBatches = nullptr;
+    const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> *m_drawBatches = nullptr;
 };
 
 template <typename RenderPass, typename Material>
