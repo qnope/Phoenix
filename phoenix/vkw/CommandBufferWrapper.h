@@ -1,90 +1,54 @@
 #pragma once
 
-#include "Buffer/Buffer.h"
-#include "Descriptor/DescriptorSet.h"
-#include "GraphicPipeline.h"
-#include "PipelineLayout.h"
+#include <array>
+#include "vulkan.h"
 #include <ltl/Tuple.h>
 #include <ltl/condition.h>
-
-constexpr std::size_t MAX_BINDING = 10;
 
 namespace phx {
 class CommandBufferWrapper {
   public:
-    CommandBufferWrapper(vk::CommandBuffer buffer) noexcept : m_buffer{buffer} {}
+    explicit CommandBufferWrapper(vk::CommandBuffer buffer) noexcept : m_cmdBuffer{buffer} {}
 
-    template <typename Pipeline, typename... VertexBuffers>
-    void bindVertexBuffersToGraphicPipeline(Pipeline &pipeline, VertexBuffers &... vertexBuffers) noexcept {
-        typed_static_assert_msg(is_graphic_pipeline(pipeline), "Pipeline must be a graphic pipeline");
-        static_assert(sizeof...(VertexBuffers) < MAX_BINDING, "Unable to have more than MAX_BINDING bindings");
-        typed_static_assert_msg(
-            (true_v && ... && doesBufferSupport<vk::BufferUsageFlagBits::eVertexBuffer>(vertexBuffers)),
-            "Buffers must be vertex buffers");
-
-        auto pipelineVertexBufferTypes = pipeline.vertexBufferTypes;
-        auto vertexBufferTypes = ltl::tuple_t{vertexBuffers.type...};
-        typed_static_assert_msg(pipelineVertexBufferTypes.length == vertexBufferTypes.length,
-                                "Pipeline must be bound to the good number of Vertex Buffers");
-        typed_static_assert_msg(pipelineVertexBufferTypes == vertexBufferTypes,
-                                "Types of vertex buffer must match pipeline ones");
-
-        auto vertexBuffersTuple = ltl::tuple_t<VertexBuffers &...>{vertexBuffers...};
-
-        bindGraphicPipeline(pipeline);
-
-        ltl::enumerate_with(
-            [this](auto index, auto &vertexBuffer) {
-                if (m_boundVertexBuffers[index.value] != vertexBuffer.getHandle()) {
-                    m_boundVertexBuffers[index.value] = vertexBuffer.getHandle();
-                    m_buffer.bindVertexBuffers(index.value, vertexBuffer.getHandle(), vk::DeviceSize{0});
-                }
-            },
-            vertexBuffersTuple);
-    }
-
-    template <typename Pipeline, typename Buffer>
-    void bindIndexBufferToGraphicPipeline(Pipeline &pipeline, Buffer &buffer) {
-        typed_static_assert_msg(is_graphic_pipeline(pipeline), "Pipeline must be a graphic pipeline");
-        bindGraphicPipeline(pipeline);
-        typed_static_assert_msg((buffer.type == ltl::AnyOf{ltl::type_v<uint16_t>, ltl::type_v<uint32_t>}),
-                                "Index Buffer must be an uint16_t or an uint32_t buffer");
-        if (m_boundIndexBuffer != buffer.getHandle()) {
-            m_boundIndexBuffer = buffer.getHandle();
-            if_constexpr(buffer.type == ltl::type_v<uint16_t>) {
-                m_buffer.bindIndexBuffer(m_boundIndexBuffer, 0, vk::IndexType::eUint16);
-            }
-            else {
-                m_buffer.bindIndexBuffer(m_boundIndexBuffer, 0, vk::IndexType::eUint32);
-            }
+    void bindVertexBuffer(vk::Buffer buffer) noexcept {
+        if (buffer != m_boundVertexBuffer) {
+            m_boundVertexBuffer = buffer;
+            m_cmdBuffer.bindVertexBuffers(0, {m_boundVertexBuffer}, vk::DeviceSize(0));
         }
     }
 
-    template <typename PipelineLayout, typename... Sets>
-    void bindDescriptorSets(vk::PipelineBindPoint bindingPoint, const PipelineLayout &layout, Sets... sets) {
-        typed_static_assert_msg(is_pipeline_layout(layout), "PipelineLayout must be a PipelineLayout");
-        typed_static_assert_msg((true_v && ... && is_descriptor_set(sets)), "Sets must be DescriptorSets");
-
-        constexpr auto setLayouts = ltl::type_list_v<decltype_t(Sets::layout)...>;
-
-        typed_static_assert_msg(setLayouts == layout.layouts, "DescriptorSets's layouts must match Pipeline Layout's");
-
-        m_buffer.bindDescriptorSets(bindingPoint, layout.getHandle(), 0, std::array{sets.getHandle()...}, {});
-    }
-
-  private:
-    template <typename Pipeline>
-    void bindGraphicPipeline(Pipeline &pipeline) {
-        if (m_boundGraphicPipeline != pipeline.getHandle()) {
-            m_boundGraphicPipeline = pipeline.getHandle();
-            m_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_boundGraphicPipeline);
+    void bindIndexBuffer(vk::Buffer buffer) {
+        if (m_boundIndexBuffer != buffer) {
+            m_boundIndexBuffer = buffer;
+            m_cmdBuffer.bindIndexBuffer(m_boundIndexBuffer, 0, vk::IndexType::eUint32);
         }
     }
 
+    void bindDescriptorSet(vk::PipelineLayout pipelineLayout, vk::PipelineBindPoint bindingPoint, uint32_t setIndex,
+                           vk::DescriptorSet set) {
+        assert(setIndex < 4);
+        if (m_boundSets[setIndex] != ltl::tuple_t{pipelineLayout, set}) {
+            m_boundSets[setIndex] = ltl::tuple_t{pipelineLayout, set};
+            m_cmdBuffer.bindDescriptorSets(bindingPoint, pipelineLayout, setIndex, set, nullptr);
+        }
+    }
+
+    void bindGraphicPipeline(vk::Pipeline pipeline) {
+        if (m_boundGraphicPipeline != pipeline) {
+            m_boundGraphicPipeline = pipeline;
+            m_cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_boundGraphicPipeline);
+        }
+    }
+
+    void push(vk::PipelineLayout layout, vk::PushConstantRange range, const void *data) {
+        m_cmdBuffer.pushConstants(layout, range.stageFlags, range.offset, range.size, data);
+    }
+
   private:
-    vk::CommandBuffer m_buffer;
+    vk::CommandBuffer m_cmdBuffer;
     vk::Pipeline m_boundGraphicPipeline{};
-    std::array<vk::Buffer, MAX_BINDING> m_boundVertexBuffers{};
+    std::array<ltl::tuple_t<vk::PipelineLayout, vk::DescriptorSet>, 4> m_boundSets{};
+    vk::Buffer m_boundVertexBuffer{};
     vk::Buffer m_boundIndexBuffer{};
 };
 } // namespace phx

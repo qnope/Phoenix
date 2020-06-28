@@ -19,7 +19,7 @@ class TexturedMaterial : public AbstractMaterial {
         return pipelineLayout.hasLayout(layoutType());
     }
 
-    void bindTo(vk::CommandBuffer cmdBuffer, const PipelineLayout &pipelineLayout) const noexcept {
+    void bindTo(CommandBufferWrapper &cmdBuffer, const PipelineLayout &pipelineLayout) const noexcept {
         pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, descriptorSet());
     }
 

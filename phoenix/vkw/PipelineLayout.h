@@ -4,6 +4,7 @@
 #include "vulkan.h"
 
 #include "Descriptor/DescriptorSet.h"
+#include "CommandBufferWrapper.h"
 
 #include <ltl/algos.h>
 #include <ltl/tuple_algos.h>
@@ -57,20 +58,20 @@ class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
     PipelineLayout(vk::Device device, with_push_constants_t, PushConstantRanges... ranges) noexcept :
         PipelineLayout(device, ltl::tuple_t{ranges...}, ltl::tuple_t{}) {}
 
-    void bind(vk::CommandBuffer cmdBuffer, vk::PipelineBindPoint bindPoint, DescriptorSet set) const noexcept {
+    void bind(CommandBufferWrapper &cmdBuffer, vk::PipelineBindPoint bindPoint, DescriptorSet set) const noexcept {
         auto setIndex = descriptorSetIndex(set.layoutType());
 
-        cmdBuffer.bindDescriptorSets(bindPoint, getHandle(), setIndex, set.getHandle(), {});
+        cmdBuffer.bindDescriptorSet(getHandle(), bindPoint, setIndex, set.getHandle());
     }
 
     template <typename PushConstant, typename... Ts>
-    void push(vk::CommandBuffer cmdBuffer, Ts... _values) const noexcept {
+    void push(CommandBufferWrapper &cmdBuffer, Ts... _values) const noexcept {
         std::array values = {_values...};
         vk::PushConstantRange range = PushConstant::getRange();
         assert(hasPushConstant(typeid(PushConstant)));
         assert(range.size == values.size() * sizeof(values[0]));
 
-        cmdBuffer.pushConstants(getHandle(), range.stageFlags, range.offset, range.size, values.data());
+        cmdBuffer.push(getHandle(), range, values.data());
     }
 
     bool hasLayout(std::type_index layoutType) const noexcept { return ltl::contains(m_layoutTypes, layoutType); }

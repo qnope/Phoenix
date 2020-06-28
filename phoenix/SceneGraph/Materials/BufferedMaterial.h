@@ -18,7 +18,7 @@ class BufferedMaterial : public AbstractMaterial {
                pipelineLayout.hasPushConstant(pushConstantType);
     }
 
-    void bindTo(vk::CommandBuffer cmdBuffer, const PipelineLayout &pipelineLayout) const noexcept {
+    void bindTo(CommandBufferWrapper &cmdBuffer, const PipelineLayout &pipelineLayout) const noexcept {
         pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, descriptorSet());
         pipelineLayout.push<decltype(pushConstantRanges)>(cmdBuffer, m_index);
     }

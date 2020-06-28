@@ -19,20 +19,22 @@ GraphicPipeline GBufferOutputSubpass::getCompatiblePipeline(const Material &mate
 vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferOutputSubpass &pass) noexcept {
     assert(pass.m_descriptorSet);
 
+    CommandBufferWrapper wrapper{cmdBuffer};
+
     for (auto [drawInformationsAndMaterial, index] : pass.m_drawBatches) {
         const auto &[drawInformations, material] = drawInformationsAndMaterial;
 
         auto pipeline = pass.getCompatiblePipeline(material);
         const auto &pipelineLayout = pipeline.layout();
-        cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.getHandle());
-        pipelineLayout.bind(cmdBuffer, vk::PipelineBindPoint::eGraphics, *pass.m_descriptorSet);
+        wrapper.bindGraphicPipeline(pipeline.getHandle());
+        pipelineLayout.bind(wrapper, vk::PipelineBindPoint::eGraphics, *pass.m_descriptorSet);
 
-        cmdBuffer.bindVertexBuffers(0, drawInformations.vertexBuffer.getHandle(), vk::DeviceSize(0));
-        cmdBuffer.bindIndexBuffer(drawInformations.indexBuffer.getHandle(), 0, vk::IndexType::eUint32);
+        wrapper.bindIndexBuffer(drawInformations.indexBuffer.getHandle());
+        wrapper.bindVertexBuffer(drawInformations.vertexBuffer.getHandle());
 
-        material.bindTo(cmdBuffer, pipelineLayout);
+        material.bindTo(wrapper, pipelineLayout);
 
-        pipelineLayout.push<MatrixPushConstant>(cmdBuffer, uint32_t(index));
+        pipelineLayout.push<MatrixPushConstant>(wrapper, uint32_t(index));
         cmdBuffer.drawIndexed(drawInformations.indexCount, 1, drawInformations.firstIndex,
                               drawInformations.vertexOffset, 0);
     }
@@ -42,7 +44,22 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferOutputSub
 void GBufferOutputSubpass::setMatrixBufferAndDrawBatches(
     DescriptorSet matrixBufferDescriptorSet, std::vector<ltl::tuple_t<DrawBatche, uint32_t>> drawBatches) noexcept {
     m_descriptorSet = matrixBufferDescriptorSet;
-    m_drawBatches = drawBatches;
+    m_drawBatches = std::move(drawBatches);
+
+    auto comparator = [](const auto &drawBatchIndex1, const auto &drawBatchIndex2) {
+        const auto &mtl1 = drawBatchIndex1[0_n][1_n];
+        const auto &mtl2 = drawBatchIndex2[0_n][1_n];
+
+        const auto &drawInfo1 = drawBatchIndex1[0_n][0_n];
+        const auto &drawInfo2 = drawBatchIndex2[0_n][0_n];
+
+        if (mtl1 == mtl2) {
+            return drawInfo1 < drawInfo2;
+        }
+        return mtl1 < mtl2;
+    };
+
+    ltl::sort(m_drawBatches, comparator);
 }
 
 } // namespace phx
