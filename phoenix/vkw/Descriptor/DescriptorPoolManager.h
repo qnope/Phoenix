@@ -31,7 +31,7 @@ class DescriptorPoolManager {
         using Pool = DescriptorPoolList<Layout>;
         std::type_index type = typeid(Pool);
 
-        if (auto pool = ltl::find_map_ptr(m_pools, type))
+        if (auto pool = ltl::map_find_ptr(m_pools, type))
             return pool;
 
         auto it = m_pools.insert({type, m_device.createDescriptorPool<Layout>()}).first;

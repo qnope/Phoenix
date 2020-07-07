@@ -24,7 +24,7 @@ class BufferedMaterialManager {
         auto bufferInfo = m_buffers.send(std::vector{value});
         auto bufferHandle = bufferInfo.buffer.getHandle();
 
-        if (auto set = ltl::find_map_value(m_descriptorSets, bufferHandle)) {
+        if (auto set = ltl::map_find_value(m_descriptorSets, bufferHandle)) {
             return {*set, uint32_t(bufferInfo.offset)};
         }
 

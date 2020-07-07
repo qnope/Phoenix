@@ -35,7 +35,7 @@ class ImageLoader<SampledImageRef<Type, Format, _Usage>> {
     ImageLoader(Device &device) noexcept : m_device{device} {}
 
     SampledImage load(const std::string &path, bool withMipmap, vk::PipelineStageFlags pipelineStage) {
-        if (auto *image = ltl::find_map_ptr(m_images, path)) {
+        if (auto *image = ltl::map_find_ptr(m_images, path)) {
             return {(*image)[1_n], m_sampler};
         }
         auto [width, height, data] = loadImage(path);
