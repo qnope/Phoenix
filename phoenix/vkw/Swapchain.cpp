@@ -1,6 +1,8 @@
 #include "Swapchain.h"
 #include <limits>
 
+#include <ltl/Range/DefaultView.h>
+
 namespace phx {
 
 static vk::SurfaceFormatKHR chooseSwapchainFormat(vk::PhysicalDevice device, vk::SurfaceKHR surface) {
@@ -116,17 +118,13 @@ vk::AttachmentDescription Swapchain::getAttachmentDescription() const noexcept {
 
 void Swapchain::generateFramebuffer(vk::RenderPass renderpass) noexcept {
     using namespace ltl;
-    for (auto &img : m_swapchainImages) {
-        auto imgView = img[1_n].getHandle();
-        m_framebuffers.emplace_back(
-            Framebuffer{m_device, renderpass, m_extent.width, m_extent.height, tuple_t{imgView}});
+    for (auto &imgView : m_swapchainImages | ltl::get(1_n)) {
+        m_framebuffers.emplace_back(Framebuffer{m_device, renderpass, m_extent.width, m_extent.height, imgView});
     }
 }
 
-const Framebuffer<vk::ImageView> &Swapchain::getFramebuffer(uint32_t index) const noexcept {
-    return m_framebuffers[index];
-}
+const Framebuffer<1> &Swapchain::getFramebuffer(uint32_t index) const noexcept { return m_framebuffers[index]; }
 
-const std::vector<Framebuffer<vk::ImageView>> &Swapchain::getFramebuffers() const noexcept { return m_framebuffers; }
+const std::vector<Framebuffer<1>> &Swapchain::getFramebuffers() const noexcept { return m_framebuffers; }
 
 } // namespace phx

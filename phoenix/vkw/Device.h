@@ -76,9 +76,9 @@ class Device final : public VulkanResource<vk::UniqueDevice> {
     }
 
     template <typename... Ts>
-    Framebuffer<Ts...> createFramebuffer(vk::RenderPass renderPass, uint32_t width, uint32_t height,
-                                         Ts... attachments) const noexcept {
-        return {getHandle(), renderPass, width, height, {attachments...}};
+    Framebuffer<sizeof...(Ts)> createFramebuffer(vk::RenderPass renderPass, uint32_t width, uint32_t height,
+                                                 const Ts &... attachments) const noexcept {
+        return {getHandle(), renderPass, width, height, attachments...};
     }
 
     Fence createFence(bool signaledState) const;

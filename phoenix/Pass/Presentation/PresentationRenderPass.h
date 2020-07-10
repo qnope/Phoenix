@@ -8,7 +8,7 @@
 namespace phx {
 
 class PhoenixWindow;
-template <typename...>
+template <std::size_t>
 class Framebuffer;
 
 class PresentationRenderPass {

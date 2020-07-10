@@ -56,7 +56,7 @@ class PresentationRenderPass::Impl {
     PhoenixWindow &m_phoenixWindow;
     Pass m_renderPass;
     DescriptorPoolManager m_poolManager;
-    const std::vector<Framebuffer<vk::ImageView>> *m_framebuffers;
+    const std::vector<Framebuffer<1>> *m_framebuffers;
     std::vector<std::unique_ptr<PresentationSubpass>> m_subpasses;
     std::size_t m_currentIndex{0};
 };

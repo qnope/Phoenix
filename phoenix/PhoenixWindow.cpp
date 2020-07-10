@@ -62,15 +62,15 @@ uint32_t PhoenixWindow::getImageCount() const noexcept { return m_swapchain.getI
 
 uint32_t PhoenixWindow::getCurrentImageIndex() const noexcept { return m_currentImageIndex; }
 
-const Framebuffer<vk::ImageView> &PhoenixWindow::getCurrentFramebuffer() const noexcept {
+const Framebuffer<1> &PhoenixWindow::getCurrentFramebuffer() const noexcept {
     return m_swapchain.getFramebuffer(m_currentImageIndex);
 }
 
-const Framebuffer<vk::ImageView> &PhoenixWindow::getFramebuffer(uint32_t index) const noexcept {
+const Framebuffer<1> &PhoenixWindow::getFramebuffer(uint32_t index) const noexcept {
     return m_swapchain.getFramebuffer(index);
 }
 
-const std::vector<Framebuffer<vk::ImageView>> &PhoenixWindow::getFramebuffers() const noexcept {
+const std::vector<Framebuffer<1>> &PhoenixWindow::getFramebuffers() const noexcept {
     return m_swapchain.getFramebuffers();
 }
 

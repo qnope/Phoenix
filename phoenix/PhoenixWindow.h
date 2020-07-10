@@ -40,9 +40,9 @@ class PhoenixWindow {
 
     uint32_t getImageCount() const noexcept;
     uint32_t getCurrentImageIndex() const noexcept;
-    const Framebuffer<vk::ImageView> &getCurrentFramebuffer() const noexcept;
-    const Framebuffer<vk::ImageView> &getFramebuffer(uint32_t index) const noexcept;
-    const std::vector<Framebuffer<vk::ImageView>> &getFramebuffers() const noexcept;
+    const Framebuffer<1> &getCurrentFramebuffer() const noexcept;
+    const Framebuffer<1> &getFramebuffer(uint32_t index) const noexcept;
+    const std::vector<Framebuffer<1>> &getFramebuffers() const noexcept;
 
     vk::Semaphore getImageAvailableSemaphore() const noexcept;
 

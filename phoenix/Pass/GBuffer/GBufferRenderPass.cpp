@@ -15,18 +15,30 @@ static auto buildDepthSubpassDescription() {
 }
 
 static auto buildGBufferSubpassDescription() {
-    ltl::tuple_t depth{AttachmentReference{0_n, vk::ImageLayout::eDepthStencilAttachmentOptimal}};
+    ltl::tuple_t depth{AttachmentReference{0_n, vk::ImageLayout::eDepthStencilReadOnlyOptimal}};
 
     ltl::tuple_t outputs{AttachmentReference{1_n, vk::ImageLayout::eColorAttachmentOptimal}};
 
     return SubpassDescription{outputs, ltl::tuple_t{}, depth, ltl::tuple_t{}};
 }
 
+static auto buildSkySubpassDescription() {
+    ltl::tuple_t depth{AttachmentReference{0_n, vk::ImageLayout::eDepthStencilReadOnlyOptimal}};
+    ltl::tuple_t outputs{AttachmentReference{2_n, vk::ImageLayout::eColorAttachmentOptimal}};
+
+    return SubpassDescription{outputs, ltl::tuple_t{}, depth, ltl::tuple_t{}};
+}
+
 static auto buildDependencies() {
-    vk::SubpassDependency dependencyDepthToGBuffer(
-        0, 1, vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
-        vk::PipelineStageFlagBits::eEarlyFragmentTests, vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-        vk::AccessFlagBits::eDepthStencilAttachmentRead, vk::DependencyFlagBits::eByRegion);
+    auto make_depth_dependency = [](auto src, auto dst) {
+        return vk::SubpassDependency(
+            src, dst, vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
+            vk::PipelineStageFlagBits::eEarlyFragmentTests, vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+            vk::AccessFlagBits::eDepthStencilAttachmentRead, vk::DependencyFlagBits::eByRegion);
+    };
+
+    vk::SubpassDependency depthToGBuffer = make_depth_dependency(0, 1);
+    vk::SubpassDependency depthToSky = make_depth_dependency(0, 2);
 
     vk::SubpassDependency dependencyExternToDepth(VK_SUBPASS_EXTERNAL, 0, vk::PipelineStageFlagBits::eTopOfPipe,
                                                   vk::PipelineStageFlagBits::eEarlyFragmentTests, vk::AccessFlags(),
@@ -36,7 +48,12 @@ static auto buildDependencies() {
                                                         vk::PipelineStageFlagBits::eColorAttachmentOutput,
                                                         vk::AccessFlags(), vk::AccessFlagBits::eColorAttachmentWrite);
 
-    return ltl::tuple_t{dependencyDepthToGBuffer, dependencyExternToDepth, dependencyExternToColorBuffer};
+    vk::SubpassDependency dependencyExternToSky(VK_SUBPASS_EXTERNAL, 2, vk::PipelineStageFlagBits::eTopOfPipe,
+                                                vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::AccessFlags(),
+                                                vk::AccessFlagBits::eColorAttachmentWrite);
+
+    return ltl::tuple_t{depthToGBuffer, depthToSky, dependencyExternToDepth, dependencyExternToColorBuffer,
+                        dependencyExternToSky};
 }
 
 static auto make_render_pass(Device &device) {
@@ -125,12 +142,16 @@ class GBufferRenderPass::Impl {
 
     ColorBufferView m_albedoView = m_albedoMap.createImageView<vk::ImageViewType::e2D>();
 
+    ColorBuffer m_skyMap =
+        m_device.createImage<ColorBuffer>(m_width.get(), m_height.get(), 1u, false, VMA_MEMORY_USAGE_GPU_ONLY);
+    ColorBufferView m_skyMapView = m_skyMap.createImageView<vk::ImageViewType::e2D>();
+
     Sampler m_sampler = m_device.createSampler(vk::Filter::eLinear, vk::SamplerMipmapMode::eLinear);
 
     decltype(make_render_pass(m_device)) m_renderPass = make_render_pass(m_device);
 
-    Framebuffer<vk::ImageView, vk::ImageView> m_framebuffer = m_device.createFramebuffer(
-        m_renderPass.getHandle(), m_width.get(), m_height.get(), m_depthView.getHandle(), m_albedoView.getHandle());
+    Framebuffer<2> m_framebuffer =
+        m_device.createFramebuffer(m_renderPass.getHandle(), m_width.get(), m_height.get(), m_depthView, m_albedoView);
 
     GBufferOutputSubpass m_outputSubpass = make_gbuffer_output_subpass(
         m_device, m_width, m_height, m_descriptorPoolManager, m_renderPass, m_matrixBufferLayout);

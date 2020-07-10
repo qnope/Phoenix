@@ -20,8 +20,8 @@ class Swapchain final : public VulkanResource<vk::UniqueSwapchainKHR> {
     vk::AttachmentDescription getAttachmentDescription() const noexcept;
     void generateFramebuffer(vk::RenderPass renderpass) noexcept;
 
-    const Framebuffer<vk::ImageView> &getFramebuffer(uint32_t index) const noexcept;
-    const std::vector<Framebuffer<vk::ImageView>> &getFramebuffers() const noexcept;
+    const Framebuffer<1> &getFramebuffer(uint32_t index) const noexcept;
+    const std::vector<Framebuffer<1>> &getFramebuffers() const noexcept;
 
   private:
     using SwapchainImage = Image<vk::ImageType::e2D, vk::Format::eB8G8R8A8Srgb, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT>;
@@ -33,7 +33,7 @@ class Swapchain final : public VulkanResource<vk::UniqueSwapchainKHR> {
     uint32_t m_imageCount;
 
     std::vector<ltl::tuple_t<SwapchainImage, SwapchainImageView>> m_swapchainImages;
-    std::vector<Framebuffer<vk::ImageView>> m_framebuffers;
+    std::vector<Framebuffer<1>> m_framebuffers;
 
     vk::SurfaceFormatKHR m_surfaceFormat;
 };

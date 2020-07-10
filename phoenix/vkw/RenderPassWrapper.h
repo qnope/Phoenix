@@ -102,8 +102,8 @@ inline auto operator<<(const RenderPass<RPs...> &renderPass, const T &operation)
     return RenderPassWrapper<RenderPass<RPs...>, T>{renderPass, operation};
 }
 
-template <typename... FBs, typename... RPs>
-inline auto operator<<(const Framebuffer<FBs...> &fb, const RenderPassWrapper<RPs...> &wrapper) {
+template <std::size_t N, typename... RPs>
+inline auto operator<<(const Framebuffer<N> &fb, const RenderPassWrapper<RPs...> &wrapper) {
     return RenderPassWrapperWithFramebuffer{fb, wrapper};
 }
 
