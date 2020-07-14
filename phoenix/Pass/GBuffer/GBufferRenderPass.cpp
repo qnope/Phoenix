@@ -52,8 +52,7 @@ static auto buildDependencies() {
                                                 vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::AccessFlags(),
                                                 vk::AccessFlagBits::eColorAttachmentWrite);
 
-    return ltl::tuple_t{depthToGBuffer, depthToSky, dependencyExternToDepth, dependencyExternToColorBuffer,
-                        dependencyExternToSky};
+    return ltl::tuple_t{depthToGBuffer, dependencyExternToDepth, dependencyExternToColorBuffer};
 }
 
 static auto make_render_pass(Device &device) {
