@@ -82,7 +82,7 @@ class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
 
     uint32_t descriptorSetIndex(std::type_index layoutType) const noexcept {
         assert(hasLayout(layoutType));
-        return uint32_t(std::distance(m_layoutTypes.begin(), *ltl::find(m_layoutTypes, layoutType)));
+        return uint32_t(*ltl::index_of(m_layoutTypes, layoutType));
     }
 
   public:
