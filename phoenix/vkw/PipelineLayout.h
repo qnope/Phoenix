@@ -31,8 +31,9 @@ class PipelineLayout : public VulkanResource<vk::UniquePipelineLayout> {
                    ltl::tuple_t<const SetLayouts &...> setLayouts) noexcept :
         m_pushConstantRangeTypes{typeid(PushConstantRanges)...}, //
         m_layoutTypes{typeid(SetLayouts)...} {
-        auto pushConstantRanges = ranges(
-            [](auto... range) { return std::array<vk::PushConstantRange, sizeof...(range)>{range.getRange()...}; });
+        auto pushConstantRanges = ranges([](auto... range) { //
+            return std::array<vk::PushConstantRange, sizeof...(range)>{range.getRange()...};
+        });
 
         auto layouts = setLayouts([](const auto &... layout) {
             return std::array<vk::DescriptorSetLayout, sizeof...(layout)>{layout.getHandle()...};

@@ -37,7 +37,7 @@ class RenderPassWrapper<RenderPass<RPs...>, Operations...> {
     }
 
     void executeSubpasses(vk::CommandBuffer commandBuffer) const noexcept {
-        typed_static_assert(is_complete);
+        typed_static_assert_msg(is_complete, "Some subpasses are not handled");
 
         auto executeOneOperation = [this, commandBuffer](auto operationType) {
             auto index = *ltl::find_type(operations, operationType);

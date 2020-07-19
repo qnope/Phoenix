@@ -3,6 +3,7 @@
 
 #include "../DepthPass/DepthSubpass.h"
 #include "GBufferOutputSubpass.h"
+#include "../SkyPass/SkyPass.h"
 
 #include <vkw/RenderPassWrapper.h>
 
@@ -52,7 +53,8 @@ static auto buildDependencies() {
                                                 vk::PipelineStageFlagBits::eColorAttachmentOutput, vk::AccessFlags(),
                                                 vk::AccessFlagBits::eColorAttachmentWrite);
 
-    return ltl::tuple_t{depthToGBuffer, dependencyExternToDepth, dependencyExternToColorBuffer};
+    return ltl::tuple_t{depthToGBuffer, dependencyExternToDepth, dependencyExternToColorBuffer, depthToSky,
+                        dependencyExternToSky};
 }
 
 static auto make_render_pass(Device &device) {
@@ -76,8 +78,9 @@ static auto make_render_pass(Device &device) {
     attachmentDepth.initialLayout = vk::ImageLayout::eUndefined;
     attachmentDepth.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
-    auto attachments = ltl::tuple_t{attachmentDepth, attachmentColor};
-    auto subpasses = ltl::tuple_t{buildDepthSubpassDescription(), buildGBufferSubpassDescription()};
+    auto attachments = ltl::tuple_t{attachmentDepth, attachmentColor, attachmentColor};
+    auto subpasses =
+        ltl::tuple_t{buildDepthSubpassDescription(), buildGBufferSubpassDescription(), buildSkySubpassDescription()};
 
     auto dependencies = buildDependencies();
     return device.createRenderPass(attachments, subpasses, dependencies);
@@ -107,6 +110,10 @@ class GBufferRenderPass::Impl {
 
     auto getSampledAlbedoMap() const noexcept { return SampledImage2dRgbaSrgbRef{m_albedoView, m_sampler}; }
 
+    void setSkyInformations(const SkyInformations &skyInformations) noexcept {
+        m_skySubpass.setSkyInformations(skyInformations);
+    }
+
     void setMatrixBufferSetAndDrawBatches(DescriptorSet matrixBufferDescriptorSet,
                                           const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> &drawBatches) noexcept {
         auto toDrawInformationsAndIndex = ltl::unzip([](DrawBatche drawBatch, auto index) {
@@ -120,6 +127,8 @@ class GBufferRenderPass::Impl {
 
     const auto &renderPass() const noexcept { return m_renderPass; }
     const auto &framebuffer() const noexcept { return m_framebuffer; }
+
+    const auto &skySubpass() const noexcept { return m_skySubpass; }
     const auto &depthSubpass() const noexcept { return m_depthSubpass; }
     const auto &outputSubpass() const noexcept { return m_outputSubpass; }
 
@@ -149,18 +158,22 @@ class GBufferRenderPass::Impl {
 
     decltype(make_render_pass(m_device)) m_renderPass = make_render_pass(m_device);
 
-    Framebuffer<2> m_framebuffer =
-        m_device.createFramebuffer(m_renderPass.getHandle(), m_width.get(), m_height.get(), m_depthView, m_albedoView);
-
-    GBufferOutputSubpass m_outputSubpass = make_gbuffer_output_subpass(
-        m_device, m_width, m_height, m_descriptorPoolManager, m_renderPass, m_matrixBufferLayout);
+    Framebuffer<3> m_framebuffer = m_device.createFramebuffer(m_renderPass.getHandle(), m_width.get(), m_height.get(),
+                                                              m_depthView, m_albedoView, m_skyMapView);
 
     DepthSubpass m_depthSubpass = make_depth_subpass(m_device, m_width, m_height, m_renderPass, m_matrixBufferLayout);
+    GBufferOutputSubpass m_outputSubpass = make_gbuffer_output_subpass(
+        m_device, m_width, m_height, m_descriptorPoolManager, m_renderPass, m_matrixBufferLayout);
+    SkySubpass m_skySubpass = make_sky_subpass(m_device, m_width, m_height, m_renderPass);
 };
 
 GBufferRenderPass::GBufferRenderPass(Device &device, const MatrixBufferLayout &matrixBufferLayout, Width width,
                                      Height height) :
     m_impl{std::make_unique<Impl>(device, matrixBufferLayout, width, height)} {}
+
+void GBufferRenderPass::setSkyInformations(const SkyInformations &skyInformations) noexcept {
+    m_impl->setSkyInformations(skyInformations);
+}
 
 void GBufferRenderPass::setBufferDrawBatches(
     DescriptorSet matrixBufferDescriptorSet,
@@ -177,10 +190,11 @@ vk::CommandBuffer operator<<(vk::CommandBuffer cmdBuffer, const GBufferRenderPas
 
     auto &renderPass = impl.renderPass();
     auto &framebuffer = impl.framebuffer();
-    auto &depthSubpass = impl.depthSubpass();
-    auto &outputSubpass = impl.outputSubpass();
+    const auto &depthSubpass = impl.depthSubpass();
+    const auto &outputSubpass = impl.outputSubpass();
+    const auto &skySubpass = impl.skySubpass();
 
-    cmdBuffer << (framebuffer << (renderPass << depthSubpass << outputSubpass));
+    cmdBuffer << (framebuffer << (renderPass << depthSubpass << outputSubpass << skySubpass));
 
     return cmdBuffer;
 }

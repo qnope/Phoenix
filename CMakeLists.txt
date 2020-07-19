@@ -27,6 +27,10 @@ set(PHOENIX_PASS
     phoenix/Pass/GBuffer/GBufferRenderPass.cpp
     phoenix/Pass/GBuffer/GBufferOutputSubpass.cpp
 
+    phoenix/Pass/SkyPass/SkyPass.h
+    phoenix/Pass/SkyPass/SkyPass.cpp
+    phoenix/Pass/SkyPass/SkyInformation.h
+
     phoenix/Pass/DepthPass/DepthSubpass.h
     phoenix/Pass/DepthPass/DepthSubpass.cpp
 
@@ -194,6 +198,9 @@ set(SHADER_SRC
 
     phoenix/shaders/DepthPass/DepthPass.vert
     phoenix/shaders/DepthPass/DepthPass.frag
+
+    phoenix/shaders/SkyPass/SkyPass.vert
+    phoenix/shaders/SkyPass/SkyPass.frag
 
     phoenix/shaders/PresentationPass/PresentationPass.vert
     phoenix/shaders/PresentationPass/PresentationPass.frag)

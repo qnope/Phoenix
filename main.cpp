@@ -10,6 +10,7 @@
 #include "phoenix/SceneGraph/SceneGraph.h"
 
 #include "phoenix/Pass/GBuffer/GBufferRenderPass.h"
+#include "phoenix/Pass/SkyPass/SkyInformation.h"
 #include "phoenix/Pass/Presentation/PresentationRenderPass.h"
 #include "phoenix/Pass/SceneGraphPass/SceneGraphPass.h"
 
@@ -68,6 +69,9 @@ int main(int, char **) {
         proj[1][1] *= -1;
         auto view = glm::lookAt(glm::vec3{700.0f, 700.0f, 000.0f}, glm::vec3{699.0f, 700.0f, 0.0f},
                                 glm::vec3{0.0f, 1.0f, 0.0f});
+        auto inversedMatrix = glm::inverse(proj * view);
+
+        renderPass.setSkyInformations(phx::SkyInformations{inversedMatrix});
 
         sceneGraphPass.setProjectionMatrix(proj);
         sceneGraphPass.setLookAtMatrix(view);

@@ -10,12 +10,15 @@
 
 namespace phx {
 class Device;
+struct SkyInformations;
 
 class GBufferRenderPass {
     class Impl;
 
   public:
     GBufferRenderPass(Device &device, const phx::MatrixBufferLayout &matrixBufferLayout, Width width, Height height);
+
+    void setSkyInformations(const SkyInformations &skyInformations) noexcept;
 
     void setBufferDrawBatches(DescriptorSet matrixBufferDescriptorSet,
                               const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> &drawBatches) noexcept;
