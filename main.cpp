@@ -67,7 +67,7 @@ int main(int, char **) {
 
         auto proj = glm::perspective(glm::radians(45.f), 1024.0f / 768.0f, 1.0f, 10000.f);
         proj[1][1] *= -1;
-        auto view = glm::lookAt(glm::vec3{700.0f, 700.0f, 000.0f}, glm::vec3{699.0f, 700.0f, 0.0f},
+        auto view = glm::lookAt(glm::vec3{700.0f, 3000.0f, 000.0f}, glm::vec3{699.0f, 3000.0f, 0.0f},
                                 glm::vec3{0.0f, 1.0f, 0.0f});
         auto inversedMatrix = glm::inverse(proj * view);
 
