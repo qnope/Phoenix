@@ -1,8 +1,9 @@
-#include "PresentationRenderPass.h"
-#include "PresentationSubpass.h"
 #include <PhoenixWindow.h>
+#include <vkw/RenderPass/RenderPassWrapper.h>
 #include <vkw/Descriptor/DescriptorPoolManager.h>
-#include <vkw/RenderPassWrapper.h>
+
+#include "PresentationSubpass.h"
+#include "PresentationRenderPass.h"
 
 #include <vector>
 

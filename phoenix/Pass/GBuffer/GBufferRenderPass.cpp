@@ -5,7 +5,7 @@
 #include "GBufferOutputSubpass.h"
 #include "../SkyPass/SkyPass.h"
 
-#include <vkw/RenderPassWrapper.h>
+#include <vkw/RenderPass/RenderPassWrapper.h>
 
 namespace phx {
 

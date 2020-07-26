@@ -3,12 +3,12 @@
 #include <SDL2/SDL.h>
 #include <memory>
 
-#include "SDL_Initializer.h"
 #include "constant.h"
 #include "vkw/Device.h"
-#include "vkw/SubpassBuilder.h"
 #include "vkw/Surface.h"
 #include "vkw/Swapchain.h"
+#include "SDL_Initializer.h"
+#include "vkw/RenderPass/SubpassBuilder.h"
 
 namespace phx {
 struct PhoenixWindowOpeningException {

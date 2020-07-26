@@ -135,6 +135,13 @@ set(PHOENIX_VKW_PIPELINE
     phoenix/vkw/With_Pipeline/WithDynamicStates.h
     )
 
+set(PHOENIX_VKW_RENDERPASS
+    phoenix/vkw/RenderPass/Subpass.h
+    phoenix/vkw/RenderPass/RenderPass.h
+    phoenix/vkw/RenderPass/SubpassBuilder.h
+    phoenix/vkw/RenderPass/RenderPassWrapper.h
+    )
+
 set(PHOENIX_VKW
     phoenix/vkw/Fence.h
     phoenix/vkw/Queue.h
@@ -142,22 +149,18 @@ set(PHOENIX_VKW
     phoenix/vkw/Vertex.h
     phoenix/vkw/vulkan.h
     phoenix/vkw/utility.h
-    phoenix/vkw/Subpass.h
     phoenix/vkw/Surface.h
     phoenix/vkw/Instance.h
     phoenix/vkw/Barriers.h
     phoenix/vkw/Swapchain.h
-    phoenix/vkw/RenderPass.h
     phoenix/vkw/CommandPool.h
     phoenix/vkw/Framebuffer.h
     phoenix/vkw/ShaderModule.h
-    phoenix/vkw/SubpassBuilder.h
     phoenix/vkw/PipelineLayout.h
     phoenix/vkw/ShaderCompiler.h
     phoenix/vkw/MemoryTransfer.h
     phoenix/vkw/VulkanResource.h
     phoenix/vkw/GraphicPipeline.h
-    phoenix/vkw/RenderPassWrapper.h
     phoenix/vkw/CommandBufferWrapper.h
     phoenix/vkw/TemplatedGraphicPipeline.h
 
@@ -177,6 +180,7 @@ set(PHOENIX_VKW
     ${PHOENIX_VKW_PIPELINE}
     ${PHOENIX_VKW_ALLOCATOR}
     ${PHOENIX_VKW_DESCRIPTOR}
+    ${PHOENIX_VKW_RENDERPASS}
     )
 
 set(PHOENIX
