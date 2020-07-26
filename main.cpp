@@ -34,12 +34,12 @@ int main(int, char **) {
 
         phx::SceneGraph sceneGraph(device);
 
-        auto nodes = load(sceneGraph, materialFactory);
+        // auto nodes = load(sceneGraph, materialFactory);
 
         materialFactory.flush();
 
-        for (auto node : nodes)
-            sceneGraph.rootNode<phx::GroupNode>()->addChild(std::move(node));
+        // for (auto node : nodes)
+        //    sceneGraph.rootNode<phx::GroupNode>()->addChild(std::move(node));
 
         sceneGraph.flush(vk::PipelineStageFlagBits::eVertexInput,
                          vk::AccessFlagBits::eIndexRead | vk::AccessFlagBits::eVertexAttributeRead);
@@ -65,9 +65,9 @@ int main(int, char **) {
 
         auto [matrixBufferSet, drawBatches] = sceneGraphPass.generate(sceneGraph);
 
-        auto proj = glm::perspective(glm::radians(45.f), 1024.0f / 768.0f, 1.0f, 10000.f);
+        auto proj = glm::perspective(glm::radians(90.f), 1024.0f / 768.0f, 1.0f, 10000.f);
         proj[1][1] *= -1;
-        auto view = glm::lookAt(glm::vec3{700.0f, 3000.0f, 000.0f}, glm::vec3{699.0f, 3000.0f, 0.0f},
+        auto view = glm::lookAt(glm::vec3{700.0f, 2000.0f, 000.0f}, glm::vec3{699.0f, 2001.0f, 0.0f},
                                 glm::vec3{0.0f, 1.0f, 0.0f});
         auto inversedMatrix = glm::inverse(proj * view);
 
@@ -80,7 +80,7 @@ int main(int, char **) {
             vk::CommandBufferBeginInfo info;
             commandBuffer.begin(info);
 
-            presentationPass.setSampledImage(index, renderPass.getAlbedoMap());
+            presentationPass.setSampledImage(index, renderPass.getSkyMap());
 
             renderPass.setBufferDrawBatches(matrixBufferSet, drawBatches);
             commandBuffer << renderPass << presentationPass;

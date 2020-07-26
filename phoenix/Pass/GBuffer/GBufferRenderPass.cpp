@@ -108,6 +108,7 @@ class GBufferRenderPass::Impl {
         m_width{width},                           //
         m_height{height} {}
 
+    auto getSampledSkyMap() const noexcept { return SampledImage2dRgbaSrgbRef{m_skyMapView, m_sampler}; }
     auto getSampledAlbedoMap() const noexcept { return SampledImage2dRgbaSrgbRef{m_albedoView, m_sampler}; }
 
     void setSkyInformations(const SkyInformations &skyInformations) noexcept {
@@ -180,6 +181,8 @@ void GBufferRenderPass::setBufferDrawBatches(
     const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> &drawBatches) noexcept {
     m_impl->setMatrixBufferSetAndDrawBatches(matrixBufferDescriptorSet, drawBatches);
 }
+
+SampledImage2dRgbaSrgbRef GBufferRenderPass::getSkyMap() const noexcept { return m_impl->getSampledSkyMap(); }
 
 SampledImage2dRgbaSrgbRef GBufferRenderPass::getAlbedoMap() const noexcept { return m_impl->getSampledAlbedoMap(); }
 

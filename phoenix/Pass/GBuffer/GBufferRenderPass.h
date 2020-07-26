@@ -23,6 +23,7 @@ class GBufferRenderPass {
     void setBufferDrawBatches(DescriptorSet matrixBufferDescriptorSet,
                               const std::vector<ltl::tuple_t<DrawBatche, uint32_t>> &drawBatches) noexcept;
 
+    SampledImage2dRgbaSrgbRef getSkyMap() const noexcept;
     SampledImage2dRgbaSrgbRef getAlbedoMap() const noexcept;
 
     ~GBufferRenderPass();

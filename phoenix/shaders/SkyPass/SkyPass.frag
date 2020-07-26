@@ -10,20 +10,20 @@ layout(push_constant) uniform SkyInformations {
     mat4 inversedMatrix;
 };
 
-const float radiusPlanet = 6360000;
-const float radiusAtomosphere = 6420000;
+const float radiusPlanet = 6360e3;
+const float radiusAtomosphere = 6420e3;
 
 const float HrRayleigh = 8000;
 const float HrMie = 1200;
 
-const vec3 betaRayleigh = vec3(5.8e-6, 13.5e-6, 33.1e-6);
+const vec3 betaRayleigh = 1.0 * vec3(5.8e-6, 13.5e-6, 33.1e-6);
 
-const vec3 betaMie = vec3(21e-6, 21e-6, 21e-6);
+const vec3 betaMie = vec3(210e-5, 210e-5, 210e-5);
 const float gMie = 0.76;
 
 const float pi = 3.1415926535;
 
-const vec3 sunDir = normalize(vec3(30.0, .0, 0.0));
+const vec3 sunDir = normalize(vec3(.0, 1.0, 0.0));
 
 const uint NUM_SAMPLE = 100;
 const uint NUM_SAMPLE_LIGHT = 10;
@@ -65,8 +65,6 @@ void main() {
     vec3 far = getWorldVectorFromDepth(1.0);
     vec3 dir = normalize(far - origin);
 
-    outColor.a = 1.0;
-
     origin += vec3(0.0, radiusPlanet, 0.0);
     float distanceToEndAtmosphere = intersectAtmosphere(origin, dir);
     float segmentLength = distanceToEndAtmosphere / NUM_SAMPLE;
@@ -80,7 +78,7 @@ void main() {
     vec3 sumM = vec3(0.0);
     for(uint i = 1; i <= NUM_SAMPLE; ++i) {
         vec3 samplePosition = origin + (dir * segmentLength * i);
-        float height = samplePosition.y - radiusPlanet;
+        float height = length(samplePosition) - radiusPlanet;
         float hr = exp(-height / HrRayleigh) * segmentLength;
         float hm = exp(-height / HrMie) * segmentLength;
         opticalDepthR += hr;
@@ -94,16 +92,21 @@ void main() {
 
         for(uint j = 1; j <= NUM_SAMPLE_LIGHT; ++j) {
             vec3 samplePositionSun = samplePosition + (sunDir * segmentLengthSun * j);
-            float heightLight = samplePositionSun.y - radiusPlanet;
+            float heightLight = length(samplePositionSun) - radiusPlanet;
             opticalDepthSunR += exp(-heightLight / HrRayleigh) * segmentLengthSun;
             opticalDepthSunM += exp(-heightLight / HrMie) * segmentLengthSun;
         }
 
         vec3 tau = betaRayleigh * (opticalDepthR + opticalDepthSunR) + betaMie * 1.1f * (opticalDepthM + opticalDepthSunM);
-        vec3 attenuation = vec3(exp(-tau.x), exp(-tau.y), exp(-tau.z));
+        vec3 attenuation = exp(-tau);
         sumR += attenuation * hr;
         sumM += attenuation * hm;
     }
 
-    outColor.rgb = (sumR * betaRayleigh * phaseRayleigh(u) + sumM * betaMie * phaseMie(u)) * 4.0;
+    outColor.a = 1.0;
+
+    outColor.rgb = (sumR * betaRayleigh * phaseRayleigh(u) + sumM * betaMie * phaseMie(u)) * 20.0;
+
+    outColor.rgb = 1.0 - exp(-outColor.rgb);
 }
+
